@@ -97,7 +97,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
     } catch {}
   }, []);
 
-  let categories: { icon: any, name: string, docs: (string | {name: string, image?: string})[] }[] = getCategories();
+  let categories: { icon: React.ElementType, name: string, docs: (string | {name: string, image?: string})[] }[] = getCategories();
   
   if (scrapedData && scrapedData.categories) {
     categories = categories.map((cat, i) => {
