@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Hide Next.js 15 Static/Dev Indicator */
+[data-nextjs-dialog-overlay],
+nextjs-portal,
+#nextjs-dev-tools,
+.nextjs-static-indicator-toast-wrapper {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
