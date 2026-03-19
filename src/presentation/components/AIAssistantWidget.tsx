@@ -64,8 +64,6 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
     }
   };
 
-  const [animatingDoc, setAnimatingDoc] = useState<string | null>(null);
-
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string, docs: ({name: string, image?: string} | string)[] }[] } | null>(null);
   const [brandName, setBrandName] = useState('La Clínica');
   const [email, setEmail] = useState('');
@@ -74,9 +72,9 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
     try {
       const url = new URLSearchParams(window.location.search).get('site');
       if (url) {
-        setBrandName(new URL(url).hostname.replace('www.', '').split('.')[0]);
+        setTimeout(() => setBrandName(new URL(url).hostname.replace('www.', '').split('.')[0]), 0);
       }
-    } catch(e) {}
+    } catch { /* ignored */ }
   }, []);
 
   useEffect(() => {
@@ -99,7 +97,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
     } catch {}
   }, []);
 
-  let categories = getCategories();
+  let categories: { icon: any, name: string, docs: (string | {name: string, image?: string})[] }[] = getCategories();
   
   if (scrapedData && scrapedData.categories) {
     categories = categories.map((cat, i) => {
@@ -122,7 +120,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 pointer-events-none!">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6 pointer-events-none!">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/10 pointer-events-none!" />
 
@@ -204,7 +202,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
                                    <div className="flex items-center gap-2">
                                      <div className="flex -space-x-3.5 shrink-0 pl-1">
                                        {cat.docs.slice(0, 3).map((docItem, i) => {
-                                         const docObj = docItem as {name: string, image?: string};
+                                         const docObj = docItem as unknown as {name: string, image?: string};
                                          const docName = typeof docItem === 'string' ? docItem : docObj.name;
                                          const docImg = docObj.image ? docObj.image : `https://randomuser.me/api/portraits/${i % 2 === 0 ? 'women' : 'men'}/${(idx * 10) + i + 20}.jpg`;
                                          return (
@@ -244,7 +242,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
                                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Seleccione Especialista</h4>
                                   <div className="flex flex-col gap-3">
                                      {cat.docs.map((docItem, i) => {
-                                       const docObj = docItem as {name: string, image?: string};
+                                       const docObj = docItem as unknown as {name: string, image?: string};
                                        const docName = typeof docItem === 'string' ? docItem : docObj.name;
                                        const docImg = docObj.image ? docObj.image : `https://randomuser.me/api/portraits/${i % 2 === 0 ? 'women' : 'men'}/${(idx * 10) + i + 20}.jpg`;
                                        const isSelected = selectedDocDetails?.name === docName;
