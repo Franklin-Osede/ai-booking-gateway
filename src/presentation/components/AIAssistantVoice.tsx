@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, ChevronRight, Volume2 } from "lucide-react";
 import { NICHE_CONFIGS } from "../config/nicheConfig";
@@ -9,12 +9,17 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
   const [isOpen, setIsOpen] = useState(false);
   const [phase, setPhase] = useState<"idle" | "listening" | "thinking" | "speaking" | "closing">("idle");
   const [spokenText, setSpokenText] = useState("");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const config = NICHE_CONFIGS[niche] || NICHE_CONFIGS.medical;
   const posClass = pos === "right" ? "right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-6";
 
   const toggleVoice = () => {
     if (isOpen) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
       setIsOpen(false);
       setPhase("idle");
       setSpokenText("");
@@ -34,26 +39,44 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
     }
     
     if (phase === "thinking") {
-      const waitT = setTimeout(() => {
-        setPhase("speaking");
-        setSpokenText("");
-      }, 1500);
-      return () => clearTimeout(waitT);
-    }
-    
-    if (phase === "speaking") {
-      // Simulate Polly typing out the Text-to-Speech transcript
       const fullText = config.chatGreeting + " " + config.chatOffer;
-      let i = 0;
-      const typeT = setInterval(() => {
-        setSpokenText(fullText.slice(0, i));
-        i++;
-        if (i > fullText.length) {
-          clearInterval(typeT);
-          setTimeout(() => setPhase("closing"), 500);
-        }
-      }, 35);
-      return () => clearInterval(typeT);
+
+      // Real AWS Polly Connection
+      fetch('/api/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: fullText })
+      })
+      .then(res => {
+         if (!res.ok) throw new Error("Voice API Error");
+         return res.blob();
+      })
+      .then(blob => {
+        // Prevent playing if the user closed the widget while fetching
+        if (phase !== "thinking") return;
+        
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        
+        audio.onplay = () => {
+          setPhase("speaking");
+          setSpokenText(fullText); // Display full spoken transcript
+        };
+        
+        audio.onended = () => {
+          setPhase("closing");
+        };
+
+        audio.play().catch(e => {
+          console.error("Audio playback failed (Autoplay blocked?)", e);
+          setPhase("closing");
+        });
+      })
+      .catch(e => {
+        console.error("Polly fetch failed", e);
+        setPhase("closing");
+      });
     }
   }, [isOpen, phase, config]);
 
