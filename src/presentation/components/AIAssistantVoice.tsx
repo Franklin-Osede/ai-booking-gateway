@@ -2,20 +2,90 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, X, Volume2, Sparkles, ChevronRight, Bot } from "lucide-react";
+import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react";
 import { NICHE_CONFIGS } from "../config/nicheConfig";
+
+function getContrastColor(hexcolor: string) {
+  if (!hexcolor || hexcolor.length < 6) return '#ffffff';
+  const hex = hexcolor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 150) ? '#000000' : '#ffffff';
+}
+
+function getDarkerColor(hexcolor: string) {
+  if (!hexcolor || hexcolor.length < 6) return '#000';
+  const hex = hexcolor.replace('#', '');
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+  r = Math.max(0, r - 40);
+  g = Math.max(0, g - 40);
+  b = Math.max(0, b - 40);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+type Msg = { id: string; text: string; sender: "bot" | "user"; playing?: boolean; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean };
 
 export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { color: string, niche?: string, pos?: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{ id: string; text: string; sender: "bot" | "user"; playing?: boolean }[]>([]);
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  const [showCTA, setShowCTA] = useState(false);
+  const [stepInfo, setStepInfo] = useState<{ options: string[]; stepId: number }>({ options: [], stepId: 0 });
   const endRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
+  // Inline Calendar & Flow States
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedDoctor, setSelectedDoctor] = useState<string>("");
+  const [brandName, setBrandName] = useState("nuestra clínica");
+  const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
+  
   const config = NICHE_CONFIGS[niche] || NICHE_CONFIGS.medical;
   const posClass = pos === "right" ? "right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-6";
+  const contrastText = getContrastColor(color);
+  const darkerBorder = getDarkerColor(color);
+
+  const readableBrandText = contrastText === '#000000' ? darkerBorder : color;
+
+  const [scrapedData, setScrapedData] = useState<{ categories: { name?: string, docs: ({name: string, image?: string} | string)[] }[] } | null>(null);
+
+  useEffect(() => {
+    try {
+      const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
+      if (storedSite) {
+        setTimeout(() => setBrandName(new URL(storedSite).hostname.replace('www.', '').split('.')[0]), 0);
+        fetch('/api/v1/scrape-team?url=' + encodeURIComponent(storedSite) + '&t=' + Date.now())
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.success) {
+              setScrapedData(data);
+            }
+          })
+          .catch(e => console.error(e));
+      }
+    } catch {}
+  }, []);
+
+  let categories = config.categories;
+  if (scrapedData && scrapedData.categories) {
+    categories = categories.map((cat, i) => {
+       const scrapedCat = scrapedData.categories![i];
+       if (!scrapedCat) return cat;
+       return {
+          ...cat,
+          name: scrapedCat.name || cat.name,
+          docs: scrapedCat.docs?.length ? scrapedCat.docs : cat.docs
+       };
+    });
+    if (scrapedData.categories.length > 0) {
+      categories = categories.slice(0, scrapedData.categories.length);
+    }
+  }
 
   const stopAudio = () => {
     if (audioRef.current) {
@@ -29,21 +99,25 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
       stopAudio();
       setIsOpen(false);
       setMessages([]);
-      setShowOptions(false);
-      setShowCTA(false);
+      setStepInfo({ options: [], stepId: 0 });
+      setSelectedDate(null);
+      setSelectedTime("");
+      setSelectedService("");
+      setSelectedDoctor("");
     } else {
       setIsOpen(true);
+      triggerFlowStep(0);
     }
   };
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isOpen, showOptions, showCTA]);
+  }, [messages, isOpen, stepInfo, selectedDate, selectedTime]);
 
-  const fetchAudio = async (text: string, msgId: string, onEnd: () => void) => {
+  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraProps?: Partial<Msg>) => {
     try {
       setIsProcessing(true);
-      setMessages(prev => [...prev, { id: msgId, text, sender: "bot", playing: true }]);
+      setMessages(prev => [...prev, { id: msgId, text, sender: "bot", playing: true, ...extraProps }]);
       
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
@@ -73,37 +147,61 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
     }
   };
 
-  // Step 1: Greeting
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setTimeout(() => {
-        fetchAudio(config.chatGreeting, "msg-1", () => {
-           setShowOptions(true);
-        });
-      }, 500);
+  const triggerFlowStep = (nextStepId: number, userSelection?: string) => {
+    if (userSelection) {
+       setMessages(prev => [...prev, { id: "user-" + Date.now(), text: userSelection, sender: "user" }]);
+       // Extract contextual data organically based on the conversational funnel depth
+       if (nextStepId === 2) setSelectedService(userSelection);
+       if (nextStepId === 3) setSelectedDoctor(userSelection);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+    setStepInfo({ options: [], stepId: nextStepId });
 
-  // Step 2: User clicks a predefined chip
-  const handleUserSelect = (text: string) => {
-    if (isProcessing) return;
-    setShowOptions(false);
-    
-    // Add user message
-    setMessages(prev => [...prev, { id: "user-" + Date.now(), text, sender: "user" }]);
-    
-    // Step 3: Bot replies with Offer
     setTimeout(() => {
-      fetchAudio(config.chatOffer, "msg-2", () => {
-         setShowCTA(true);
-      });
+      if (nextStepId === 0) {
+        const greeting = `¡Hola! Bienvenido a ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. Soy tu asistente virtual. ¿En qué área necesitas ayuda hoy?`;
+        fetchAudio(greeting, "bot-0", () => {
+          setStepInfo({ options: ["Agendar una cita", "Tengo una consulta rápida"], stepId: 1 });
+        });
+      } 
+      else if (nextStepId === 1) {
+        const serviceQuestion = `Perfecto. ¿Con qué especialidad o tratamiento te gustaría tu sesión hoy?`;
+        fetchAudio(serviceQuestion, "bot-1", () => {
+          const chips = categories.slice(0, 2).map((c: { name: string }) => c.name);
+          setStepInfo({ options: [...chips], stepId: 2 });
+        });
+      }
+      else if (nextStepId === 2) {
+        const docQuestion = `Excelente opción. Aquí tienes algunos de nuestros especialistas disponibles para esa área. ¿Cuál prefieres?`;
+        fetchAudio(docQuestion, "bot-2", () => {
+           const category = categories[0];
+           const docs = category.docs.slice(0, 2).map((d: string | { name: string }) => typeof d === 'string' ? d : d.name);
+           setStepInfo({ options: [...docs, "Cualquiera disponible"], stepId: 3 });
+        });
+      }
+      else if (nextStepId === 3) {
+        const calQuestion = "Genial. Aquí tienes mi disponibilidad para los próximos días. Selecciona la fecha y hora que prefieras.";
+        fetchAudio(calQuestion, "bot-3", () => {
+           // We do not set showCTA anymore, we append a Calendar Bubble!
+           setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
+        });
+      }
     }, 600);
   };
 
-  const primaryButtonStyle = {
-    backgroundColor: color,
-    color: "#000",
+  const handleUserSelect = (text: string, currentStep: number) => {
+    if (isProcessing) return;
+    if (currentStep === 1) triggerFlowStep(1, text);
+    else if (currentStep === 2) triggerFlowStep(2, text);
+    else if (currentStep === 3) triggerFlowStep(3, text);
+  };
+
+  const handleConfirmBooking = () => {
+     setMessages(prev => prev.filter(m => !m.isCalendar)); // remove calendar
+     setMessages(prev => [...prev, { id: "user-confirm", text: `Confirmo la cita para el Oct ${selectedDate} a las ${selectedTime}`, sender: "user" }]);
+     
+     setTimeout(() => {
+        fetchAudio(`¡Estupendo! Tu reserva con ${selectedDoctor || 'nuestro experto'} para el día ${selectedDate} a las ${selectedTime} ha quedado confirmada. Te esperamos.`, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
+     }, 600);
   };
 
   return (
@@ -122,18 +220,18 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-inner shrink-0 relative overflow-hidden bg-gray-50 group-hover:scale-105 transition-transform"
                >
                  <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at top left, ${color}, transparent)` }} />
-                 <Sparkles size={28} style={{ color: color }} />
+                 <Sparkles size={28} style={{ color: readableBrandText }} />
                </div>
                <span className="text-[17px] font-medium tracking-tight text-gray-800 leading-snug">
-                 ¿Quieres hablar con nuestro <strong className="font-extrabold" style={{ color }}>Agente de IA</strong>?
+                 ¿Quieres hablar con nuestro <strong className="font-extrabold" style={{ color: readableBrandText }}>Agente de IA</strong>?
                </span>
              </div>
              
              <button 
-               className="w-full py-4 rounded-xl flex items-center justify-center gap-3 font-semibold text-white shadow-md active:scale-95 transition-transform"
-               style={{ backgroundColor: color }}
+               className="w-full py-4 rounded-xl flex items-center justify-center gap-3 font-semibold shadow-md active:scale-95 transition-transform"
+               style={{ backgroundColor: color, color: contrastText }}
              >
-               <Mic fill="white" size={20} /> Entrar al Chat de Voz
+               <Mic fill={contrastText} size={20} /> Entrar al Chat de Voz
              </button>
            </motion.div>
         )}
@@ -145,14 +243,14 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`fixed bottom-6 ${posClass} w-[360px] h-[550px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
+            className={`fixed bottom-6 ${posClass} w-[360px] h-[580px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             {/* Header */}
             <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div 
                   className="p-2 rounded-full text-black shrink-0 relative overflow-hidden"
-                  style={{ backgroundColor: `${color}40`, color: color }}
+                  style={{ backgroundColor: `${color}40`, color: readableBrandText }}
                 >
                   <Sparkles size={20} className="relative z-10" />
                 </div>
@@ -184,65 +282,134 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
                   >
                     {msg.sender === "bot" && (
                       <div 
-                        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-sm relative"
-                        style={{ backgroundColor: `${color}20`, color: color }}
+                        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-sm relative overflow-hidden"
+                        style={{ backgroundColor: msg.isSuccess ? '#10b98120' : `${color}20`, color: msg.isSuccess ? '#10b981' : readableBrandText }}
                       >
                         {msg.playing ? (
-                           <Volume2 size={16} className="animate-pulse" />
+                           <Volume2 size={16} className="animate-pulse relative z-10" />
+                        ) : msg.isSuccess ? (
+                           <CheckCircle2 size={16} className="relative z-10" />
                         ) : (
-                           <Bot size={16} />
+                           // eslint-disable-next-line @next/next/no-img-element
+                           <img src="https://i.pravatar.cc/150?img=47" alt="AI Agent" className="w-full h-full object-cover" />
                         )}
                         {msg.playing && <div className="absolute inset-0 rounded-full animate-ping opacity-40" style={{ backgroundColor: color }} />}
                       </div>
                     )}
-                    <div 
-                      className={`max-w-[80%] px-4 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
-                        msg.sender === "user" 
-                          ? "rounded-tr-none font-medium text-black" 
-                          : "bg-white text-gray-800 rounded-tl-none border border-gray-100"
-                      }`}
-                      style={msg.sender === "user" ? { backgroundColor: color } : {}}
-                    >
-                      {msg.text}
-                    </div>
+
+                    {/* Chat Bubble OR Inline Calendar */}
+                    {msg.isCalendar ? (
+                      <div className="w-full pl-3 pr-1 pt-2">
+                        <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm w-full">
+                           <div className="flex justify-between items-center mb-4">
+                             <ChevronLeft size={16} className="text-gray-400" />
+                             <span className="font-bold text-[13px] text-gray-800">Octubre 2026</span>
+                             <ChevronRight size={16} className="text-gray-400" />
+                           </div>
+                           <div className="grid grid-cols-7 gap-y-2 text-center text-[10px] font-bold text-gray-400 mb-2 uppercase">
+                             <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                           </div>
+                           <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center text-[12px] font-semibold mb-4">
+                             {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
+                               const isRed = [5, 12, 19].includes(d);
+                               const isGreen = [14, 15, 21].includes(d);
+                               let btnClass = "w-7 h-7 rounded-full flex items-center justify-center mx-auto transition-colors ";
+                               if (selectedDate === d) btnClass += "text-white shadow-md scale-110";
+                               else if (isRed) btnClass += "text-red-400 bg-red-50 font-bold cursor-not-allowed line-through";
+                               else if (isGreen) btnClass += "text-emerald-700 bg-emerald-100 ring-1 ring-emerald-300 font-extrabold";
+                               else btnClass += "text-gray-700 bg-white hover:bg-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]";
+                               return (
+                                 <button key={d} disabled={isRed} onClick={() => { setSelectedDate(d); setSelectedTime(""); }} className={btnClass} style={selectedDate === d ? { backgroundColor: color } : {}}>{d}</button>
+                               )
+                             })}
+                           </div>
+                           {selectedDate && (
+                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-gray-100 pt-3">
+                               <p className="text-[11px] font-bold text-gray-500 mb-2">Horarios:</p>
+                               <div className="flex flex-wrap gap-2">
+                                 {times.map(t => (
+                                   <button key={t} onClick={() => setSelectedTime(t)} className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${selectedTime === t ? 'shadow-md border-transparent text-white' : 'border border-gray-200 text-gray-600'}`} style={selectedTime === t ? { backgroundColor: color, color: contrastText } : {}}>{t}</button>
+                                 ))}
+                               </div>
+                             </motion.div>
+                           )}
+                           <AnimatePresence>
+                             {selectedDate && selectedTime && (
+                               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                                 <button onClick={handleConfirmBooking} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-white shadow-md active:scale-95 transition-all" style={{ backgroundColor: color, color: contrastText }}>
+                                   Confirmar Reserva
+                                 </button>
+                               </motion.div>
+                             )}
+                           </AnimatePresence>
+                        </div>
+                      </div>
+                    ) : msg.isFinalCard ? (
+                      <div className="w-full pt-1 pb-2">
+                         <div className="bg-white border text-center border-gray-100 rounded-3xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] w-full relative overflow-hidden">
+                           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: color }} />
+                           <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm ring-1 ring-gray-50">
+                             <CheckCircle2 size={28} className="text-green-500" />
+                           </div>
+                           <h3 className="font-extrabold text-[17px] text-gray-900 mb-1 tracking-tight">¡Reserva Confirmada!</h3>
+                           <p className="text-[12px] text-gray-500 mb-6 font-medium leading-relaxed px-2">Hemos enviado un email con todos los detalles y preparación previa para tu visita.</p>
+                           
+                           <div className="bg-gray-50/80 rounded-2xl p-4 mb-6 text-left space-y-3.5 border border-gray-100">
+                             {selectedDoctor && (
+                               <div className="flex flex-col gap-1 border-b border-gray-200/60 pb-3">
+                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Especialista</span>
+                                 <span className="text-[14px] font-bold text-gray-800 tracking-tight">{selectedDoctor}</span>
+                               </div>
+                             )}
+                             {selectedService && (
+                               <div className="flex flex-col gap-1 border-b border-gray-200/60 pb-3">
+                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Servicio</span>
+                                 <span className="text-[14px] font-bold text-gray-800 tracking-tight">{selectedService}</span>
+                               </div>
+                             )}
+                             <div className="flex flex-col gap-1">
+                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fecha y Horario</span>
+                               <span className="text-[14px] font-bold text-gray-800 tracking-tight">Oct {selectedDate}, {selectedTime}</span>
+                             </div>
+                           </div>
+
+                           <button onClick={() => setIsOpen(false)} className="w-full py-4 rounded-xl font-bold shadow-md active:scale-95 transition-all text-[14px] flex items-center justify-center gap-2 group" style={{ backgroundColor: color, color: contrastText }}>
+                             Volver a la web <ChevronRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                           </button>
+                         </div>
+                      </div>
+                    ) : (
+                      <div 
+                        className={`max-w-[80%] px-4 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
+                          msg.sender === "user" 
+                            ? "rounded-tr-none" 
+                            : "bg-white text-gray-800 rounded-tl-none border border-gray-100"
+                        }`}
+                        style={msg.sender === "user" ? { backgroundColor: color, color: contrastText } : {}}
+                      >
+                        {msg.text}
+                      </div>
+                    )}
                   </motion.div>
                 ))}
                 
                 {/* Interactive Chips for Demo Flow */}
-                {showOptions && (
+                {stepInfo.options.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     className="flex flex-col gap-2 mt-4 items-end"
                   >
-                    <span className="text-xs text-gray-400 mb-1 mr-1">Selecciona una respuesta:</span>
-                    {[config.chatCta, "Tengo una consulta rápida"].map((opt, i) => (
+                    {stepInfo.options.map((opt, i) => (
                       <button
                         key={i}
-                        onClick={() => handleUserSelect(opt)}
-                        className="px-4 py-2 bg-white text-sm font-medium border border-gray-200 rounded-2xl shadow-sm hover:border-gray-300 transition-colors"
-                        style={{ color: '#333' }}
+                        onClick={() => handleUserSelect(opt, stepInfo.stepId)}
+                        className="px-4 py-2.5 text-[14px] text-right font-medium rounded-2xl shadow-sm hover:scale-105 active:scale-95 transition-all"
+                        style={{ backgroundColor: color, color: contrastText }}
                       >
                         {opt}
                       </button>
                     ))}
-                  </motion.div>
-                )}
-
-                {/* Final Booking Call-To-Action */}
-                {showCTA && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    className="w-full flex justify-center mt-6 mb-2 delay-150"
-                  >
-                    <button 
-                      onClick={() => window.location.href = `?site=${new URLSearchParams(window.location.search).get('site')}&widget=form&color=${color.replace('#', '')}&niche=${niche}`}
-                      className="w-[85%] py-3.5 rounded-xl text-white font-bold shadow-[0_8px_16px_rgba(0,0,0,0.12)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
-                      style={{ backgroundColor: color }}
-                    >
-                      {config.chatCta} <ChevronRight size={18} strokeWidth={3} />
-                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -251,22 +418,19 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
 
             {/* Microphone Context Area */}
             <div className="p-4 bg-white border-t border-gray-100 flex flex-col items-center gap-2 relative">
-               {!showOptions && !showCTA && (
-                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-3 py-1 rounded-full animate-bounce">
-                   {isProcessing ? "Hablando..." : "El agente te está escuchando"}
+               {stepInfo.options.length === 0 && !messages.some(m => m.isCalendar) && (
+                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-3 py-1 rounded-full animate-pulse">
+                   {isProcessing ? "Hablando..." : "Escuchando..."}
                  </div>
                )}
                <motion.button
                  animate={isProcessing ? { scale: [1, 1.1, 1] } : {}}
                  transition={{ repeat: Infinity, duration: 2 }}
-                 className="w-14 h-14 rounded-full flex items-center justify-center text-white shadow-[0_10px_20px_rgba(0,0,0,0.15)] opacity-50 select-none pointer-events-none"
-                 style={{ backgroundColor: color }}
+                 className="w-14 h-14 rounded-full flex items-center justify-center shadow-[0_10px_20px_rgba(0,0,0,0.15)] opacity-50 select-none pointer-events-none"
+                 style={{ backgroundColor: color, color: contrastText }}
                >
-                 <Mic size={24} fill="white" />
+                 <Mic size={24} fill={contrastText} />
                </motion.button>
-               <span className="text-[11px] font-medium text-gray-400">
-                 Interacción por voz habilitada
-               </span>
             </div>
           </motion.div>
         )}
