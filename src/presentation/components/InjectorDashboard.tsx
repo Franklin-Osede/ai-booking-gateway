@@ -9,6 +9,7 @@ export function InjectorDashboard() {
   const [widgetType, setWidgetType] = useState("form");
   const [niche, setNiche] = useState("medical");
   const [brandColor, setBrandColor] = useState("#FFD700");
+  const [pos, setPos] = useState("left");
   const [demoUrl, setDemoUrl] = useState("");
 
   const generateLink = () => {
@@ -18,6 +19,7 @@ export function InjectorDashboard() {
       url.searchParams.set("widget", widgetType);
       url.searchParams.set("niche", niche);
       url.searchParams.set("color", brandColor.replace("#", ""));
+      url.searchParams.set("pos", pos);
       setDemoUrl(url.toString());
     } catch { }
   };
@@ -119,6 +121,21 @@ export function InjectorDashboard() {
                  className="flex-1 bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white font-mono text-lg uppercase"
                />
              </div>
+          </div>
+
+          {/* Position Selection */}
+          <div>
+            <label className="block text-sm font-semibold text-neutral-300 mb-3">5. Posición del Widget</label>
+            <div className="relative">
+              <select 
+                value={pos}
+                onChange={(e) => setPos(e.target.value)}
+                className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white text-lg cursor-pointer appearance-none px-5"
+              >
+                <option value="left">Abajo a la Izquierda (Recomendado)</option>
+                <option value="right">Abajo a la Derecha</option>
+              </select>
+            </div>
           </div>
 
           {/* Action */}

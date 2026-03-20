@@ -14,7 +14,7 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
   const [showCTA, setShowCTA] = useState(false);
 
   const config = NICHE_CONFIGS[niche] || NICHE_CONFIGS.medical;
-  const posClass = pos === "right" ? "right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-6";
+  const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,26 +70,26 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 50, opacity: 0 }}
             onClick={() => setIsOpen(true)}
-            className={`fixed bottom-6 ${posClass} bg-white p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col gap-4 z-50 border border-gray-100/50 cursor-pointer hover:shadow-[0_25px_60px_rgba(0,0,0,0.2)] transition-shadow w-[300px]`}
+            className={`fixed bottom-6 md:bottom-8 ${posClass} bg-white p-3 sm:p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col gap-2.5 sm:gap-4 z-50 border border-gray-100/50 cursor-pointer hover:shadow-[0_25px_60px_rgba(0,0,0,0.2)] transition-shadow w-[210px] sm:w-[300px]`}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2.5 sm:gap-4">
               <div 
-                className="w-14 h-14 rounded-full flex items-center justify-center shadow-inner shrink-0 relative overflow-hidden bg-gray-50"
+                className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-inner shrink-0 relative overflow-hidden bg-gray-50"
               >
                 {/* Simulated 3D gold abstract icon */}
                 <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at top left, ${color}, transparent)` }} />
-                <Sparkles size={28} style={{ color: color }} />
+                <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: color }} />
               </div>
-              <span className="text-xl font-medium tracking-tight text-gray-800">
+              <span className="text-[12px] sm:text-[16px] font-medium tracking-tight text-gray-800">
                 ¿Necesitas ayuda?
               </span>
             </div>
             
             <button 
-              className="w-full py-4 rounded-xl flex items-center justify-center gap-3 font-semibold text-white shadow-md active:scale-95 transition-transform"
+              className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold text-white shadow-md active:scale-95 transition-transform text-[13px] sm:text-base"
               style={{ backgroundColor: color }}
             >
-              <Phone fill="white" size={20} /> Asistente de IA
+              <Phone fill="white" size={16} /> Asistente de IA
             </button>
           </motion.div>
         )}
@@ -101,7 +101,7 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`fixed bottom-6 ${posClass} w-[360px] h-[550px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
+            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[290px] sm:w-[320px] h-[480px] max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             {/* Header */}
             <div 

@@ -1,4 +1,4 @@
-import { Stethoscope, HeartPulse, Activity, User, Scissors, Sparkles, Droplet, UserCheck, Home, Key, Building2, Car, Wrench, ShieldCheck, Briefcase, Scale, FileText, Monitor, Server, Zap, Smile } from "lucide-react";
+import { Stethoscope, HeartPulse, Activity, User, Scissors, Sparkles, Droplet, UserCheck, Car, Wrench, ShieldCheck, Briefcase, Scale, FileText, Monitor, Server, Zap, Smile } from "lucide-react";
 
 export type NicheConfig = {
   title: string;

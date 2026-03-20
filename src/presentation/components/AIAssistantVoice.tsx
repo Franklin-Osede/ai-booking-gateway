@@ -46,7 +46,7 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
   const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
   
   const config = NICHE_CONFIGS[niche] || NICHE_CONFIGS.medical;
-  const posClass = pos === "right" ? "right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-6";
+  const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
   const contrastText = getContrastColor(color);
   const darkerBorder = getDarkerColor(color);
 
@@ -213,25 +213,25 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
              animate={{ y: 0, opacity: 1 }}
              exit={{ y: 50, opacity: 0 }}
              onClick={toggleVoice}
-             className={`fixed bottom-6 ${posClass} bg-white p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col gap-4 z-50 border border-gray-100/50 cursor-pointer hover:shadow-[0_25px_60px_rgba(0,0,0,0.2)] transition-shadow w-[300px] group`}
+             className={`fixed bottom-6 md:bottom-8 ${posClass} bg-white p-3 sm:p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col gap-2.5 sm:gap-4 z-50 border border-gray-100/50 cursor-pointer hover:shadow-[0_25px_60px_rgba(0,0,0,0.2)] transition-shadow w-[210px] sm:w-[300px] group`}
            >
-             <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2.5 sm:gap-4">
                <div 
-                 className="w-14 h-14 rounded-full flex items-center justify-center shadow-inner shrink-0 relative overflow-hidden bg-gray-50 group-hover:scale-105 transition-transform"
+                 className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-inner shrink-0 relative overflow-hidden bg-gray-50 group-hover:scale-105 transition-transform"
                >
                  <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at top left, ${color}, transparent)` }} />
-                 <Sparkles size={28} style={{ color: readableBrandText }} />
+                 <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: readableBrandText }} />
                </div>
-               <span className="text-[17px] font-medium tracking-tight text-gray-800 leading-snug">
+               <span className="text-[12px] sm:text-[16px] font-medium tracking-tight text-gray-800 leading-snug">
                  ¿Quieres hablar con nuestro <strong className="font-extrabold" style={{ color: readableBrandText }}>Agente de IA</strong>?
                </span>
              </div>
              
              <button 
-               className="w-full py-4 rounded-xl flex items-center justify-center gap-3 font-semibold shadow-md active:scale-95 transition-transform"
+               className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[13px] sm:text-base"
                style={{ backgroundColor: color, color: contrastText }}
              >
-               <Mic fill={contrastText} size={20} /> Entrar al Chat de Voz
+               <Mic fill={contrastText} size={16} /> Entrar al Chat de Voz
              </button>
            </motion.div>
         )}
@@ -243,7 +243,7 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`fixed bottom-6 ${posClass} w-[360px] h-[580px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
+            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[290px] sm:w-[320px] h-[480px] max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             {/* Header */}
             <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">

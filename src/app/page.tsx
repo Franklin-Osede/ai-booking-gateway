@@ -19,7 +19,7 @@ export default async function Home({
   const siteUrl = params.site;
   const widgetType = params.widget || "form";
   const niche = params.niche || "medical";
-  const pos = params.pos || "right";
+  const pos = "left";
   const brandColor = params.color ? `#${params.color}` : "#FFD700";
 
   if (!siteUrl) {
