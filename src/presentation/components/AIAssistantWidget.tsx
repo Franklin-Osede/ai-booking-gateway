@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, ChevronRight, ChevronLeft, CreditCard, CheckCircle2, Stethoscope, HeartPulse, Activity } from "lucide-react";
+import { ChevronRight, ChevronLeft, CreditCard, CheckCircle2, Activity } from "lucide-react";
 
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
@@ -18,7 +18,9 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff'; // Threshold to 200 for intense brights like cyan/yellow
 }
 
-export function AIAssistantWidget({ color, niche = "medical" }: { color: string, niche?: string }) {
+import { NICHE_CONFIGS } from "../config/nicheConfig";
+
+export function AIAssistantWidget({ color, niche = "medical" }: { color: string, niche?: string, pos?: string }) {
   const [step, setStep] = useState(1);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -36,32 +38,8 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
   const nextStep = () => setStep((s) => Math.min(5, s + 1));
   const prevStep = () => setStep((s) => Math.max(1, s - 1));
 
-  // Dynamic Content based on Niche
   const getCategories = () => {
-    switch (niche) {
-      case "dental":
-        return [
-          { icon: Stethoscope, name: 'Implantología', docs: ['Dr. Bayo', 'Dra. Martínez', 'Dr. López', 'Dra. Ruiz'] },
-          { icon: HeartPulse, name: 'Ortodoncia', docs: ['Dr. Torres', 'Dra. Gómez', 'Dr. Sánchez'] },
-          { icon: Activity, name: 'Estética Dental', docs: ['Dra. Ramírez', 'Ana López'] },
-          { icon: User, name: 'Odontopediatría', docs: ['Dr. Muñoz', 'Dra. Vargas', 'Dra. León'] }
-        ];
-      case "legal":
-        return [
-          { icon: User, name: 'Derecho Penal', docs: ['Abog. Pérez', 'Abog. Gómez', 'Abog. Sánchez'] },
-          { icon: User, name: 'Derecho Civil', docs: ['Abog. Torres', 'Abog. Ruiz'] },
-          { icon: User, name: 'Gestoría Laboral', docs: ['Gestor Ramírez', 'Ana López'] },
-          { icon: User, name: 'Derecho Familia', docs: ['Abog. Muñoz', 'Abog. Vargas'] }
-        ];
-      default: // medical
-        return [
-          { icon: Stethoscope, name: 'Urología', docs: ['Dr. Pérez', 'Dra. Gómez', 'Dr. Sánchez', 'Dr. Castro'] },
-          { icon: HeartPulse, name: 'Andrología', docs: ['Dr. Torres', 'Dr. Ruiz', 'Dr. Núñez'] },
-          { icon: Activity, name: 'Fisioterapia', docs: ['Dra. Ramírez', 'Ana López', 'Rodrigo'] },
-          { icon: User, name: 'Ginecología', docs: ['Dra. Muñoz', 'Dr. Vargas', 'Dra. León'] },
-          { icon: User, name: 'Psicología', docs: ['Dr. Medina', 'Dra. Ríos', 'Dr. Molina'] }
-        ];
-    }
+    return NICHE_CONFIGS[niche]?.categories || NICHE_CONFIGS["medical"].categories;
   };
 
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string, docs: ({name: string, image?: string} | string)[] }[] } | null>(null);
@@ -141,7 +119,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
                 <div className="w-8 md:w-12 h-8 md:h-12 -ml-3" />
               )}
               <h2 className="font-extrabold text-2xl md:text-3xl tracking-tight text-gray-900">
-                {step === 1 && "Selecciona tu profesional"}
+                {step === 1 && (NICHE_CONFIGS[niche]?.title || NICHE_CONFIGS["medical"].title)}
                 {step === 2 && "Selecciona fecha y hora"}
                 {step === 3 && "Acceso al portal"}
                 {step === 4 && "Confirmar Reserva"}
@@ -239,7 +217,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
                               >
                                 <div className="px-4 pb-4 md:px-6 md:pb-6">
                                   <div className="w-full h-px bg-gray-100 mb-4" />
-                                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Seleccione Especialista</h4>
+                                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{NICHE_CONFIGS[niche]?.buttonLabel || "Especialistas"}</h4>
                                   <div className="flex flex-col gap-3">
                                      {cat.docs.map((docItem, i) => {
                                        const docObj = docItem as unknown as {name: string, image?: string};

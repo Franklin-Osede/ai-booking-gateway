@@ -87,8 +87,8 @@ export function InjectorDashboard() {
                {[
                  { id: "form", title: "Formulario Consulta", desc: "Flujo Multi-Paso" },
                  { id: "chat", title: "Chat de IA", desc: "Agente Conversacional" },
-                 { id: "banner", title: "Lead Magnet", desc: "Captación" },
-                 { id: "both", title: "Ambos 🚀", desc: "Reserva + Banner" },
+                 { id: "voice", title: "Agente de Voz", desc: "Clon de Voz IA" },
+                 { id: "both", title: "Ambos 🚀", desc: "Reserva + Agente Voz" },
                ].map(w => (
                  <button
                    key={w.id}

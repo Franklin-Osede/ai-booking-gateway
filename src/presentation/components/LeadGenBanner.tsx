@@ -4,15 +4,17 @@ import { motion } from "framer-motion";
 import { ArrowRight, Mail } from "lucide-react";
 import { useState } from "react";
 
-export function LeadGenBanner({ color }: { color: string }) {
+export function LeadGenBanner({ color, pos = "left" }: { color: string, pos?: string }) {
   const [sent, setSent] = useState(false);
+
+  const posClass = pos === "right" ? "right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-6";
 
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
-      className="fixed bottom-6 left-6 w-[340px] bg-white/90 backdrop-blur-xl p-5 rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden"
+      className={`fixed bottom-6 ${posClass} w-[340px] bg-white/90 backdrop-blur-xl p-5 rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden`}
     >
       {/* Accent glow line at top */}
       <div 
