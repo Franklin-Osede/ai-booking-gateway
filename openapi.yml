@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: Widget Injector MVP API
+  version: 1.0.0
+  description: Backend proxy APIs for the OmniAgents Growth Hacking Widget.
+servers:
+  - url: /api/v1
+paths:
+  /voice:
+    post:
+      summary: AWS Polly Voice Synthesis Endpoint
+      description: Converts text to neural speech using AWS Polly using the OmniAgents-Root IAM credentials.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: The precise text to be spoken by the agent.
+                voiceId:
+                  type: string
+                  description: Optional Polly Neural Voice ID (Defaults to 'Lucia', es-ES).
+      responses:
+        "200":
+          description: A raw binary MP3 audio stream ready for HTML5 Audio ingestion.
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request (Missing mandatory text payload).
+        "500":
+          description: Internal Server Error (Failed to synthesize speech via AWS SDK or AWS quota limits).
+  /proxy:
+    get:
+      summary: Reverse Proxy Endpoint
+      description: Fetches target prospect website HTML to inject into the background iframe while avoiding browser CORS restrictions.
+      parameters:
+        - name: url
+          in: query
+          description: The target website URL
+          required: true
+          schema:
+            type: string
+            format: uri
+      responses:
+        "200":
+          description: HTML content of the target site.
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Missing or invalid URL parameter.
+  /scrape-team:
+    get:
+      summary: Auto-Scrape Team Members
+      description: Scrapes the prospect website for team members to auto-populate the widget avatars dynamically.
+      parameters:
+        - name: url
+          in: query
+          description: The target website URL
+          required: true
+          schema:
+            type: string
+            format: uri
+      responses:
+        "200":
+          description: JSON object containing scraped physician categories and team members.
+          content:
+            application/json:
+              schema:
+                type: object

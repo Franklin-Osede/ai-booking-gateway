@@ -63,7 +63,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
     try {
       const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
       if (storedSite) {
-        fetch('/api/scrape-team?url=' + encodeURIComponent(storedSite) + '&t=' + Date.now())
+        fetch('/api/v1/scrape-team?url=' + encodeURIComponent(storedSite) + '&t=' + Date.now())
           .then(res => res.json())
           .then(data => {
             if (data && data.success) {

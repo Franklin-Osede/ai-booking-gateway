@@ -26,7 +26,7 @@ export default async function Home({
     return <InjectorDashboard />;
   }
 
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(siteUrl)}`;
+  const proxyUrl = `/api/v1/proxy?url=${encodeURIComponent(siteUrl)}`;
 
   return (
     <main className="fixed inset-0 w-screen h-screen overflow-hidden bg-white">
