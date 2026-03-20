@@ -2,48 +2,44 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, X, Send, Sparkles, Phone } from "lucide-react";
+import { Bot, X, Send, Sparkles, Phone, ChevronRight } from "lucide-react";
 
-export function AIAssistantChat({ color, niche = "medical" }: { color: string, niche?: string }) {
+import { NICHE_CONFIGS } from "../config/nicheConfig";
+
+export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { color: string, niche?: string, pos?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ id: string; text: string; sender: "bot" | "user" }[]>([]);
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const [showCTA, setShowCTA] = useState(false);
+
+  const config = NICHE_CONFIGS[niche] || NICHE_CONFIGS.medical;
+  const posClass = pos === "right" ? "right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-6";
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen]);
 
   useEffect(() => {
-    let t0: ReturnType<typeof setTimeout>;
-    let t1: ReturnType<typeof setTimeout>;
-    let t2: ReturnType<typeof setTimeout>;
-    
     if (isOpen && messages.length === 0) {
-      t0 = setTimeout(() => {
-        setMessages([{ id: "1", text: "Conectando con tu agente asignado...", sender: "bot" }]);
-      }, 0);
+      setMessages([{ id: "1", text: "Conectando con tu agente asignado...", sender: "bot" }]);
       
-      t1 = setTimeout(() => {
-        setMessages([
-          { id: "1", text: "Analizando contexto de tu visita...", sender: "bot" }
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { id: "2", text: "Analizando contexto de tu visita...", sender: "bot" }
         ]);
       }, 1000);
 
-      t2 = setTimeout(() => {
-        const saludo = niche === "dental" ? "una de las mejores clínicas dentales de la zona" 
-                     : niche === "legal" ? "este increíble bufete de abogados"
-                     : niche === "medical" ? "este gran centro médico"
-                     : "los servicios de esta web";
-        
-        setMessages([
-          { id: "2", text: "¡Hola! Soy tu asistente especialista AI.", sender: "bot" },
-          { id: "3", text: `He analizado la página y veo que ofrecemos excelentes servicios en ${saludo}. ¿En qué te puedo ayudar hoy?`, sender: "bot" },
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { id: "3", text: config.chatGreeting, sender: "bot" }
         ]);
       }, 2500);
     }
-    return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); };
-  }, [isOpen, messages.length, niche]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -51,19 +47,23 @@ export function AIAssistantChat({ color, niche = "medical" }: { color: string, n
     setInput("");
     
     // Smooth conversation flow
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now().toString() + "b", text: "Entiendo perfectamente. Esa es una gran solicitud.", sender: "bot" }
-      ]);
-      
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
-          { id: Date.now().toString() + "c", text: "Para darte máxima prioridad y que nuestro especialista resuelva esto en su próxima hora libre, ¿me podrías dejar tu WhatsApp o correo aquí?", sender: "bot" }
+          { id: Date.now().toString() + "b", text: config.chatThinking, sender: "bot" }
         ]);
-      }, 1500);
-    }, 800);
+        
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            { id: Date.now().toString() + "c", text: config.chatOffer, sender: "bot" }
+          ]);
+          
+          setTimeout(() => {
+            setShowCTA(true);
+          }, 800);
+        }, 1500);
+      }, 800);
   };
 
   const primaryButtonStyle = {
@@ -80,7 +80,7 @@ export function AIAssistantChat({ color, niche = "medical" }: { color: string, n
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 50, opacity: 0 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 bg-white p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col gap-4 z-50 border border-gray-100/50 cursor-pointer hover:shadow-[0_25px_60px_rgba(0,0,0,0.2)] transition-shadow w-[300px]"
+            className={`fixed bottom-6 ${posClass} bg-white p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col gap-4 z-50 border border-gray-100/50 cursor-pointer hover:shadow-[0_25px_60px_rgba(0,0,0,0.2)] transition-shadow w-[300px]`}
           >
             <div className="flex items-center gap-4">
               <div 
@@ -111,7 +111,7 @@ export function AIAssistantChat({ color, niche = "medical" }: { color: string, n
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className="fixed bottom-6 right-6 w-[360px] h-[550px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5"
+            className={`fixed bottom-6 ${posClass} w-[360px] h-[550px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             {/* Header */}
             <div 
@@ -170,6 +170,22 @@ export function AIAssistantChat({ color, niche = "medical" }: { color: string, n
                     </div>
                   </motion.div>
                 ))}
+                
+                {showCTA && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="w-full flex justify-center mt-6 mb-2 delay-150"
+                  >
+                    <button 
+                      onClick={() => window.location.href = `?site=${new URLSearchParams(window.location.search).get('site')}&widget=form&color=${color.replace('#', '')}&niche=${niche}`}
+                      className="w-[85%] py-3.5 rounded-xl text-white font-bold shadow-[0_8px_16px_rgba(0,0,0,0.12)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                      style={{ backgroundColor: color }}
+                    >
+                      {config.chatCta} <ChevronRight size={18} strokeWidth={3} />
+                    </button>
+                  </motion.div>
+                )}
               </AnimatePresence>
               <div ref={endRef} />
             </div>
