@@ -22,21 +22,11 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      setMessages([{ id: "1", text: "Conectando con tu agente asignado...", sender: "bot" }]);
-      
       setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { id: "2", text: "Analizando contexto de tu visita...", sender: "bot" }
+        setMessages([
+          { id: "1", text: config.chatGreeting, sender: "bot" }
         ]);
-      }, 1000);
-
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { id: "3", text: config.chatGreeting, sender: "bot" }
-        ]);
-      }, 2500);
+      }, 400); // Pequeño delay de 400ms para que termine la animación de apertura del chat
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
