@@ -3,6 +3,7 @@ import { AIAssistantWidget } from "@/presentation/components/AIAssistantWidget";
 import { AIAssistantChat } from "@/presentation/components/AIAssistantChat";
 import { LeadGenBanner } from "@/presentation/components/LeadGenBanner";
 import { AIAssistantVoice } from "@/presentation/components/AIAssistantVoice";
+import { AIAssistantPhone } from "@/presentation/components/AIAssistantPhone";
 import { InjectorDashboard } from "@/presentation/components/InjectorDashboard";
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default async function Home({
           {widgetType === "chat" && <AIAssistantChat color={brandColor} niche={niche} pos={pos} />}
           {widgetType === "banner" && <LeadGenBanner color={brandColor} pos={pos} />}
           {widgetType === "voice" && <AIAssistantVoice color={brandColor} niche={niche} pos={pos} />}
+          {widgetType === "phone" && <AIAssistantPhone color={brandColor} niche={niche} pos={pos} />}
           {widgetType === "both" && (
             <>
               <AIAssistantWidget color={brandColor} niche={niche} pos={pos} />

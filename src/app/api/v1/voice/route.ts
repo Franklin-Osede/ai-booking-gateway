@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Sanitize for XML
-    let cleanText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const cleanText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     // 2. Wrap in SSML and slightly reduce the reading speed to make it sound more relaxed and conversational
-    const ssmlText = `<speak><prosody rate="95%">${cleanText}</prosody></speak>`;
+    const ssmlText = `<speak><prosody rate="90%">${cleanText}</prosody></speak>`;
 
     const command = new SynthesizeSpeechCommand({
       Engine: "neural",
