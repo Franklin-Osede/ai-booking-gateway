@@ -90,7 +90,7 @@ export function InjectorDashboard() {
                  { id: "form", title: "Formulario Consulta", desc: "Flujo Multi-Paso" },
                  { id: "chat", title: "Chat de IA", desc: "Agente Conversacional" },
                  { id: "voice", title: "Agente de Voz", desc: "Clon de Voz IA Web" },
-                 { id: "phone", title: "Llamada Simulada", desc: "UI App Teléfono (Demo)" },
+                 { id: "phone", title: "Llamada Simulada (DEMO iOS) ⭐️", desc: "UI App Teléfono" },
                  { id: "both", title: "Ambos 🚀", desc: "Reserva + Agente Voz" },
                ].map(w => (
                  <button
