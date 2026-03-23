@@ -132,7 +132,7 @@ export function AIAssistantPhone({ color, pos = "right", niche }: { color: strin
     setTimeout(() => {
       // Inbound Phone Call Flow (Pure Voice, No Chat/Calendar UI)
       if (nextStepId === 0) {
-        const greeting = `Hola, te comunicas con la recepción web de ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. Mi nombre es Marcos. ¿En qué te puedo ayudar hoy?`;
+        const greeting = `Hola, te comunicas con la recepción web de ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. Mi nombre es Marcos, ¿en qué te puedo ayudar hoy?`;
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: ["¿Qué servicios tenéis?"], stepId: 1 });
         });
@@ -140,19 +140,19 @@ export function AIAssistantPhone({ color, pos = "right", niche }: { color: strin
       else if (nextStepId === 1) {
         const catNames = scrapedData?.categories?.map(c => c.name) || ["Odontología general", "Ortodoncia", "Implantología"];
         const listedCats = catNames.slice(0, 3).join(", ");
-        const serviceQuestion = `Claro, contamos con especialistas excelentes en áreas como ${listedCats}. ¿Te gustaría agendar una cita con alguno de ellos para esta semana?`;
+        const serviceQuestion = `Claro, contamos con especialistas excelentes en áreas como ${listedCats}, ¿te gustaría agendar una cita con alguno de ellos para esta semana?`;
         fetchAudio(serviceQuestion, "bot-1", () => {
           setStepInfo({ options: ["Sí"], stepId: 2 });
         });
       }
       else if (nextStepId === 2) {
-        const calQuestion = "Perfecto. He revisado el calendario del doctor y tengo un hueco libre mañana a las 10 de la mañana, o el jueves por la tarde. ¿Qué horario prefieres?";
+        const calQuestion = "Perfecto, he revisado el calendario del doctor y tengo un hueco libre mañana a las 10 de la mañana, o el jueves por la tarde. ¿Qué horario prefieres?";
         fetchAudio(calQuestion, "bot-2", () => {
            setStepInfo({ options: ["El jueves"], stepId: 3 });
         });
       }
       else if (nextStepId === 3) {
-        const confirm = "¡Estupendo! Tu cita ha quedado reservada en nuestra agenda. Te acabo de enviar un SMS con los detalles para que lo tengas a mano. ¡Nos vemos pronto!";
+        const confirm = "¡Estupendo! Tu cita ha quedado reservada en nuestra agenda, te acabo de enviar un SMS con los detalles para que lo tengas a mano. ¡Nos vemos pronto!";
         fetchAudio(confirm, "bot-3", () => {
            setStepInfo({ options: [], stepId: 4 });
            setTimeout(() => setIsOpen(false), 3000); // Hang up simulation

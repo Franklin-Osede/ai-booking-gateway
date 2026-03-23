@@ -31,6 +31,7 @@ type Msg = { id: string; text: string; sender: "bot" | "user"; playing?: boolean
 
 export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { color: string, niche?: string, pos?: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [stepInfo, setStepInfo] = useState<{ options: string[]; stepId: number }>({ options: [], stepId: 0 });
@@ -45,7 +46,8 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
   const [brandName, setBrandName] = useState("nuestra clínica");
   const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
   
-  const config = NICHE_CONFIGS[niche] || NICHE_CONFIGS.medical;
+  const activeNiche = detectedNiche || niche || "medical";
+  const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
   const contrastText = getContrastColor(color);
   const darkerBorder = getDarkerColor(color);
@@ -64,6 +66,9 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
           .then(data => {
             if (data && data.success) {
               setScrapedData(data);
+              if (data.detectedNiche) setDetectedNiche(data.detectedNiche);
+            } else if (data && data.detectedNiche) {
+              setDetectedNiche(data.detectedNiche);
             }
           })
           .catch(e => console.error(e));
@@ -164,14 +169,14 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
         });
       } 
       else if (nextStepId === 1) {
-        const serviceQuestion = `Perfecto. ¿Con qué especialidad o tratamiento te gustaría tu sesión hoy?`;
+        const serviceQuestion = `Perfecto, ¿con qué especialidad o tratamiento te gustaría tu sesión hoy?`;
         fetchAudio(serviceQuestion, "bot-1", () => {
           const chips = categories.slice(0, 2).map((c: { name: string }) => c.name);
           setStepInfo({ options: [...chips], stepId: 2 });
         });
       }
       else if (nextStepId === 2) {
-        const docQuestion = `Excelente opción. Aquí tienes algunos de nuestros especialistas disponibles para esa área. ¿Cuál prefieres?`;
+        const docQuestion = `Excelente opción, aquí tienes algunos de nuestros especialistas disponibles para esa área. ¿Cuál prefieres?`;
         fetchAudio(docQuestion, "bot-2", () => {
            const category = categories[0];
            const docs = category.docs.slice(0, 2).map((d: string | { name: string }) => typeof d === 'string' ? d : d.name);
@@ -179,7 +184,7 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
         });
       }
       else if (nextStepId === 3) {
-        const calQuestion = "Genial. Aquí tienes mi disponibilidad para los próximos días. Selecciona la fecha y hora que prefieras.";
+        const calQuestion = "Genial, aquí tienes mi disponibilidad para los próximos días. Selecciona la fecha y hora que prefieras.";
         fetchAudio(calQuestion, "bot-3", () => {
            // We do not set showCTA anymore, we append a Calendar Bubble!
            setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
@@ -199,8 +204,15 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
      setMessages(prev => prev.filter(m => !m.isCalendar)); // remove calendar
      setMessages(prev => [...prev, { id: "user-confirm", text: `Confirmo la cita para el Oct ${selectedDate} a las ${selectedTime}`, sender: "user" }]);
      
+     const spokenTime = selectedTime === "09.30" ? "nueve y media de la mañana" :
+                        selectedTime === "10.00" ? "diez de la mañana" :
+                        selectedTime === "11.30" ? "once y media de la mañana" :
+                        selectedTime === "16.00" ? "cuatro de la tarde" :
+                        selectedTime === "17.20" ? "cinco y veinte de la tarde" :
+                        selectedTime.replace('.', ':');
+
      setTimeout(() => {
-        fetchAudio(`¡Estupendo! Tu reserva con ${selectedDoctor || 'nuestro experto'} para el día ${selectedDate} a las ${selectedTime} ha quedado confirmada. Te esperamos.`, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
+        fetchAudio(`¡Estupendo! Tu reserva con ${selectedDoctor || 'nuestro experto'} para el día ${selectedDate} a las ${spokenTime} ha quedado confirmada, te esperamos.`, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
      }, 600);
   };
 

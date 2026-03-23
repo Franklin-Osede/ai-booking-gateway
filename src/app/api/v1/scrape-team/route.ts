@@ -40,7 +40,8 @@ export async function GET(request: Request) {
           { name: 'Dr. Eduardo Carriel', image: 'https://bayodental.com/wp-content/uploads/2022/09/BayoDental-tu-Dentista-en-Gandia-Eduardo-Carriel.jpg' }] },
         { name: 'Endodoncia', docs: [
           { name: 'Dra. Pilar Candel', image: 'https://bayodental.com/wp-content/uploads/2022/09/BayoDental-tu-Dentista-en-Gandia-Pilar-Candel-.jpg' }] }
-      ]
+      ],
+      detectedNiche: 'dental'
     });
   }
 
@@ -56,6 +57,19 @@ export async function GET(request: Request) {
     const html = await response.text();
     const $ = cheerio.load(html);
     
+    // Niche Detection Logic
+    const textLower = $('body').text().toLowerCase();
+    let detectedNiche = 'medical';
+    if (textLower.includes('dental') || textLower.includes('dentista') || textLower.includes('odontolog') || url.includes('dental') || url.includes('dentista')) {
+       detectedNiche = 'dental';
+    } else if (textLower.includes('abogado') || textLower.includes('legal') || textLower.includes('bufete')) {
+       detectedNiche = 'legal';
+    } else if (url.includes('auto') || textLower.includes('concesionario') || textLower.includes('taller')) {
+       detectedNiche = 'auto';
+    } else if (textLower.includes('salon') || textLower.includes('peluqueria') || textLower.includes('belleza')) {
+       detectedNiche = 'beauty';
+    }
+
     const doctors: string[] = [];
     
     // Extract real doctor names using Regex on visible text
@@ -93,10 +107,10 @@ export async function GET(request: Request) {
         { docs: doctors.slice(0, 3) },
         { docs: doctors.slice(3, 6).length ? doctors.slice(3, 6) : doctors.slice(0, 2) }
       ];
-      return NextResponse.json({ categories, success: true });
+      return NextResponse.json({ categories, success: true, detectedNiche });
     }
 
-    return NextResponse.json({ categories: [], success: false });
+    return NextResponse.json({ categories: [], success: false, detectedNiche });
   } catch (error) {
     console.error("Scraping error", error);
     return NextResponse.json({ error: 'Failed to scrape' }, { status: 500 });

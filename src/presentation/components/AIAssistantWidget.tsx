@@ -23,6 +23,7 @@ import { NICHE_CONFIGS } from "../config/nicheConfig";
 export function AIAssistantWidget({ color, niche = "medical" }: { color: string, niche?: string, pos?: string }) {
   const [step, setStep] = useState(1);
   const [isOpen, setIsOpen] = useState(true);
+  const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
 
   // Form states
   const [specialty, setSpecialty] = useState("");
@@ -39,7 +40,8 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
   const prevStep = () => setStep((s) => Math.max(1, s - 1));
 
   const getCategories = () => {
-    return NICHE_CONFIGS[niche]?.categories || NICHE_CONFIGS["medical"].categories;
+    const activeNiche = detectedNiche || niche || "medical";
+    return NICHE_CONFIGS[activeNiche]?.categories || NICHE_CONFIGS["medical"].categories;
   };
 
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string, docs: ({name: string, image?: string} | string)[] }[] } | null>(null);
@@ -68,6 +70,9 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
           .then(data => {
             if (data && data.success) {
               setScrapedData(data);
+              if (data.detectedNiche) setDetectedNiche(data.detectedNiche);
+            } else if (data && data.detectedNiche) {
+              setDetectedNiche(data.detectedNiche);
             }
           })
           .catch(e => console.error(e));
@@ -119,7 +124,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
                 <div className="w-8 md:w-12 h-8 md:h-12 -ml-3" />
               )}
               <h2 className="font-extrabold text-2xl md:text-3xl tracking-tight text-gray-900">
-                {step === 1 && (NICHE_CONFIGS[niche]?.title || NICHE_CONFIGS["medical"].title)}
+                {step === 1 && (NICHE_CONFIGS[detectedNiche || niche || "medical"]?.title || NICHE_CONFIGS["medical"].title)}
                 {step === 2 && "Selecciona fecha y hora"}
                 {step === 3 && "Acceso al portal"}
                 {step === 4 && "Confirmar Reserva"}
@@ -217,7 +222,7 @@ export function AIAssistantWidget({ color, niche = "medical" }: { color: string,
                               >
                                 <div className="px-4 pb-4 md:px-6 md:pb-6">
                                   <div className="w-full h-px bg-gray-100 mb-4" />
-                                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{NICHE_CONFIGS[niche]?.buttonLabel || "Especialistas"}</h4>
+                                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{NICHE_CONFIGS[detectedNiche || niche || "medical"]?.buttonLabel || "Especialistas"}</h4>
                                   <div className="flex flex-col gap-3">
                                      {cat.docs.map((docItem, i) => {
                                        const docObj = docItem as unknown as {name: string, image?: string};

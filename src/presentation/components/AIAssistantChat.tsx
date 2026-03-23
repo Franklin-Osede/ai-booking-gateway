@@ -8,6 +8,7 @@ import { NICHE_CONFIGS } from "../config/nicheConfig";
 
 export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { color: string, niche?: string, pos?: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ id: string; text: string; sender: "bot" | "user"; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean }[]>([]);
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
@@ -21,7 +22,8 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
   const [brandName, setBrandName] = useState("nuestra clínica");
   const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
 
-  const config = NICHE_CONFIGS[niche] || NICHE_CONFIGS.medical;
+  const activeNiche = detectedNiche || niche || "medical";
+  const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
 
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string, docs: ({name: string, image?: string} | string)[] }[] } | null>(null);
@@ -34,7 +36,12 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
         fetch('/api/v1/scrape-team?url=' + encodeURIComponent(storedSite) + '&t=' + Date.now())
           .then(res => res.json())
           .then(data => {
-             if (data && data.success) setScrapedData(data);
+             if (data && data.success) {
+               setScrapedData(data);
+               if (data.detectedNiche) setDetectedNiche(data.detectedNiche);
+             } else if (data && data.detectedNiche) {
+               setDetectedNiche(data.detectedNiche);
+             }
           }).catch(e => console.error(e));
       }
     } catch {}
