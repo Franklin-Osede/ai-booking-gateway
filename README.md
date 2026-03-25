@@ -1,6 +1,6 @@
 # AI Booking Gateway & Widget Injector 🚀
 
-> An intelligent, embeddable widget system featuring AI-driven voice and chat assistants. Designed for seamless integration and lead generation, powered by Next.js and AWS Bedrock.
+> An advanced, embeddable widget system featuring AI-driven voice and chat assistants. Designed for seamless integration, dynamic personalization, and high-conversion lead generation, powered by Next.js, AWS Bedrock, and AWS Polly.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
@@ -10,25 +10,40 @@
 
 ## 🌟 Overview
 
-The **AI Booking Gateway** (internal codename: `widget-inyector`) is a modern front-end application and embeddable widget solution. It provides websites with instant AI capabilities, including voice-enabled assistants, intelligent chat interfaces, and automated data extraction for lead generation.
+The **AI Booking Gateway** (internal codename: `widget-inyector`) is a state-of-the-art front-end application and embeddable widget solution. It provides websites with instant AI capabilities, including interactive voice-enabled assistants, intelligent chat interfaces, and automated data extraction for contextualized lead generation.
 
-### Key Features
+## 🏆 Project Milestones & Core Features
 
-- **Conversational AI Widget:** Embeddable chat and voice assistant elements (`AIAssistantChat`, `AIAssistantVoice`).
-- **Voice Synthesis:** Integrated with **AWS Polly** and **AWS Bedrock Runtime** for natural language understanding and text-to-speech.
-- **Dynamic Content Scraping:** Utilizes `cheerio` to parse target websites and contextualize the AI assistant dynamically.
-- **High-Performance UI:** Built on **React 19** and **Next.js 16.2** (Turbopack enabled) with fluid animations via **Framer Motion**.
-- **Modern Styling:** Styled edge-to-edge using **Tailwind CSS v4** and customized icons from `lucide-react`.
+We have recently implemented a massive suite of features focusing on conversion, realism, and robust architecture:
+
+### 🎙️ Advanced Voice Assistant & TTS Pipeline
+- **Authentic iOS-style UI:** A premium, familiar phone widget interface with a refined Push-to-Talk (PTT) demo flow.
+- **Real Amazon Polly API Integration:** Seamless Text-to-Speech (TTS) pipeline linking the Voice UI to a robust Bedrock/Polly serverless backend endpoint.
+- **Prosody Optimization:** Fine-tuned AWS Polly speech synthesis (including the "Marcos" voice) for highly natural, conversational cadence.
+- **Interactive Demo Flow:** Multi-step voice demonstration with interactive tap-chips to guide users effortlessly through the conversion funnel.
+- **Responsive & Seamless:** Widget resize updates for mobile and precise position alignment to avoid overlaps with existing site elements.
+
+### 📅 Calendar & Booking Integration
+- **Embedded AI Calendar:** Fully migrated the Voice Agent booking flow into an immersive, React-based inline calendar, dramatically reducing booking friction directly within the widget.
+
+### 🧠 Dynamic Personalization & Scraping
+- **Contextual Scraping:** Implemented dynamic target website scanning (`?site` parsing) to provide highly personalized AI greetings based on the host page.
+- **Niche Configuration Engine:** Expanded `nicheConfig` to definitively cover 7 specific industry sectors (Dental, Legal, SaaS, Auto, etc.), automatically customizing the AI's behavior and terminology.
+- **Resilient Fallbacks:** Hardened scraping proxies with generic aesthetic fallbacks to guarantee a perfect presentation and completely prevent AI hallucination when target data is unavailable or restrictive.
+
+### ⚙️ Engine & Dashboard Upgrades
+- **API Standardization:** Migrated all proxy and scraper endpoints to strict **v1 OpenAPI standards**.
+- **Dashboard Enhancements:** Upgraded the injector panel to dynamically serve complete voice agent payloads instead of legacy static lead magnets.
+- **Chat UX Polish:** Removed slow connecting animations to improve immediate conversion rates and resolved render loop issues for flawless long-session stability.
 
 ## 🏗️ Technical Architecture
 
-This project is built with scalability, performance, and developer experience (DX) in mind:
+This project strictly adheres to **Clean Architecture / Domain-Driven Design (DDD)** principles, structured into `app`, `application`, `domain`, `infrastructure`, and `presentation` layers to guarantee maximum enterprise scalability.
 
-- **Framework:** Next.js (App Router) for hybrid SSR/SSG and serverless API routes.
-- **Language:** TypeScript `v5` with strict typing for maximum reliability.
-- **Styling Strategy:** Tailwind CSS (v4) paired with `clsx` and `tailwind-merge` for dynamic component styling.
-- **Testing:** Comprehensive unit and component testing setup using **Vitest**, `jsdom`, and `@testing-library/react`.
-- **Linting & Formatting:** Enforced code quality via ESLint 9.
+- **Framework:** Next.js 16.2 (App Router) with Turbopack for hybrid SSR/SSG and serverless API routes.
+- **Language:** TypeScript `v5` ensuring absolute type safety across all domains.
+- **Styling UI:** Tailwind CSS v4, Framer Motion for fluid edge-to-edge animations, and customizable `lucide-react` icons.
+- **Testing:** Comprehensive Vite-powered test environment (`vitest`, `jsdom`, `@testing-library/react`).
 
 ## 🚀 Getting Started
 
@@ -36,55 +51,32 @@ This project is built with scalability, performance, and developer experience (D
 
 - Node.js 20+
 - `npm`, `yarn`, or `pnpm`
-- AWS Credentials configured in your environment (for Bedrock and Polly access)
+- AWS Credentials configured in your environment for Bedrock and Polly access
 
-### Installation
+### Installation & Run
 
-1. Clone the repository:
-
+1. **Clone & Install:**
    ```bash
    git clone git@github.com:Franklin-Osede/ai-booking-gateway.git
-   ```
-
-2. Navigate into the project directory:
-
-   ```bash
    cd widget-inyector
-   ```
-
-3. Install dependencies:
-
-   ```bash
    npm install
    ```
 
-4. Set up environment variables:
-   Duplicate the `.env.local.example` (or set up `.env.local`) with your AWS configurations and other required keys.
+2. **Environment Variables:**
+   Duplicate the `.env.local.example` to `.env.local` and populate your AWS configurations.
 
-### Development
-
-Start the development server with Turbopack enabled:
-
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:3005`.
+3. **Development Server:**
+   ```bash
+   npm run dev
+   ```
+   *Application will be available at `http://localhost:3005`*
 
 ## 🧪 Testing
 
-Run the test suite using Vitest to ensure code acts as expected:
-
+Run the automated Vitest suite to validate domain logic and UI components:
 ```bash
 npx vitest
 ```
 
-## 📈 Scalability & Future Roadmap
-
-- Implementation of further modular widget components.
-- Expanding AI LLM integrations beyond initial Bedrock runtimes.
-- Sophisticated metrics dashboards for interaction analysis.
-
 ---
-
 _Designed and developed with modern web engineering standards._
