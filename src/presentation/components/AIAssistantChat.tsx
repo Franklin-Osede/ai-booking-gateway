@@ -22,6 +22,22 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
   const [brandName, setBrandName] = useState("nuestra clínica");
   const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
 
+  const [today, setToday] = useState<Date | null>(null);
+  const [monthOffset, setMonthOffset] = useState(0);
+  useEffect(() => setToday(new Date()), []);
+  
+  const realYear = today ? today.getFullYear() : 2026;
+  const realMonth = today ? today.getMonth() : 9;
+  const currentDay = today ? today.getDate() : 15;
+
+  const displayedDate = new Date(realYear, realMonth + monthOffset, 1);
+  const dispYear = displayedDate.getFullYear();
+  const dispMonthIdx = displayedDate.getMonth();
+  const daysInMonth = new Date(dispYear, dispMonthIdx + 1, 0).getDate();
+  const monthNameStr = displayedDate.toLocaleString('es-ES', { month: 'long' });
+  const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
+  const monthShort = monthNameStr.substring(0, 3);
+
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "medical");
   const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
@@ -197,8 +213,7 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
   };
 
   const handleConfirmBooking = () => {
-     setMessages(prev => prev.filter(m => !m.isCalendar)); // remove calendar
-     setMessages(prev => [...prev, { id: "user-confirm", text: `Confirmo la cita para el Oct ${selectedDate} a las ${selectedTime}`, sender: "user" }]);
+     setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "user-confirm", text: `Confirmo la cita para el ${selectedDate} de ${monthNameStr} a las ${selectedTime}`, sender: "user" }]);
      
      pushBotMessage(`¡Estupendo! Tu reserva con ${selectedDoctor || 'nuestro experto'} para el día ${selectedDate} a las ${selectedTime} ha quedado confirmada. Te esperamos.`, 600, () => {}, { isSuccess: true, isFinalCard: true });
   };
@@ -309,24 +324,26 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
                       <div className="w-full pl-0 pr-1 pt-2">
                         <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm w-full">
                            <div className="flex justify-between items-center mb-4">
-                             <ChevronRight size={16} className="text-gray-400 rotate-180" />
-                             <span className="font-bold text-[13px] text-gray-800">Octubre 2026</span>
-                             <ChevronRight size={16} className="text-gray-400" />
+                             <button onClick={() => setMonthOffset(p => p - 1)} disabled={monthOffset <= 0} className="p-1 disabled:opacity-30"><ChevronRight size={16} className="text-gray-400 rotate-180" /></button>
+                             <span className="font-bold text-[13px] text-gray-800">{currentMonthText}</span>
+                             <button onClick={() => setMonthOffset(p => p + 1)} className="p-1 hover:bg-gray-50 rounded-full"><ChevronRight size={16} className="text-gray-400" /></button>
                            </div>
                            <div className="grid grid-cols-7 gap-y-2 text-center text-[10px] font-bold text-gray-400 mb-2 uppercase">
                              <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
                            </div>
                            <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center text-[12px] font-semibold mb-4">
-                             {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
-                               const isRed = [5, 12, 19].includes(d);
-                               const isGreen = [14, 15, 21].includes(d);
+                             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
+                               const isPast = monthOffset < 0 || (monthOffset === 0 && d < currentDay);
+                               const isRed = !isPast && (monthOffset === 0 ? [currentDay + 2, currentDay + 7, currentDay + 11].includes(d) : [4, 11, 18, 25].includes(d));
+                               const isGreen = !isPast && (monthOffset === 0 ? [currentDay + 1, currentDay + 3, currentDay + 6, currentDay + 8].includes(d) : [2, 7, 9, 14, 16, 21, 23, 28].includes(d));
                                let btnClass = "w-7 h-7 rounded-full flex items-center justify-center mx-auto transition-colors ";
                                if (selectedDate === d) btnClass += "text-white shadow-md scale-110";
+                               else if (isPast) btnClass += "text-gray-300 font-normal cursor-not-allowed";
                                else if (isRed) btnClass += "text-red-400 bg-red-50 font-bold cursor-not-allowed line-through";
-                               else if (isGreen) btnClass += "text-emerald-700 bg-emerald-100 ring-1 ring-emerald-300 font-extrabold";
+                               else if (isGreen) btnClass += "bg-[#10b98115] text-[#10b981] font-semibold hover:bg-[#10b98130] cursor-pointer";
                                else btnClass += "text-gray-700 bg-white hover:bg-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]";
                                return (
-                                 <button key={d} disabled={isRed} onClick={() => { setSelectedDate(d); setSelectedTime(""); }} className={btnClass} style={selectedDate === d ? { backgroundColor: color } : {}}>{d}</button>
+                                 <button key={d} disabled={isPast || isRed} onClick={() => { setSelectedDate(d); setSelectedTime(""); }} className={btnClass} style={selectedDate === d ? { backgroundColor: color, color: '#fff' } : {}}>{d}</button>
                                )
                              })}
                            </div>
@@ -376,7 +393,7 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
                              )}
                              <div className="flex flex-col gap-1">
                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fecha y Horario</span>
-                               <span className="text-[14px] font-bold text-gray-800 tracking-tight">Oct {selectedDate}, {selectedTime}</span>
+                               <span className="text-[14px] font-bold text-gray-800 tracking-tight">{monthShort} {selectedDate}, {selectedTime}</span>
                              </div>
                            </div>
                            <button onClick={() => setIsOpen(false)} className="w-full py-4 rounded-xl font-bold shadow-md active:scale-95 transition-all text-[14px] flex items-center justify-center gap-2 group" style={primaryButtonStyle}>

@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, X, Volume2, Sparkles, Play, Menu, Camera } from "lucide-react";
+import { Mic, X, Volume2, Sparkles, Play, Menu, Camera, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { NICHE_CONFIGS } from "../config/nicheConfig";
 
 function getContrastColor(hexcolor: string) {
@@ -52,10 +52,61 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [micTime, setMicTime] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedDoctor] = useState("Laura - Asesora");
+  const [selectedService] = useState("Valoración Capilar Gratuita");
+  const times = ["09:30", "10:00", "11:30", "16:00", "17:20"];
+  
+  const [today, setToday] = useState<Date | null>(null);
+  const [monthOffset, setMonthOffset] = useState(0);
+  useEffect(() => setToday(new Date()), []);
+  
+  const realYear = today ? today.getFullYear() : 2026;
+  const realMonth = today ? today.getMonth() : 9;
+  const currentDay = today ? today.getDate() : 15;
+
+  const displayedDate = new Date(realYear, realMonth + monthOffset, 1);
+  const dispYear = displayedDate.getFullYear();
+  const dispMonthIdx = displayedDate.getMonth();
+  const daysInMonth = new Date(dispYear, dispMonthIdx + 1, 0).getDate();
+  const monthNameStr = displayedDate.toLocaleString('es-ES', { month: 'long' });
+  const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
+  const monthShort = monthNameStr.substring(0, 3);
+
+  const handleConfirmBooking = () => {
+    setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "bot-done-card", text: "¡Confirmado!", sender: "bot", isFinalCard: true }]);
+    setTimeout(() => {
+       const confirmationText = `Perfecto. Tu cita para el día ${selectedDate} de ${monthNameStr} a las ${selectedTime} ha sido reservada con éxito. Te hemos enviado un correo con todos los detalles. ¡Nos vemos pronto!`;
+       fetchAudio(confirmationText, "bot-done-audio", () => {});
+    }, 500);
+  };
   const endRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasRecognizedRef = useRef(false);
+  const preloadedGreetingRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // Pre-fetch greeting for instantaneous startup
+    const preloadGreeting = async () => {
+      const greeting = `¡Hola! <break time="200ms"/> Bienvenido a la Clínica Capilar. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+      try {
+        const res = await fetch('/api/v1/voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: greeting })
+        });
+        if (res.ok) {
+          const blob = await res.blob();
+          preloadedGreetingRef.current = URL.createObjectURL(blob);
+        }
+      } catch (e) {
+        console.error("Polly Preload Error:", e);
+      }
+    };
+    preloadGreeting();
+  }, []);
 
   const AudioTimer = ({ isPlaying, duration }: { isPlaying?: boolean, duration?: number }) => {
     const [elapsed, setElapsed] = useState(0);
@@ -141,16 +192,20 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
       const displayText = text.replace(/<[^>]*>/g, '');
       setMessages(prev => [...prev, { id: msgId, text: displayText, sender: "bot", playing: true, ...extraProps }]);
       
-      const res = await fetch('/api/v1/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
+      let audioUrl = "";
+      if (msgId === "bot-0" && preloadedGreetingRef.current) {
+        audioUrl = preloadedGreetingRef.current;
+      } else {
+        const res = await fetch('/api/v1/voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        if (!res.ok) throw new Error("Voice API Error");
+        const blob = await res.blob();
+        audioUrl = URL.createObjectURL(blob);
+      }
       
-      if (!res.ok) throw new Error("Voice API Error");
-      
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
       const audio = new Audio(audioUrl);
       
       audio.onloadedmetadata = () => {
@@ -194,9 +249,11 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
     }
     setStepInfo({ options: [], stepId: nextStepId });
 
+    const delay = nextStepId === 0 ? 200 : 700;
+
     setTimeout(() => {
       if (nextStepId === 0) {
-        const greeting = `¡Hola! <break time="200ms"/> Bienvenido a la clínica. <break time="150ms"/> Soy tu asesora capilar. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+        const greeting = `¡Hola! <break time="200ms"/> Bienvenido a la Clínica Capilar. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: [], stepId: 1 });
         });
@@ -208,7 +265,7 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
         });
       }
       else if (nextStepId === 2) {
-        const photoQuestion = `Entendido. Cada paciente es único, así que lo ideal en estos casos es que el cirujano evalúe tu zona donante. ¿Podrías subir un par de fotos usando el botón de Cámara que ha aparecido en el chat? Es 100% confidencial.`;
+        const photoQuestion = `Entendido. Cada paciente es único, así que lo ideal en estos casos es que el cirujano evalúe tu zona donante. ¿Podrías subir un par de fotos usando el botón de cámara que aparecerá a continuación en el chat? Es 100% confidencial.`;
         fetchAudio(photoQuestion, "bot-2", () => {
           setShowPhotoUpload(true);
         });
@@ -226,7 +283,7 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
            setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
         });
       }
-    }, 600);
+    }, delay);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -242,21 +299,15 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
     }
   };
 
+  const isBotPlaying = messages.some(m => m.playing);
+
   const handleMicClick = () => {
-    if (isProcessing) return;
+    if (isProcessing || isBotPlaying) return;
     
     if (isListening) {
        setIsListening(false);
        if ((window as any).recognitionInstance) {
           (window as any).recognitionInstance.stop();
-          // Timeout para ver si el onresult capturó algo antes de frenar
-          setTimeout(() => {
-             if (!hasRecognizedRef.current) {
-                if (stepInfo.stepId === 1) triggerFlowStep(1, "Diferencia entre FUE y DHI.");
-                else if (stepInfo.stepId === 2) triggerFlowStep(2, "Entradas y coronilla.");
-                else if (stepInfo.stepId === 4) triggerFlowStep(4, "Sí, perfecto.");
-             }
-          }, 300);
        } else {
           // Fallback simulation (si no hay Speech API)
           if (stepInfo.stepId === 1) triggerFlowStep(1, "Diferencia entre FUE y DHI.");
@@ -277,11 +328,16 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
+      recognition.continuous = true;
+      (window as any).currentTranscriptChunk = "";
+
       recognition.onresult = (event: any) => {
         hasRecognizedRef.current = true;
-        const transcript = event.results[0][0].transcript;
-        setIsListening(false);
-        triggerFlowStep(stepInfo.stepId, transcript);
+        let chunk = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+           chunk += event.results[i][0].transcript + " ";
+        }
+        (window as any).currentTranscriptChunk = chunk;
       };
 
       recognition.onerror = (event: any) => {
@@ -290,8 +346,16 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
       };
       
       recognition.onend = () => {
-         // Asegurarnos de limpiar la UI si se corta solo
          setIsListening(false);
+         const text = ((window as any).currentTranscriptChunk || "").trim();
+         if (hasRecognizedRef.current && text.length > 0) {
+            triggerFlowStep(stepInfo.stepId, text);
+         } else {
+            if (stepInfo.stepId === 1) triggerFlowStep(1, "Diferencia entre FUE y DHI.");
+            else if (stepInfo.stepId === 2) triggerFlowStep(2, "Entradas y coronilla.");
+            else if (stepInfo.stepId === 4) triggerFlowStep(4, "Sí, perfecto.");
+         }
+         (window as any).currentTranscriptChunk = "";
       };
 
       recognition.start();
@@ -393,7 +457,7 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
                         : 'bg-black text-white rounded-tr-sm border border-black/5'
                     }`}
                   >
-                    {msg.sender === "bot" ? (
+                    {msg.sender === "bot" && !msg.isCalendar && !msg.isFinalCard ? (
                       <div className="flex flex-col w-full">
                         <div className="flex items-center gap-4 w-full">
                            <div className="relative shrink-0 cursor-pointer" onClick={() => togglePlayAudio(msg.id)}>
@@ -458,6 +522,88 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
                            </div>
                         ))}
                       </div>
+                    ) : msg.isCalendar ? (
+                      <div className="w-full pl-3 pr-1 pt-2">
+                        <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm w-full">
+                           <div className="flex justify-between items-center mb-4">
+                             <button onClick={() => setMonthOffset(p => p - 1)} disabled={monthOffset <= 0} className="p-1 disabled:opacity-30"><ChevronLeft size={16} className="text-gray-400" /></button>
+                             <span className="font-bold text-[13px] text-gray-800">{currentMonthText}</span>
+                             <button onClick={() => setMonthOffset(p => p + 1)} className="p-1 hover:bg-gray-50 rounded-full"><ChevronRight size={16} className="text-gray-400" /></button>
+                           </div>
+                           <div className="grid grid-cols-7 gap-y-2 text-center text-[10px] font-bold text-gray-400 mb-2 uppercase">
+                             <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                           </div>
+                           <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center text-[12px] font-semibold mb-4">
+                             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
+                               const isPast = monthOffset < 0 || (monthOffset === 0 && d < currentDay);
+                               const isRed = !isPast && (monthOffset === 0 ? [currentDay + 2, currentDay + 7, currentDay + 11].includes(d) : [4, 11, 18, 25].includes(d));
+                               const isGreen = !isPast && (monthOffset === 0 ? [currentDay + 1, currentDay + 3, currentDay + 6, currentDay + 8].includes(d) : [2, 7, 9, 14, 16, 21, 23, 28].includes(d));
+                               let btnClass = "w-7 h-7 rounded-full flex items-center justify-center mx-auto transition-colors ";
+                               if (selectedDate === d) btnClass += "text-white shadow-md scale-110";
+                               else if (isPast) btnClass += "text-gray-300 font-normal cursor-not-allowed";
+                               else if (isRed) btnClass += "text-red-400 bg-red-50 font-bold cursor-not-allowed line-through";
+                               else if (isGreen) btnClass += "bg-[#10b98115] text-[#10b981] font-semibold hover:bg-[#10b98130] cursor-pointer";
+                               else btnClass += "text-gray-700 bg-white hover:bg-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]";
+                               return (
+                                 <button key={d} disabled={isPast || isRed} onClick={() => { setSelectedDate(d); setSelectedTime(""); }} className={btnClass} style={selectedDate === d ? { backgroundColor: color, color: '#fff' } : {}}>{d}</button>
+                               )
+                             })}
+                           </div>
+                           {selectedDate && (
+                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-gray-100 pt-3">
+                               <p className="text-[11px] font-bold text-gray-500 mb-2">Horarios:</p>
+                               <div className="flex flex-wrap gap-2">
+                                 {times.map(t => (
+                                   <button key={t} onClick={() => setSelectedTime(t)} className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${selectedTime === t ? 'shadow-md border-transparent text-white' : 'border border-gray-200 text-gray-600'}`} style={selectedTime === t ? { backgroundColor: color, color: contrastText } : {}}>{t}</button>
+                                 ))}
+                               </div>
+                             </motion.div>
+                           )}
+                           <AnimatePresence>
+                             {selectedDate && selectedTime && (
+                               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                                 <button onClick={handleConfirmBooking} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-white shadow-md active:scale-95 transition-all" style={{ backgroundColor: color, color: contrastText }}>
+                                   Confirmar Reserva
+                                 </button>
+                               </motion.div>
+                             )}
+                           </AnimatePresence>
+                        </div>
+                      </div>
+                    ) : msg.isFinalCard ? (
+                      <div className="w-full pt-1 pb-2">
+                         <div className="bg-white border text-center border-gray-100 rounded-3xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] w-full relative overflow-hidden">
+                           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: color }} />
+                           <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm ring-1 ring-gray-50">
+                             <CheckCircle2 size={28} className="text-green-500" />
+                           </div>
+                           <h3 className="font-extrabold text-[17px] text-gray-900 mb-1 tracking-tight">¡Cita Solicitada!</h3>
+                           <p className="text-[12px] text-gray-500 mb-6 font-medium leading-relaxed px-2">Hemos enviado un email con todos los detalles e información para preparar tu visita a la clínica.</p>
+                           
+                           <div className="bg-gray-50/80 rounded-2xl p-4 mb-6 text-left space-y-3.5 border border-gray-100">
+                             {selectedDoctor && (
+                               <div className="flex flex-col gap-1 border-b border-gray-200/60 pb-3">
+                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Asesora</span>
+                                 <span className="text-[14px] font-bold text-gray-800 tracking-tight">{selectedDoctor}</span>
+                               </div>
+                             )}
+                             {selectedService && (
+                               <div className="flex flex-col gap-1 border-b border-gray-200/60 pb-3">
+                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Servicio</span>
+                                 <span className="text-[14px] font-bold text-gray-800 tracking-tight">{selectedService}</span>
+                               </div>
+                             )}
+                             <div className="flex flex-col gap-1">
+                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fecha y Horario</span>
+                               <span className="text-[14px] font-bold text-gray-800 tracking-tight">{monthShort} {selectedDate}, {selectedTime}</span>
+                             </div>
+                           </div>
+
+                           <button onClick={() => setIsOpen(false)} className="w-full py-4 rounded-xl font-bold shadow-md active:scale-95 transition-all text-[14px] flex items-center justify-center gap-2 group" style={{ backgroundColor: color, color: contrastText }}>
+                             Volver a la web <ChevronRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                           </button>
+                         </div>
+                      </div>
                     ) : (
                       <div className="text-[13px] sm:text-[15px] leading-relaxed font-medium">
                         {msg.text}
@@ -502,11 +648,11 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
                  onClick={handleMicClick}
                  animate={isProcessing || isListening ? { scale: [1, 1.1, 1] } : {}}
                  transition={{ repeat: Infinity, duration: 1.5 }}
-                 className={`w-14 h-14 rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition-all ${isListening ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]' : 'shadow-[0_10px_20px_rgba(0,0,0,0.15)] opacity-90 hover:opacity-100'}`}
-                 style={!isListening ? { backgroundColor: color, color: contrastText } : { color: '#ffffff' }}
-                 title="Haz clic para grabar"
+                 className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isProcessing || isBotPlaying ? 'opacity-40 grayscale cursor-not-allowed shadow-none' : 'cursor-pointer hover:scale-105 shadow-[0_10px_20px_rgba(0,0,0,0.15)] opacity-90 hover:opacity-100'} ${isListening ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]' : ''}`}
+                 style={!(isListening || isProcessing || isBotPlaying) ? { backgroundColor: color, color: contrastText } : (isProcessing || isBotPlaying) ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : { color: '#ffffff' }}
+                 title={isProcessing || isBotPlaying ? "Espera a que termine de hablar" : "Haz clic para grabar"}
                >
-                 <Mic size={24} fill={isListening ? "currentColor" : "none"} color={isListening ? "#ffffff" : contrastText} />
+                 <Mic size={24} fill={isListening ? "currentColor" : "none"} color={isListening ? "#ffffff" : (isProcessing || isBotPlaying) ? "#9ca3af" : contrastText} />
                </motion.button>
             </div>
           </motion.div>
