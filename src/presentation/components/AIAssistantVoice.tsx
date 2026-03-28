@@ -42,7 +42,18 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
   useEffect(() => {
     // Pre-fetch greeting for instantaneous startup
     const preloadGreeting = async () => {
-      const greeting = `¡Hola! <break time="200ms"/> Bienvenido a la Clínica Capilar. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+      let currentBrand = "la Clínica Capilar";
+      try {
+         const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
+         if (storedSite) {
+            let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
+            parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
+            if (!parsedName) parsedName = "especializada";
+            currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
+         }
+      } catch (e) {}
+
+      const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${currentBrand}. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
       try {
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
