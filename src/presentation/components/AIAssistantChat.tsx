@@ -229,23 +229,23 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
             onClick={toggleChat}
             className={`fixed bottom-6 md:bottom-8 ${posClass} bg-white p-3 sm:p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col gap-2.5 sm:gap-4 z-50 border border-gray-100/50 cursor-pointer hover:shadow-[0_25px_60px_rgba(0,0,0,0.2)] transition-shadow w-[210px] sm:w-[300px]`}
           >
-            <div className="flex items-center gap-2.5 sm:gap-4">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 w-full">
               <div 
                 className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-inner shrink-0 relative overflow-hidden bg-gray-50"
               >
-                <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at top left, ${color}, transparent)` }} />
+              <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at top left, ${color}, transparent)` }} />
                 <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: color }} />
               </div>
-              <span className="text-[12px] sm:text-[16px] font-medium tracking-tight text-gray-800">
-                ¿Necesitas ayuda?
+              <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-gray-800 leading-snug text-center">
+                Da el primer paso<br /> hacia <strong className="font-extrabold" style={{ color: color }}>tu cambio</strong>
               </span>
             </div>
             
             <button 
-              className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[13px] sm:text-base"
+              className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[14px] sm:text-[15px]"
               style={primaryButtonStyle}
             >
-              <Bot fill={primaryButtonStyle.color} size={16} /> Chat de IA
+              <Bot fill={primaryButtonStyle.color} size={16} /> Tu Asistente Virtual
             </button>
           </motion.div>
         )}
@@ -262,17 +262,14 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
             {/* Header */}
             <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div 
-                  className="p-2 rounded-full text-black shrink-0 relative overflow-hidden"
-                  style={{ backgroundColor: `${color}40`, color: color }}
-                >
-                  <Bot size={20} className="relative z-10" />
+                <div className="w-10 h-10 rounded-full shrink-0 relative overflow-hidden shadow-sm border border-gray-200">
+                  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Asesora" className="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg leading-tight">Chat de IA</h3>
-                  <div className="flex items-center gap-1">
+                <div className="flex flex-col">
+                  <h3 className="font-bold text-[14px] sm:text-[15px] leading-tight text-gray-900 whitespace-nowrap">Laura · Asesora Médica</h3>
+                  <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <p className="text-xs text-green-600 font-medium">{isProcessing ? "Escribiendo..." : "En línea"}</p>
+                    <p className="text-[12px] text-green-600 font-medium tracking-tight">{isProcessing ? "Escribiendo..." : "En línea"}</p>
                   </div>
                 </div>
               </div>
