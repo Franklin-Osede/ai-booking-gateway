@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,9 +51,11 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
   const [stepInfo, setStepInfo] = useState<{ options: string[]; stepId: number }>({ options: [], stepId: 0 });
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [micTime, setMicTime] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasRecognizedRef = useRef(false);
 
   const AudioTimer = ({ isPlaying, duration }: { isPlaying?: boolean, duration?: number }) => {
     const [elapsed, setElapsed] = useState(0);
@@ -160,16 +163,28 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
       
       audio.onended = () => {
          setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: false } : m));
-         setIsProcessing(false);
          onEnd();
       };
       
       await audio.play();
+      setIsProcessing(false);
     } catch (e) {
       console.error("Polly Error:", e);
       setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: false } : m));
       setIsProcessing(false);
       onEnd();
+    }
+  };
+
+  const togglePlayAudio = (msgId: string) => {
+    if (audioRef.current && audioRef.current.src) {
+      if (!audioRef.current.paused) {
+         audioRef.current.pause();
+         setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: false } : m));
+      } else {
+         audioRef.current.play();
+         setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: true } : m));
+      }
     }
   };
 
@@ -229,20 +244,72 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
 
   const handleMicClick = () => {
     if (isProcessing) return;
-    if (!isListening) {
-       setIsListening(true);
+    
+    if (isListening) {
+       setIsListening(false);
+       if ((window as any).recognitionInstance) {
+          (window as any).recognitionInstance.stop();
+          // Timeout para ver si el onresult capturó algo antes de frenar
+          setTimeout(() => {
+             if (!hasRecognizedRef.current) {
+                if (stepInfo.stepId === 1) triggerFlowStep(1, "Diferencia entre FUE y DHI.");
+                else if (stepInfo.stepId === 2) triggerFlowStep(2, "Entradas y coronilla.");
+                else if (stepInfo.stepId === 4) triggerFlowStep(4, "Sí, perfecto.");
+             }
+          }, 300);
+       } else {
+          // Fallback simulation (si no hay Speech API)
+          if (stepInfo.stepId === 1) triggerFlowStep(1, "Diferencia entre FUE y DHI.");
+          else if (stepInfo.stepId === 2) triggerFlowStep(2, "Entradas y coronilla.");
+          else if (stepInfo.stepId === 4) triggerFlowStep(4, "Sí, perfecto.");
+       }
        return;
     }
-    setIsListening(false);
 
-    if (stepInfo.stepId === 1) {
-       triggerFlowStep(1, "Dudo entre la técnica FUE o la DHI, y la verdad es que me da miedo que me duela o quede mal.");
-    } else if (stepInfo.stepId === 2) {
-       triggerFlowStep(2, "Principalmente son las entradas y un poco la coronilla.");
-    } else if (stepInfo.stepId === 4) {
-       triggerFlowStep(4, "Sí, me parece estupendo, agendemos la videollamada.");
+    setIsListening(true);
+    setMicTime(0);
+    hasRecognizedRef.current = false;
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event: any) => {
+        hasRecognizedRef.current = true;
+        const transcript = event.results[0][0].transcript;
+        setIsListening(false);
+        triggerFlowStep(stepInfo.stepId, transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+         console.warn("Speech error:", event.error);
+         setIsListening(false);
+      };
+      
+      recognition.onend = () => {
+         // Asegurarnos de limpiar la UI si se corta solo
+         setIsListening(false);
+      };
+
+      recognition.start();
+      (window as any).recognitionInstance = recognition;
+    } else {
+      console.warn("Speech API not supported in this browser");
     }
   };
+
+  useEffect(() => {
+    let interval: any;
+    if (isListening) {
+      interval = setInterval(() => setMicTime(prev => prev + 1), 1000);
+    } else {
+      setMicTime(0);
+    }
+    return () => clearInterval(interval);
+  }, [isListening]);
 
   const toggleTranscript = (id: string) => {
     setMessages(prev => prev.map(m => m.id === id ? { ...m, showTranscript: !m.showTranscript } : m));
@@ -332,8 +399,8 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
                     {msg.sender === "bot" ? (
                       <div className="flex flex-col w-full">
                         <div className="flex items-center gap-4 w-full">
-                           <div className="relative shrink-0">
-                             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-md transition-transform active:scale-95 z-10 relative" style={{ backgroundColor: color }}>
+                           <div className="relative shrink-0 cursor-pointer" onClick={() => togglePlayAudio(msg.id)}>
+                             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-105 active:scale-95 z-10 relative" style={{ backgroundColor: color }}>
                                 {msg.playing ? <Volume2 size={24} color="#fff" className="animate-pulse" /> : <Play size={24} color="#fff" className="ml-1" />}
                              </div>
                              {msg.playing && <div className="absolute inset-0 rounded-full animate-ping opacity-40 z-0" style={{ backgroundColor: color }} />}
@@ -415,7 +482,7 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
                            <>
                               <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
                               <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-white font-bold text-[13px] shadow-md transition-all active:scale-95 group" style={{ backgroundColor: color }}>
-                                 <Camera size={16} className="group-hover:scale-110 transition-transform"/> Seleccionar fotos
+                                 <Camera size={16} className="group-hover:scale-110 transition-transform"/> Subir imágenes
                               </button>
                            </>
                         )}
@@ -428,20 +495,21 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
 
             {/* Microphone Context Area */}
             <div className="p-4 bg-white border-t border-gray-100 flex flex-col items-center gap-2 relative">
-               {stepInfo.options.length === 0 && !messages.some(m => m.isCalendar) && (
-                 <div className={`absolute -top-10 left-1/2 -translate-x-1/2 text-white text-[10px] px-3 py-1 rounded-full animate-pulse transition-colors ${isListening ? 'bg-red-500' : 'bg-black/80'}`}>
-                   {isProcessing ? "Hablando..." : isListening ? "Escuchando... (Vuelve a pulsar)" : "Toca el micro para hablar"}
+               {(isListening || isProcessing) && stepInfo.options.length === 0 && !messages.some(m => m.isCalendar) && (
+                 <div className={`absolute -top-10 left-1/2 -translate-x-1/2 text-white text-[11px] font-bold px-4 py-1.5 rounded-full flex items-center gap-2 transition-all shadow-md ${isListening ? 'bg-red-500 animate-pulse' : 'bg-black/80'}`}>
+                   {isListening && <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>}
+                   {isProcessing ? "Procesando..." : `Grabando... 0:0${micTime}`}
                  </div>
                )}
                <motion.button
                  onClick={handleMicClick}
                  animate={isProcessing || isListening ? { scale: [1, 1.1, 1] } : {}}
-                 transition={{ repeat: Infinity, duration: 2 }}
-                 className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_10px_20px_rgba(0,0,0,0.15)] cursor-pointer hover:scale-105 transition-all ${isListening ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)]' : 'opacity-80 hover:opacity-100'}`}
-                 style={!isListening ? { backgroundColor: color, color: contrastText } : {}}
-                 title="Haz clic para hablar / enviar"
+                 transition={{ repeat: Infinity, duration: 1.5 }}
+                 className={`w-14 h-14 rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition-all ${isListening ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]' : 'shadow-[0_10px_20px_rgba(0,0,0,0.15)] opacity-90 hover:opacity-100'}`}
+                 style={!isListening ? { backgroundColor: color, color: contrastText } : { color: '#ffffff' }}
+                 title="Haz clic para grabar"
                >
-                 <Mic size={24} fill={isListening ? "currentColor" : contrastText} />
+                 <Mic size={24} fill={isListening ? "currentColor" : "none"} color={isListening ? "#ffffff" : contrastText} />
                </motion.button>
             </div>
           </motion.div>
