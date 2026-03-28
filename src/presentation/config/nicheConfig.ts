@@ -117,5 +117,19 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Briefcase, name: "Ventas y Comercial", docs: ["Ejecutivo Junior", "Director Comercial"] },
       { icon: FileText, name: "Administración / Facturación", docs: ["Dpto. Cobros", "Contabilidad"] }
     ]
+  },
+  hair_transplant: {
+    title: "Especialistas Capilares",
+    subtitle: "Resuelve tus dudas sobre el injerto capilar y reserva tu valoración gratuita sin compromiso.",
+    buttonLabel: "Valoración",
+    chatGreeting: "Hola, soy tu asesora de recuperación capilar. Sé que dar el paso genera muchas dudas. ¿Qué te gustaría saber hoy?",
+    chatThinking: "Analizando especialistas capilares disponibles...",
+    chatOffer: "Entiendo perfectamente tus dudas. Tengo espacios disponibles para que un doctor experto analice tu caso particular. ¿Reservamos una valoración gratuita?",
+    chatCta: "Agendar Valoración Capilar",
+    categories: [
+      { icon: User, name: "Técnica FUE / DHI", docs: ["Médico Cirujano Capilar", "Especialista FUE"] },
+      { icon: Sparkles, name: "Tratamientos Preventivos", docs: ["Dermatólogo Tricólogo", "Especialista PRP"] },
+      { icon: HeartPulse, name: "Seguimiento Postoperatorio", docs: ["Equipo Médico Seguimiento", "Asesor Post-Cirugía"] }
+    ]
   }
 };

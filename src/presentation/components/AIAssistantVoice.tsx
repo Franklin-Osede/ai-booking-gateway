@@ -46,7 +46,8 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
   const [brandName, setBrandName] = useState("nuestra clínica");
   const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
   
-  const activeNiche = detectedNiche || niche || "medical";
+  // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
+  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "medical");
   const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
   const contrastText = getContrastColor(color);
@@ -122,7 +123,9 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
   const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraProps?: Partial<Msg>) => {
     try {
       setIsProcessing(true);
-      setMessages(prev => [...prev, { id: msgId, text, sender: "bot", playing: true, ...extraProps }]);
+      // Remove SSML tags for the visual chat bubble
+      const displayText = text.replace(/<[^>]*>/g, '');
+      setMessages(prev => [...prev, { id: msgId, text: displayText, sender: "bot", playing: true, ...extraProps }]);
       
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
@@ -163,19 +166,38 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
 
     setTimeout(() => {
       if (nextStepId === 0) {
-        const greeting = `¡Hola! Bienvenido a ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. Soy tu asistente virtual. ¿En qué área necesitas ayuda hoy?`;
+        const isHT = activeNiche === 'hair_transplant';
+        const greeting = isHT 
+          ? `¡Hola! <break time="400ms"/> Bienvenido a la clínica. <break time="400ms"/> ¿En qué especialidad capilar necesitas ayuda hoy?` 
+          : `¡Hola! Bienvenido a ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. Soy tu asistente virtual. ¿En qué área necesitas ayuda hoy?`;
+        
         fetchAudio(greeting, "bot-0", () => {
-          setStepInfo({ options: ["Agendar una cita", "Tengo una consulta rápida"], stepId: 1 });
+          setStepInfo({ options: isHT ? ["Técnica F.U.E.", "Técnica D.H.I.", "Postoperatorio"] : ["Agendar una cita", "Tengo una consulta rápida"], stepId: 1 });
         });
       } 
       else if (nextStepId === 1) {
-        const serviceQuestion = `Perfecto, ¿con qué especialidad o tratamiento te gustaría tu sesión hoy?`;
+        const isHT = activeNiche === 'hair_transplant';
+        let scrapedDoc = "nuestra Directora Médica";
+        if (categories[0] && categories[0].docs && categories[0].docs.length > 0) {
+           const d = categories[0].docs[0];
+           scrapedDoc = typeof d === 'string' ? d : d.name;
+        }
+
+        const serviceQuestion = isHT 
+          ? `Excelente decisión. <break time="400ms"/> Para la técnica FUE tenemos a los mejores cirujanos disponibles, <break time="200ms"/> incluyendo a ${scrapedDoc}. <break time="600ms"/> ¿Prefieres reservar directamente con ${scrapedDoc} <break time="200ms"/> o ver más alternativas?`
+          : `Perfecto, ¿con qué especialidad o tratamiento te gustaría tu sesión hoy?`;
+        
         fetchAudio(serviceQuestion, "bot-1", () => {
-          const chips = categories.slice(0, 2).map((c: { name: string }) => c.name);
-          setStepInfo({ options: [...chips], stepId: 2 });
+          const defaultChips = categories.slice(0, 2).map((c: { name: string }) => c.name);
+          setStepInfo({ options: isHT ? [scrapedDoc, "Ver Alternativas"] : [...defaultChips], stepId: 2 });
         });
       }
       else if (nextStepId === 2) {
+        const isHT = activeNiche === 'hair_transplant';
+        if (isHT) {
+           triggerFlowStep(3); // skip doc question naturally to calendar
+           return;
+        }
         const docQuestion = `Excelente opción, aquí tienes algunos de nuestros especialistas disponibles para esa área. ¿Cuál prefieres?`;
         fetchAudio(docQuestion, "bot-2", () => {
            const category = categories[0];
@@ -196,7 +218,10 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
   const handleUserSelect = (text: string, currentStep: number) => {
     if (isProcessing) return;
     if (currentStep === 1) triggerFlowStep(1, text);
-    else if (currentStep === 2) triggerFlowStep(2, text);
+    else if (currentStep === 2) {
+       if (activeNiche === 'hair_transplant') triggerFlowStep(3, text);
+       else triggerFlowStep(2, text);
+    }
     else if (currentStep === 3) triggerFlowStep(3, text);
   };
 
@@ -211,8 +236,13 @@ export function AIAssistantVoice({ color, niche = "medical", pos = "right" }: { 
                         selectedTime === "17.20" ? "cinco y veinte de la tarde" :
                         selectedTime.replace('.', ':');
 
+     const isHT = activeNiche === 'hair_transplant';
      setTimeout(() => {
-        fetchAudio(`¡Estupendo! Tu reserva con ${selectedDoctor || 'nuestro experto'} para el día ${selectedDate} a las ${spokenTime} ha quedado confirmada, te esperamos.`, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
+        const docName = selectedDoctor || 'nuestro experto';
+        const confirmMsg = isHT 
+             ? `¡Estupendo! <break time="400ms"/> Tu reserva con ${docName} en nuestra clínica ha quedado confirmada. <break time="300ms"/> Te esperamos.`
+             : `¡Estupendo! Tu reserva con ${docName} para el día ${selectedDate} a las ${spokenTime} ha quedado confirmada, te esperamos.`;
+        fetchAudio(confirmMsg, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
      }, 600);
   };
 

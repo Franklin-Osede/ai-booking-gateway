@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
        return NextResponse.json({ error: "Missing text payload" }, { status: 400 });
     }
 
-    // 1. Sanitize for XML
-    const cleanText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    // 1. Sanitize for XML but ALLOW <break> tags to pass through for highly realistic pacing
+    const cleanText = text.replace(/&/g, "&amp;");
 
     // 2. Wrap in SSML and slightly reduce the reading speed to make it sound more relaxed and conversational
     const ssmlText = `<speak><prosody rate="90%">${cleanText}</prosody></speak>`;

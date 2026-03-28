@@ -22,7 +22,8 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
   const [brandName, setBrandName] = useState("nuestra clínica");
   const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
 
-  const activeNiche = detectedNiche || niche || "medical";
+  // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
+  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "medical");
   const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
 
@@ -142,7 +143,13 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
          setStepInfo({ options: [...docs, "Cualquiera disponible"], stepId: 3 });
       });
     }
-    else if (resolvedNextStepId === 3) {
+    else if (resolvedNextStepId === 3 || resolvedNextStepId === 10) {
+      if (userSelection && userSelection.toLowerCase().includes("pensar")) {
+         pushBotMessage("Sin problema. Estaremos aquí cuando lo necesites. ¡Que tengas un gran día!", 600, () => {
+            setStepInfo({ options: [], stepId: 0 });
+         });
+         return;
+      }
       pushBotMessage("¡Buena elección! Aquí tienes mi calendario interactivo. Haz clic en la fecha y luego elige la hora que mejor te cuadre.", 1000, () => {
          setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
       });
@@ -163,7 +170,6 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
     const txt = input.trim();
     setInput("");
     
-    // Si estamos en un step que espera respuesta, lo avanzamos simulando un click
     if ((stepInfo.stepId >= 1 && stepInfo.stepId <= 3) || stepInfo.stepId === 10 || stepInfo.stepId === 100) {
        if (stepInfo.stepId === 1) triggerFlowStep(1, txt);
        else if (stepInfo.stepId === 2) triggerFlowStep(2, txt);
@@ -171,11 +177,22 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
        else if (stepInfo.stepId === 10) triggerFlowStep(10, txt);
        else if (stepInfo.stepId === 100) triggerFlowStep(1, txt);
     } else {
-       // Si es charla libre
        setMessages(prev => [...prev, { id: "user-" + Date.now(), text: txt, sender: "user" }]);
-       pushBotMessage(config.chatThinking, 800, () => {
-          pushBotMessage("¡Gracias! He anotado esto en tu ficha para tu próxima visita.", 1200, () => {});
-       });
+       
+       const lowerTxt = txt.toLowerCase();
+       if (activeNiche === 'hair_transplant' && (lowerTxt.includes("turqu") || lowerTxt.includes("precio") || lowerTxt.includes("caro") || lowerTxt.includes("barato") || lowerTxt.includes("coste"))) {
+         pushBotMessage(config.chatThinking, 800, () => {
+           pushBotMessage("Es normal que compares. El modelo 'Low Cost' suele ser más barato, pero nosotros garantizamos un diseño médico personalizado superior, densidad máxima y seguimiento presencial a tu lado si hay cualquier imprevisto. Además, ofrecemos financiación al 100% por solo 99€ al mes.", 1500, () => {
+              pushBotMessage("¿Quieres agendar una videollamada de 10 minutos para que el doctor te valore?", 500, () => {
+                 setStepInfo({ options: ["Agendar videollamada", "Lo pensaré"], stepId: 10 });
+              });
+           });
+         });
+       } else {
+         pushBotMessage(config.chatThinking, 800, () => {
+            pushBotMessage("¡Gracias! He anotado esto en tu ficha para tu próxima visita.", 1200, () => {});
+         });
+       }
     }
   };
 

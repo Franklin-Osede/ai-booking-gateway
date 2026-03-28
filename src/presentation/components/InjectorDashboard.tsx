@@ -71,6 +71,7 @@ export function InjectorDashboard() {
                 onChange={(e) => setNiche(e.target.value)}
                 className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white text-lg cursor-pointer appearance-none px-5"
               >
+                <option value="hair_transplant">Clínica Capilar (Especialistas)</option>
                 <option value="medical">Clínica Médica / Especialista</option>
                 <option value="dental">Clínica Dental</option>
                 <option value="legal">Despacho de Abogados / Asesoría</option>
@@ -87,11 +88,13 @@ export function InjectorDashboard() {
              <label className="block text-sm font-semibold text-neutral-300 mb-3">3. Elige el Upgrade Tecnológico</label>
              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                {[
-                 { id: "form", title: "Formulario Consulta", desc: "Flujo Multi-Paso" },
-                 { id: "chat", title: "Chat de IA", desc: "Agente Conversacional" },
-                 { id: "voice", title: "Agente de Voz", desc: "Clon de Voz IA Web" },
-                 { id: "phone", title: "Llamada Simulada (DEMO iOS) ⭐️", desc: "UI App Teléfono" },
-                 { id: "both", title: "Ambos 🚀", desc: "Reserva + Agente Voz" },
+                 { id: "voice", title: "Agente de Voz", desc: "Flujo guiado con opciones (Chips)" },
+                 { id: "voice-free", title: "Agente de Consulta (Libre)", desc: "Conversación abierta al micrófono" },
+                 { id: "dual-voice", title: "Demo Doble Voz", desc: "Muestra Libre (Izq) y Guiada (Der)" },
+                 { id: "form", title: "Formulario Consulta", desc: "Flujo Visual Multi-Paso" },
+                 { id: "chat", title: "Chat de IA", desc: "Agente Conversacional Texto" },
+                 { id: "phone", title: "Llamada Simulada ⭐️", desc: "UI App Teléfono (Estilo iOS)" },
+                 { id: "both", title: "Ambos 🚀", desc: "Formulario + Agente Voz" },
                ].map(w => (
                  <button
                    key={w.id}
