@@ -60,7 +60,11 @@ export async function GET(request: Request) {
     // Niche Detection Logic
     const textLower = $('body').text().toLowerCase();
     let detectedNiche = 'medical';
-    if (textLower.includes('dental') || textLower.includes('dentista') || textLower.includes('odontolog') || url.includes('dental') || url.includes('dentista')) {
+    if (textLower.includes('capilar') || textLower.includes('injerto') || textLower.includes('alopecia') || url.includes('capilar')) {
+       detectedNiche = 'hair_transplant';
+    } else if (textLower.includes('regenerativa') || textLower.includes('células madre') || textLower.includes('stem cell') || textLower.includes('prp')) {
+       detectedNiche = 'regenerative';
+    } else if (textLower.includes('dental') || textLower.includes('dentista') || textLower.includes('odontolog') || url.includes('dental') || url.includes('dentista')) {
        detectedNiche = 'dental';
     } else if (textLower.includes('abogado') || textLower.includes('legal') || textLower.includes('bufete')) {
        detectedNiche = 'legal';

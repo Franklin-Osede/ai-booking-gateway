@@ -6,7 +6,7 @@ import { Mic, Volume2, Phone, MessageCircle } from "lucide-react";
 
 type Msg = { id: string; text: string; sender: "bot" | "user"; playing?: boolean; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean };
 
-export function AIAssistantPhone({ color, pos = "right", niche }: { color: string, niche?: string, pos?: string }): ReactNode {
+export function AIAssistantPhone({ color, pos = "right" }: { color: string, niche?: string, pos?: string }): ReactNode {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);

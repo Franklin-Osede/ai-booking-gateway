@@ -6,6 +6,7 @@ import { AIAssistantVoice } from "@/presentation/components/AIAssistantVoice";
 import { AIAssistantVoiceFree } from "@/presentation/components/AIAssistantVoiceFree";
 import { AIAssistantPhone } from "@/presentation/components/AIAssistantPhone";
 import { InjectorDashboard } from "@/presentation/components/InjectorDashboard";
+import { AIAssistantWidgetCapilar } from "@/presentation/components/AIAssistantWidgetCapilar";
 
 export const metadata: Metadata = {
   title: "B2B Widget Injector Demo",
@@ -20,7 +21,7 @@ export default async function Home({
   const params = await searchParams;
   const siteUrl = params.site;
   const widgetType = params.widget || "form";
-  const niche = params.niche || "medical";
+  const niche = params.niche || "default";
   const pos = "left";
   const brandColor = params.color ? `#${params.color}` : "#FFD700";
 
@@ -46,6 +47,7 @@ export default async function Home({
       >
         <div className="h-full w-full relative *:pointer-events-auto">
           {widgetType === "form" && <AIAssistantWidget color={brandColor} niche={niche} pos={pos} />}
+          {widgetType === "capilar" && <AIAssistantWidgetCapilar color={brandColor} pos={pos} />}
           {widgetType === "chat" && <AIAssistantChat color={brandColor} niche={niche} pos={pos} />}
           {widgetType === "banner" && <LeadGenBanner color={brandColor} pos={pos} />}
           {widgetType === "voice" && <AIAssistantVoice color={brandColor} niche={niche} pos="right" />}

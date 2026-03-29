@@ -131,5 +131,19 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Sparkles, name: "Tratamientos Preventivos", docs: ["Dermatólogo Tricólogo", "Especialista PRP"] },
       { icon: HeartPulse, name: "Seguimiento Postoperatorio", docs: ["Equipo Médico Seguimiento", "Asesor Post-Cirugía"] }
     ]
+  },
+  regenerative: {
+    title: "Medicina Regenerativa",
+    subtitle: "Rejuvenece tu cuerpo a nivel celular y agenda tu valoración con especialistas en Stem Cells.",
+    buttonLabel: "Valoración",
+    chatGreeting: "Hola, soy tu asesora en medicina regenerativa. ¿Sobre qué tratamiento con células madre o terapia avanzada te gustaría informarte?",
+    chatThinking: "Revisando el equipo especializado en terapias avanzadas...",
+    chatOffer: "Perfecto. Te puedo agendar una consultoría rápida con nuestro especialista en regeneración celular para que analice tu caso. ¿Te viene bien?",
+    chatCta: "Agendar Valoración",
+    categories: [
+      { icon: HeartPulse, name: "Terapia de Células Madre", docs: ["Dr. Especialista Stem Cells", "Biólogo Clínico"] },
+      { icon: Activity, name: "Plasma Rico en Plaquetas (PRP)", docs: ["Especialista PRP", "Dermatólogo"] },
+      { icon: Sparkles, name: "Rejuvenecimiento Celular", docs: ["Medicina Antiaging", "Médico Estético"] }
+    ]
   }
 };
