@@ -82,7 +82,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const [selectedDoctor, setSelectedDoctor] = useState<string>("");
   const [expandedDocIdx, setExpandedDocIdx] = useState<number | null>(null);
   const [brandName, setBrandName] = useState("nuestra clínica");
-  const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
+  const times = ["09:00", "10:30", "12:00", "16:00", "17:30", "18:45"];
 
   const [today, setToday] = useState<Date | null>(null);
   const [monthOffset, setMonthOffset] = useState(0);
@@ -466,7 +466,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[290px] sm:w-[320px] h-[480px] max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
+            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[280px] sm:w-[330px] h-[400px] sm:h-[460px] max-h-[60vh] sm:max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             {/* Header */}
             <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">

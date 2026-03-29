@@ -6,25 +6,29 @@ import { Bot, X, Send, Sparkles, ChevronRight } from "lucide-react";
 
 import { NICHE_CONFIGS } from "../config/nicheConfig";
 
-export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { color: string, niche?: string, pos?: string }) {
+export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right" }: { color: string, niche?: string, pos?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
-  const [messages, setMessages] = useState<{ id: string; text: string; sender: "bot" | "user"; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean }[]>([]);
+  const [messages, setMessages] = useState<{ id: string; text: string; sender: "bot" | "user"; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean; isDoctorList?: boolean; doctorListData?: { name: string; image?: string; specialty?: string; bio?: string }[] }[]>([]);
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
-  const [stepInfo, setStepInfo] = useState<{ options: string[]; stepId: number }>({ options: [], stepId: 0 });
+  const [expandedDocIdx, setExpandedDocIdx] = useState<number | null>(null);
+  const [stepInfo, setStepInfo] = useState<{ options: string[]; stepId: number; type?: string }>({ options: [], stepId: 0 });
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedDoctor, setSelectedDoctor] = useState<string>("");
   const [brandName, setBrandName] = useState("nuestra clínica");
-  const times = ["09.30", "10.00", "11.30", "16.00", "17.20"];
+  const times = ["09.30", "10.00", "11.30", "16.00", "17.20", "18.00"];
 
   const [today, setToday] = useState<Date | null>(null);
   const [monthOffset, setMonthOffset] = useState(0);
-  useEffect(() => setToday(new Date()), []);
+  useEffect(() => {
+    const t = setTimeout(() => setToday(new Date()), 1);
+    return () => clearTimeout(t);
+  }, []);
   
   const realYear = today ? today.getFullYear() : 2026;
   const realMonth = today ? today.getMonth() : 9;
@@ -39,7 +43,7 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
   const monthShort = monthNameStr.substring(0, 3);
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
-  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "medical");
+  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
   const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
 
@@ -84,6 +88,7 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
       setIsOpen(false);
       setMessages([]);
       setStepInfo({ options: [], stepId: 0 });
+      setExpandedDocIdx(null);
       setSelectedDate(null);
       setSelectedTime("");
       setSelectedService("");
@@ -135,10 +140,10 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
              return;
           }
        }
-
-       if (resolvedNextStepId === 2) setSelectedService(userSelection);
-       if (resolvedNextStepId === 3) setSelectedDoctor(userSelection);
     }
+
+    if (resolvedNextStepId === 2) setSelectedService(userSelection || "");
+    if (resolvedNextStepId === 3) setSelectedDoctor(userSelection || "");
     setStepInfo({ options: [], stepId: resolvedNextStepId });
 
     if (resolvedNextStepId === 0) {
@@ -153,11 +158,11 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
       });
     }
     else if (resolvedNextStepId === 2) {
+      const category = categories.find((c: { name: string }) => c.name === userSelection) || categories[0];
+      const docsObj = category.docs ? category.docs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }) => typeof d === 'string' ? { name: d } : d) : [];
       pushBotMessage(`He revisado disponibilidad y tengo a varios de nuestros mejores especialistas listos para ayudarte. ¿Con cuál preferirías agendar?`, 1200, () => {
-         const category = categories.find((c: { name: string }) => c.name === userSelection) || categories[0];
-         const docs = category.docs ? category.docs.map((d: string | { name: string }) => typeof d === 'string' ? d : d.name) : [];
-         setStepInfo({ options: [...docs, "Cualquiera disponible"], stepId: 3 });
-      });
+         setStepInfo({ options: ["Cualquiera disponible"], stepId: 3 });
+      }, { isDoctorList: true, doctorListData: docsObj });
     }
     else if (resolvedNextStepId === 3 || resolvedNextStepId === 10) {
       if (userSelection && userSelection.toLowerCase().includes("pensar")) {
@@ -223,6 +228,15 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
     color: getContrastColor(color),
   };
 
+  function getDarkerColor(hexcolor: string) {
+    if (!hexcolor || hexcolor.length < 6) return '#374151';
+    const hex = hexcolor.replace('#', '');
+    const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - 40);
+    const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 40);
+    const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 40);
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }
+
   function getContrastColor(hexcolor: string) {
     if (!hexcolor || hexcolor.length < 6) return '#ffffff';
     const hex = hexcolor.replace('#', '');
@@ -272,12 +286,13 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[290px] sm:w-[420px] h-[480px] sm:h-[600px] max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
+            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[280px] sm:w-[340px] h-[380px] sm:h-[440px] max-h-[55vh] sm:max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             {/* Header */}
             <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full shrink-0 relative overflow-hidden shadow-sm border border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Asesora" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex flex-col">
@@ -329,13 +344,15 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
                              <button onClick={() => setMonthOffset(p => p + 1)} className="p-1 hover:bg-gray-50 rounded-full"><ChevronRight size={16} className="text-gray-400" /></button>
                            </div>
                            <div className="grid grid-cols-7 gap-y-2 text-center text-[10px] font-bold text-gray-400 mb-2 uppercase">
-                             <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                             <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span className="opacity-40">S</span><span className="opacity-40">D</span>
                            </div>
                            <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center text-[12px] font-semibold mb-4">
                              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
-                               const isPast = monthOffset < 0 || (monthOffset === 0 && d < currentDay);
-                               const isRed = !isPast && (monthOffset === 0 ? [currentDay + 2, currentDay + 7, currentDay + 11].includes(d) : [4, 11, 18, 25].includes(d));
-                               const isGreen = !isPast && (monthOffset === 0 ? [currentDay + 1, currentDay + 3, currentDay + 6, currentDay + 8].includes(d) : [2, 7, 9, 14, 16, 21, 23, 28].includes(d));
+                               const isWeekend = (d - 1) % 7 === 5 || (d - 1) % 7 === 6;
+                               const isPast = monthOffset < 0 || (monthOffset === 0 && d < currentDay) || isWeekend;
+                               const hash = (d * 13 + dispMonthIdx * 31) % 100;
+                               const isRed = !isPast && !isWeekend && hash < 25;
+                               const isGreen = !isPast && !isWeekend && !isRed && hash > 40 && hash < 85;
                                let btnClass = "w-7 h-7 rounded-full flex items-center justify-center mx-auto transition-colors ";
                                if (selectedDate === d) btnClass += "text-white shadow-md scale-110";
                                else if (isPast) btnClass += "text-gray-300 font-normal cursor-not-allowed";
@@ -352,7 +369,7 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
                                <p className="text-[11px] font-bold text-gray-500 mb-2">Horarios:</p>
                                <div className="grid grid-cols-3 gap-2">
                                  {times.map(t => (
-                                   <button key={t} onClick={() => setSelectedTime(t)} className={`px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all w-full text-center ${selectedTime === t ? 'shadow-md border-transparent text-white' : 'border border-gray-200 text-gray-600'}`} style={selectedTime === t ? { backgroundColor: color, color: getContrastColor(color) } : {}}>{t}</button>
+                                   <button key={t} onClick={() => setSelectedTime(t)} className={`w-full py-1.5 rounded-[10px] text-[12px] font-bold transition-all ${selectedTime === t ? 'shadow-md border-transparent text-white bg-blue-500' : 'border border-gray-200 text-gray-600 hover:border-blue-200'}`} style={selectedTime === t ? { backgroundColor: color, color: getContrastColor(color) } : {}}>{t}</button>
                                  ))}
                                </div>
                              </motion.div>
@@ -401,6 +418,49 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
                            </button>
                          </div>
                       </div>
+                    ) : msg.isDoctorList && msg.doctorListData ? (
+                       <div className="flex flex-col gap-2.5 w-[90%] mt-1.5 pt-2 mb-2">
+                         <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1">Equipo Médico</span>
+                         {msg.doctorListData.map((doc, idx) => {
+                           const isExpanded = expandedDocIdx === idx;
+                           return (
+                             <motion.div layout key={idx} className="flex flex-col p-3 bg-white border border-gray-100 rounded-[16px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-gray-200 transition-all cursor-pointer overflow-hidden relative" onClick={() => setExpandedDocIdx(isExpanded ? null : idx)}>
+                               <div className="flex items-center justify-between">
+                                 <div className="flex items-center gap-3">
+                                   <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-gray-100 shadow-sm relative">
+                                     {/* eslint-disable-next-line @next/next/no-img-element */}
+                                     <img src={doc.image || `https://randomuser.me/api/portraits/${/(Dra\.|Maria|Ana|Laura|Elena|Sofia)/i.test(doc.name) ? 'women' : 'men'}/${40 + idx}.jpg`} className="w-full h-full object-cover" alt={doc.name} />
+                                   </div>
+                                   <div className="flex flex-col">
+                                     <span className="text-[14px] font-bold text-gray-900 tracking-tight leading-none mb-1">{doc.name}</span>
+                                     <span className="text-[10px] font-semibold tracking-wide uppercase text-gray-400">{doc.specialty || "ESPECIALISTA TITULAR"}</span>
+                                   </div>
+                                 </div>
+                                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-400">
+                                    <ChevronRight size={16} className={`transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                                 </div>
+                               </div>
+                               <AnimatePresence>
+                                 {isExpanded && (
+                                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-3 flex flex-col relative">
+                                     <div className="w-full h-px bg-gray-100 mb-2" />
+                                     <p className="text-[12.5px] text-gray-500 leading-relaxed font-medium px-1 mb-3">
+                                       {doc.bio || "Especialista con amplia trayectoria clínica y vocación por la atención personalizada."}
+                                     </p>
+                                     <button 
+                                       className="w-full text-[13px] py-2.5 rounded-[10px] font-bold transition-all shadow-sm flex items-center justify-center gap-1.5" 
+                                       style={{ backgroundColor: color + "15", color: getDarkerColor(color) }}
+                                       onClick={(e) => { e.stopPropagation(); setStepInfo({ options: [], stepId: 0 }); handleUserSelect(`Reservar con ${doc.name}`, 3); }}
+                                     >
+                                       Reservar cita <ChevronRight size={14} strokeWidth={3} />
+                                     </button>
+                                   </motion.div>
+                                 )}
+                               </AnimatePresence>
+                             </motion.div>
+                           );
+                         })}
+                       </div>
                     ) : (
                       <div 
                         className={`max-w-[80%] px-4 py-3 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
@@ -425,15 +485,15 @@ export function AIAssistantChat({ color, niche = "medical", pos = "right" }: { c
                     className="flex flex-wrap gap-2 mt-2 items-start pl-12"
                   >
                     {stepInfo.options.map((opt, i) => (
-                      <button
-                        key={i}
-                        disabled={isProcessing}
-                        onClick={() => handleUserSelect(opt, stepInfo.stepId)}
-                        className={`px-4 py-2 border-[1.5px] bg-white text-[13px] text-left font-bold rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 hover:shadow-md active:scale-95'}`}
-                        style={{ borderColor: color, color: color }}
-                      >
-                        {opt}
-                      </button>
+                        <button
+                          key={i}
+                          disabled={isProcessing}
+                          onClick={() => handleUserSelect(opt, stepInfo.stepId)}
+                          className={`px-4 py-2 border-[1.5px] bg-white text-[13px] text-gray-700 text-left font-bold rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 hover:shadow-md hover:bg-gray-50 active:scale-95'}`}
+                          style={{ borderColor: color }}
+                        >
+                          {opt}
+                        </button>
                     ))}
                   </motion.div>
                 )}

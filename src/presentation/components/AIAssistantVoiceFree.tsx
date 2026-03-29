@@ -57,7 +57,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const [selectedDoctor] = useState("Laura - Asesora");
   const [selectedService] = useState("Valoración Capilar Gratuita");
   const [brandName, setBrandName] = useState("la Clínica Capilar");
-  const times = ["09:30", "10:00", "11:30", "16:00", "17:20"];
+  const times = ["09:00", "10:30", "12:00", "16:00", "17:30", "18:45"];
 
   useEffect(() => {
     try {
@@ -446,7 +446,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[290px] sm:w-[320px] h-[480px] max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
+            className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[280px] sm:w-[330px] h-[400px] sm:h-[460px] max-h-[60vh] sm:max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">
               <div className="flex items-center gap-3">
