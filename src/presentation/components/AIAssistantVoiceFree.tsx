@@ -42,7 +42,7 @@ type Msg = {
   photoUrls?: string[];
 };
 
-export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }: { color: string, niche?: string, pos?: string }) {
+export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "left" }: { color: string, niche?: string, pos?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -56,7 +56,22 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedDoctor] = useState("Laura - Asesora");
   const [selectedService] = useState("Valoración Capilar Gratuita");
+  const [brandName, setBrandName] = useState("la Clínica Capilar");
   const times = ["09:30", "10:00", "11:30", "16:00", "17:20"];
+
+  useEffect(() => {
+    try {
+      const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
+      if (storedSite) {
+        let parsed = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
+        parsed = parsed.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
+        if (!parsed) parsed = "Especializada";
+        setBrandName("la clínica " + parsed.charAt(0).toUpperCase() + parsed.slice(1));
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
   
   const [today, setToday] = useState<Date | null>(null);
   const [monthOffset, setMonthOffset] = useState(0);
@@ -99,9 +114,11 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
             if (!parsedName) parsedName = "especializada";
             currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
          }
-      } catch (e) {}
+      } catch {
+        // Ignore
+      }
 
-      const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${currentBrand}. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+      const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${currentBrand}. <break time="150ms"/> Soy Laura, tu asesora virtual. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿De qué servicios te gustaría recibir más información?`;
       try {
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
@@ -146,7 +163,7 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
   
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
-  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "medical");
+  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
   const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _config = config; 
@@ -264,7 +281,7 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
 
     setTimeout(() => {
       if (nextStepId === 0) {
-        const greeting = `¡Hola! <break time="200ms"/> Bienvenido a la Clínica Capilar. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+        const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${brandName}. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: [], stepId: 1 });
         });
@@ -434,6 +451,7 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
             <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full shrink-0 relative overflow-hidden shadow-sm border border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Asesora" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex flex-col">
@@ -542,13 +560,15 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
                              <button onClick={() => setMonthOffset(p => p + 1)} className="p-1 hover:bg-gray-50 rounded-full"><ChevronRight size={16} className="text-gray-400" /></button>
                            </div>
                            <div className="grid grid-cols-7 gap-y-2 text-center text-[10px] font-bold text-gray-400 mb-2 uppercase">
-                             <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                             <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span className="opacity-40">S</span><span className="opacity-40">D</span>
                            </div>
                            <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center text-[12px] font-semibold mb-4">
                              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
-                               const isPast = monthOffset < 0 || (monthOffset === 0 && d < currentDay);
-                               const isRed = !isPast && (monthOffset === 0 ? [currentDay + 2, currentDay + 7, currentDay + 11].includes(d) : [4, 11, 18, 25].includes(d));
-                               const isGreen = !isPast && (monthOffset === 0 ? [currentDay + 1, currentDay + 3, currentDay + 6, currentDay + 8].includes(d) : [2, 7, 9, 14, 16, 21, 23, 28].includes(d));
+                               const isWeekend = (d - 1) % 7 === 5 || (d - 1) % 7 === 6;
+                               const isPast = monthOffset < 0 || (monthOffset === 0 && d < currentDay) || isWeekend;
+                               const hash = (d * 13 + dispMonthIdx * 31) % 100;
+                               const isRed = !isPast && !isWeekend && hash < 25;
+                               const isGreen = !isPast && !isWeekend && !isRed && hash > 40 && hash < 85;
                                let btnClass = "w-7 h-7 rounded-full flex items-center justify-center mx-auto transition-colors ";
                                if (selectedDate === d) btnClass += "text-white shadow-md scale-110";
                                else if (isPast) btnClass += "text-gray-300 font-normal cursor-not-allowed";
@@ -563,9 +583,9 @@ export function AIAssistantVoiceFree({ color, niche = "medical", pos = "left" }:
                            {selectedDate && (
                              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-gray-100 pt-3">
                                <p className="text-[11px] font-bold text-gray-500 mb-2">Horarios:</p>
-                               <div className="flex flex-wrap gap-2">
+                               <div className="grid grid-cols-3 gap-2">
                                  {times.map(t => (
-                                   <button key={t} onClick={() => setSelectedTime(t)} className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${selectedTime === t ? 'shadow-md border-transparent text-white' : 'border border-gray-200 text-gray-600'}`} style={selectedTime === t ? { backgroundColor: color, color: contrastText } : {}}>{t}</button>
+                                   <button key={t} onClick={() => setSelectedTime(t)} className={`w-full py-1.5 rounded-[10px] text-[12px] font-bold transition-all ${selectedTime === t ? 'shadow-md border-transparent text-white' : 'border border-gray-200 text-gray-600'}`} style={selectedTime === t ? { backgroundColor: color, color: contrastText } : {}}>{t}</button>
                                  ))}
                                </div>
                              </motion.div>
