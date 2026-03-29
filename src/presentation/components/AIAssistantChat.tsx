@@ -159,10 +159,31 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
     }
     else if (resolvedNextStepId === 2) {
       const category = categories.find((c: { name: string }) => c.name === userSelection) || categories[0];
-      const docsObj = category.docs ? category.docs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }) => typeof d === 'string' ? { name: d } : d) : [];
+      const docsObj = category.docs ? category.docs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
+         const hairSpecialties = ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"];
+         const assignedSpecialty = hairSpecialties[idx % hairSpecialties.length];
+         if (typeof d === 'string') return { name: d, specialty: assignedSpecialty, bio: 'Especialista con miles de folículos trasplantados, apostando por técnica indolora.' };
+         return { ...d, specialty: d.specialty || assignedSpecialty };
+      }) : [];
       pushBotMessage(`He revisado disponibilidad y tengo a varios de nuestros mejores especialistas listos para ayudarte. ¿Con cuál preferirías agendar?`, 1200, () => {
-         setStepInfo({ options: ["Cualquiera disponible"], stepId: 3 });
+         setStepInfo({ options: ["Cualquiera disponible"], stepId: 25 });
       }, { isDoctorList: true, doctorListData: docsObj });
+    }
+    else if (resolvedNextStepId === 25) {
+      let docNameExtracted = "";
+      let pQuestion = `Excelente decisión. Antes de abrir el calendario, ¿podrías subir 3 fotos rápidas de tu caso? Así el equipo médico las evaluará antes de tu cita.`;
+
+      if (userSelection && userSelection.startsWith("Reservar")) {
+         docNameExtracted = userSelection.replace("Reservar con ", "");
+         setSelectedDoctor(docNameExtracted);
+         pQuestion = `Excelente elección. Antes de abrir la agenda particular de ${docNameExtracted}, ¿podrías subir 3 fotos de tu caso? Así las revisará antes de conectarse contigo.`;
+      } else if (userSelection && userSelection !== "Cualquiera disponible" && userSelection !== "Agendar Cita") {
+         setSelectedDoctor(userSelection);
+      }
+
+      pushBotMessage(pQuestion, 1200, () => {
+         setStepInfo({ options: ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
+      });
     }
     else if (resolvedNextStepId === 3 || resolvedNextStepId === 10) {
       if (userSelection && userSelection.toLowerCase().includes("pensar")) {
@@ -171,7 +192,13 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
          });
          return;
       }
-      pushBotMessage("¡Buena elección! Aquí tienes mi calendario interactivo. Haz clic en la fecha y luego elige la hora que mejor te cuadre.", 1000, () => {
+      
+      let calQuestion = "¡Buena elección! Aquí tienes mi calendario interactivo. Haz clic en la fecha y luego elige la hora que mejor te cuadre.";
+      if (userSelection === "Fotos subidas") {
+         calQuestion = "¡Perfecto! Hemos adjuntado las fotos de forma segura. Aquí tienes el calendario en tiempo real, elige tu ranura.";
+      }
+      
+      pushBotMessage(calQuestion, 1000, () => {
          setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
       });
     }
@@ -179,11 +206,23 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
 
   const handleUserSelect = (text: string, currentStep: number) => {
     if (isProcessing) return;
+    if (text === "📸 Subir fotos") {
+       document.getElementById('hidden-photo-input-chat')?.click();
+       return;
+    }
     if (currentStep === 1) triggerFlowStep(1, text);
     else if (currentStep === 2) triggerFlowStep(2, text);
+    else if (currentStep === 25) triggerFlowStep(25, text);
     else if (currentStep === 3) triggerFlowStep(3, text);
     else if (currentStep === 10) triggerFlowStep(10, text);
-    else if (currentStep === 100) triggerFlowStep(1, text); // Loop back to step 1
+    else if (currentStep === 100) triggerFlowStep(1, text);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+       setMessages(prev => [...prev, { id: "user-" + Date.now(), text: "📸 3 fotos adjuntadas", sender: "user" }]);
+       triggerFlowStep(3, "Fotos subidas");
+    }
   };
 
   const handleSend = () => {
@@ -249,6 +288,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
 
   return (
     <>
+      <input type="file" id="hidden-photo-input-chat" multiple accept="image/*" className="hidden" onChange={handleFileUpload} />
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -450,7 +490,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                                      <button 
                                        className="w-full text-[13px] py-2.5 rounded-[10px] font-bold transition-all shadow-sm flex items-center justify-center gap-1.5" 
                                        style={{ backgroundColor: color + "15", color: getDarkerColor(color) }}
-                                       onClick={(e) => { e.stopPropagation(); setStepInfo({ options: [], stepId: 0 }); handleUserSelect(`Reservar con ${doc.name}`, 3); }}
+                                       onClick={(e) => { e.stopPropagation(); setStepInfo({ options: [], stepId: 0 }); handleUserSelect(`Reservar con ${doc.name}`, 25); }}
                                      >
                                        Reservar cita <ChevronRight size={14} strokeWidth={3} />
                                      </button>
@@ -484,17 +524,27 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                     transition={{ delay: 0.3 }}
                     className="flex flex-wrap gap-2 mt-2 items-start pl-12"
                   >
-                    {stepInfo.options.map((opt, i) => (
-                        <button
-                          key={i}
-                          disabled={isProcessing}
-                          onClick={() => handleUserSelect(opt, stepInfo.stepId)}
-                          className={`px-4 py-2 border-[1.5px] bg-white text-[13px] text-gray-700 text-left font-bold rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 hover:shadow-md hover:bg-gray-50 active:scale-95'}`}
-                          style={{ borderColor: color }}
-                        >
-                          {opt}
-                        </button>
-                    ))}
+                    {stepInfo.options.map((opt, i) => {
+                        const isPrimary = opt === "📸 Subir fotos";
+                        const isSecondary = opt.includes("Omitir");
+                        return (
+                          <button
+                            key={i}
+                            disabled={isProcessing}
+                            onClick={() => handleUserSelect(opt, stepInfo.stepId)}
+                            className={`px-4 py-2 border-[1.5px] text-[13px] text-center font-bold rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all flex items-center justify-center ${
+                               isPrimary 
+                                 ? 'w-[90%] mx-auto hover:brightness-110 active:scale-95 text-white border-transparent py-3 text-[14px]' 
+                                 : isSecondary
+                                 ? 'w-[80%] mx-auto bg-gray-100/80 text-gray-500 hover:bg-gray-200 border-transparent text-[12px]'
+                                 : 'text-gray-700 bg-white hover:scale-105 hover:shadow-md hover:bg-gray-50 active:scale-95'
+                            } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            style={isPrimary ? { backgroundColor: color, color: getContrastColor(color) } : (isSecondary ? {} : { borderColor: color })}
+                          >
+                            {opt}
+                          </button>
+                        );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>

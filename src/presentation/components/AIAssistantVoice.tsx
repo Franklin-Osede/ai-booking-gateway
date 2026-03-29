@@ -339,12 +339,10 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const docPitch = `${pitchText} <break time="200ms"/> ¿Quieres ver al equipo médico, <break time="100ms"/> o prefieres que agendemos tu valoración ahora?`;
         
         fetchAudio(docPitch, "bot-2", () => {
-           setStepInfo({ options: ["Agendar Cita", "Ver Especialistas"], stepId: 3 });
+           setStepInfo({ options: ["Agendar Cita", "Ver Especialistas"], stepId: 25 });
         }, { image: photoUrl });
       }
-      else if (nextStepId === 3) {
-        let calQuestion = "Genial, aquí tienes mi disponibilidad para los próximos días. Selecciona la fecha y hora que prefieras.";
-        
+      else if (nextStepId === 25) {
         if (userSelection === "Ahora no") {
            fetchAudio("No te preocupes. Estoy aquí cuando me necesites para dar ese gran paso.", "bot-bye", () => {
              setStepInfo({ options: [], stepId: 0 });
@@ -357,7 +355,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            const category = categories[0];
            const rawDocs = category.docs.slice(0, 3);
            const seenImages = new Set<string>();
-           const docPayload = rawDocs.map((d: string | { name: string; image?: string; bio?: string }, idx: number) => {
+           const docPayload = rawDocs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
              const baseName = typeof d === 'string' ? d : d.name;
              const isFemale = /^(Dra\.|Doctora|María|Ana|Laura|Sof[ií]a|Carmen|Luc[ií]a|Elena|Paula|Claudia|Blanca|Sara|Marta)/i.test(baseName);
              const gender = isFemale ? 'women' : 'men';
@@ -372,27 +370,42 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                 }
              }
 
+             const hairSpecialties = ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"];
+             const assignedSpecialty = hairSpecialties[idx % hairSpecialties.length];
+
              if (typeof d === 'string') {
-               return { name: d, specialty: 'Especialista Titular', image: finalImg, bio: 'Con años de experiencia en tratamientos avanzados. Especialista titular con un currículum internacional y un trato cercano al paciente.' };
+               return { name: d, specialty: assignedSpecialty, image: finalImg, bio: 'Especialista titular con miles de folículos trasplantados, apostando por el diseño 100% natural.' };
              } else {
-               return { ...d, specialty: 'Especialista Titular', image: finalImg, bio: d.bio || 'Con años de experiencia en tratamientos avanzados. Especialista titular con un currículum internacional.' };
+               return { ...d, specialty: d.specialty || assignedSpecialty, image: finalImg, bio: d.bio || 'Reconocida especialista internacional con gran experiencia en casos complejos de alopecia.' };
              }
            });
            
            fetchAudio(othersMsg, "bot-others", () => {
-             setStepInfo({ options: ["Cualquiera disponible"], stepId: 3 });
+             setStepInfo({ options: ["Cualquiera disponible"], stepId: 25 });
            }, { isDoctorList: true, doctorListData: docPayload });
            return;
         }
 
+        let pQuestion = `Excelente decisión. Antes de abrir el calendario, ¿podrías subir 3 fotos rápidas de tu caso? Así el equipo médico podrá evaluarlas antes de tu cita.`;
+
         if (userSelection && userSelection.startsWith("Reservar")) {
            const docNameExtracted = userSelection.replace("Reservar con ", "");
            setSelectedDoctor(docNameExtracted);
-           calQuestion = `De acuerdo, accederemos a la agenda privada de ${docNameExtracted}. Por favor, selecciona la fecha que mejor te encaje en el calendario.`;
-        } else if (userSelection && userSelection !== "Ver disponibilidad" && userSelection !== "Agendar Cita") {
+           pQuestion = `Excelente elección. Antes de abrir la agenda de ${docNameExtracted}, ¿podrías subir 3 fotos de tu caso? Así las revisará antes de conectarse.`;
+        } else if (userSelection && userSelection !== "Cualquiera disponible" && userSelection !== "Agendar Cita") {
            setSelectedDoctor(userSelection);
         }
 
+        fetchAudio(pQuestion, "bot-photos", () => {
+           setStepInfo({ options: ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
+        });
+      }
+      else if (nextStepId === 3) {
+        let calQuestion = "De acuerdo, accede al calendario y selecciona la fecha y hora que prefieras.";
+        if (userSelection === "Fotos subidas") {
+           calQuestion = "¡Perfecto! Las he adjuntado a tu expediente seguro. Ahora sí, elige el día y la hora que mejor te vengan aquí abajo.";
+        }
+        
         fetchAudio(calQuestion, "bot-3", () => {
            setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
         });
@@ -402,9 +415,21 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
   const handleUserSelect = (text: string, currentStep: number) => {
     if (isProcessing) return;
+    if (text === "📸 Subir fotos") {
+       document.getElementById('hidden-photo-input')?.click();
+       return;
+    }
     if (currentStep === 1) triggerFlowStep(1, text);
     else if (currentStep === 2) triggerFlowStep(2, text);
+    else if (currentStep === 25) triggerFlowStep(25, text);
     else if (currentStep === 3) triggerFlowStep(3, text);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+       setMessages(prev => [...prev, { id: "user-" + Date.now(), text: "📸 3 fotos adjuntadas", sender: "user" }]);
+       triggerFlowStep(3, "Fotos subidas");
+    }
   };
 
   const handleConfirmBooking = () => {
@@ -429,6 +454,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
   return (
     <>
+      <input type="file" id="hidden-photo-input" multiple accept="image/*" className="hidden" onChange={handleFileUpload} />
       <AnimatePresence>
         {!isOpen && (
            <motion.div
@@ -678,7 +704,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                                 <button 
                                                   className="w-full text-[13px] py-2.5 rounded-[10px] font-bold transition-all shadow-sm hover:opacity-95 active:scale-[0.98] flex items-center justify-center gap-1.5" 
                                                   style={{ backgroundColor: color + "15", color: getDarkerColor(color) }}
-                                                  onClick={(e) => { e.stopPropagation(); handleUserSelect(`Reservar con ${doc.name}`, 3); }}
+                                                  onClick={(e) => { e.stopPropagation(); handleUserSelect(`Reservar con ${doc.name}`, 25); }}
                                                 >
                                                   Reservar cita <ChevronRight size={14} strokeWidth={3} />
                                                 </button>
@@ -724,16 +750,26 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     className="flex flex-col gap-2 mt-4 items-end"
                   >
-                    {stepInfo.options.map((opt, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleUserSelect(opt, stepInfo.stepId)}
-                        className="px-4 py-2.5 text-[14px] text-right font-medium rounded-2xl shadow-sm hover:scale-105 active:scale-95 transition-all"
-                        style={{ backgroundColor: color, color: contrastText }}
-                      >
-                        {opt}
-                      </button>
-                    ))}
+                    {stepInfo.options.map((opt, i) => {
+                      const isPrimary = opt === "📸 Subir fotos";
+                      const isSecondary = opt.includes("Omitir");
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => handleUserSelect(opt, stepInfo.stepId)}
+                          className={`px-4 py-2.5 text-[14px] text-center font-bold rounded-2xl shadow-sm hover:scale-105 active:scale-95 transition-all ${
+                             isPrimary 
+                               ? 'w-[90%] mx-auto hover:brightness-110 active:scale-95 border-transparent py-3 text-[14px]' 
+                               : isSecondary
+                               ? 'w-[80%] mx-auto bg-gray-100/90 text-gray-600 hover:bg-gray-200 border-transparent text-[12px]'
+                               : 'text-right'
+                          }`}
+                          style={isPrimary || (!isPrimary && !isSecondary) ? { backgroundColor: color, color: contrastText } : {}}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>
