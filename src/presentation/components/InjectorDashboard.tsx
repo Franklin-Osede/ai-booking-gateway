@@ -10,6 +10,7 @@ export function InjectorDashboard() {
   const [niche, setNiche] = useState("hair_transplant");
   const [brandColor, setBrandColor] = useState("#FFD700");
   const [pos, setPos] = useState("left");
+  const [voiceProvider, setVoiceProvider] = useState("polly");
   const [demoUrl, setDemoUrl] = useState("");
 
   const generateLink = () => {
@@ -20,6 +21,7 @@ export function InjectorDashboard() {
       url.searchParams.set("niche", niche);
       url.searchParams.set("color", brandColor.replace("#", ""));
       url.searchParams.set("pos", pos);
+      url.searchParams.set("voice", voiceProvider);
       setDemoUrl(url.toString());
     } catch { }
   };
@@ -140,6 +142,21 @@ export function InjectorDashboard() {
               >
                 <option value="left">Abajo a la Izquierda (Recomendado)</option>
                 <option value="right">Abajo a la Derecha</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Voice Provider Selection */}
+          <div>
+            <label className="block text-sm font-semibold text-neutral-300 mb-3">6. Proveedor de Voz IA</label>
+            <div className="relative">
+              <select 
+                value={voiceProvider}
+                onChange={(e) => setVoiceProvider(e.target.value)}
+                className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white text-lg cursor-pointer appearance-none px-5"
+              >
+                <option value="polly">AWS Polly (Estándar, Muy rápido)</option>
+                <option value="elevenlabs">ElevenLabs (Premium, Ultra-realista)</option>
               </select>
             </div>
           </div>

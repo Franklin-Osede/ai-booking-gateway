@@ -66,6 +66,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         let parsed = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
         parsed = parsed.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
         if (!parsed) parsed = "Especializada";
+        parsed = parsed.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, "$1 $2");
         setBrandName("la clínica " + parsed.charAt(0).toUpperCase() + parsed.slice(1));
       }
     } catch {
@@ -112,18 +113,21 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
             let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
             parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
             if (!parsedName) parsedName = "especializada";
+            parsedName = parsedName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, "$1 $2");
             currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
          }
       } catch {
         // Ignore
       }
 
-      const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${currentBrand}. <break time="150ms"/> Soy Laura, tu asesora virtual. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿De qué servicios te gustaría recibir más información?`;
+      const greeting = `Hola. Bienvenido a ${currentBrand}. Soy Laura, tu asesora médica. Sé que dar el paso es una decisión importante. ¿Qué te gustaría saber sobre nuestros tratamientos?`;
       try {
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free' })
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -224,10 +228,12 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       if (msgId === "bot-0" && preloadedGreetingRef.current) {
         audioUrl = preloadedGreetingRef.current;
       } else {
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
+          body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'free' })
         });
         if (!res.ok) throw new Error("Voice API Error");
         const blob = await res.blob();
@@ -281,13 +287,13 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
     setTimeout(() => {
       if (nextStepId === 0) {
-        const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${brandName}. <break time="150ms"/> Soy Laura, tu asesora médica. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+        const greeting = `Hola. Bienvenido a ${brandName}. Soy Laura, tu asesora médica. Sé que dar el paso es una decisión importante. ¿Qué te gustaría saber sobre nuestros tratamientos?`;
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: [], stepId: 1 });
         });
       } 
       else if (nextStepId === 1) {
-        const serviceQuestion = `Buena pregunta. <break time="300ms"/> La técnica F U E se usa para zonas amplias, <break time="200ms"/> y la D H I es perfecta para dar máxima densidad sin rapar del todo. <break time="400ms"/> Ambas son indoloras. <break time="400ms"/> Para orientarte mejor... <break time="250ms"/> ¿dirías que tu pérdida de cabello es solo en las entradas, <break time="200ms"/> o también afecta a la coronilla?`;
+        const serviceQuestion = `Buena pregunta. <break time="300ms"/> La técnica F-U-E se usa para zonas amplias, <break time="200ms"/> y la D-H-I es perfecta para dar máxima densidad sin rapar del todo. <break time="400ms"/> Ambas son indoloras. <break time="400ms"/> Para orientarte mejor... <break time="250ms"/> ¿Dirías que tu pérdida de cabello es solo en las entradas? ¿O también afecta a la coronilla?`;
         fetchAudio(serviceQuestion, "bot-1", () => {
           setStepInfo({ options: [], stepId: 2 });
         });
@@ -300,7 +306,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       }
       else if (nextStepId === 3) {
         setShowPhotoUpload(false);
-        const calQuestion = `¡Fotos perfectas y encriptadas con éxito! El doctor ya puede valorarlas. ¿Agendamos una breve videollamada gratuita para explicarte tus opciones de diseño?`;
+        const calQuestion = `Fotos procesadas con éxito. El doctor ya puede valorarlas. ¿Agendamos una breve videollamada gratuita para explicarte tus opciones de diseño?`;
         fetchAudio(calQuestion, "bot-3", () => {
            setStepInfo({ options: [], stepId: 4 });
         });

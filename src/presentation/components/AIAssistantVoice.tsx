@@ -51,18 +51,22 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
             let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
             parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
             if (!parsedName) parsedName = "especializada";
+            // Fix TTS stuttering for domains like "mcapilar" perfectly
+            parsedName = parsedName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, "$1 $2");
             currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
          }
       } catch {
         // Ignore
       }
 
-      const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${currentBrand}. <break time="150ms"/> Soy Laura, tu asesora virtual. <break time="300ms"/> Sé que dar el paso es una decisión importante. <break time="200ms"/> ¿De qué servicios te gustaría recibir más información?`;
+      const greeting = `Hola. Bienvenido a ${currentBrand}. Soy Laura, tu asesora virtual. Sé que dar el paso es una decisión importante. ¿De qué servicios te gustaría recibir más información?`;
       try {
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided' })
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -181,10 +185,13 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       const displayText = text.replace(/<[^>]*>/g, '');
       setMessages(prev => [...prev, { id: msgId, text: displayText, sender: "bot", playing: true, ...extraParams }]);
       
+      let voiceProvider = "polly";
+      try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided' })
       });
       
       if (!res.ok) throw new Error("Voice API Error");
@@ -266,8 +273,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
     setTimeout(() => {
       if (nextStepId === 0) {
-        const parsedName = brandName !== 'nuestra clínica' ? brandName.charAt(0).toUpperCase() + brandName.slice(1) : 'la clínica';
-        const greeting = `¡Hola! <break time="200ms"/> Bienvenido a ${parsedName}. <break time="150ms"/> Soy Laura, tu asesora virtual. <break time="300ms"/> ¿De qué servicios te gustaría recibir más información?`;
+        const parsedName = brandName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, "$1 $2");
+        const formattedBrand = parsedName !== 'nuestra clínica' ? parsedName.charAt(0).toUpperCase() + parsedName.slice(1) : 'la clínica';
+        const greeting = `Hola. Bienvenido a ${formattedBrand}. Soy Laura, tu asesora virtual. ¿De qué servicios te gustaría recibir más información?`;
         
         fetchAudio(greeting, "bot-0", () => {
           const initialChips = categories.slice(0, 3).map((c: { name: string }) => c.name);
@@ -289,8 +297,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         }
 
         const serviceQuestion = isHT 
-          ? `¡Estupendo! <break time="150ms"/> ${htIntro} <break time="400ms"/> ¿Te gustaría agendar una videollamada con el doctor, <break time="100ms"/> o prefieres más información de nuestros servicios en clínica?`
-          : `Perfecto, ¿con qué especialidad o tratamiento te gustaría continuar tu sesión hoy?`;
+          ? `Estupendo. ${htIntro} ¿Te gustaría agendar una videollamada con el doctor? ¿O prefieres más información de nuestros servicios en clínica?`
+          : `Perfecto. ¿Con qué especialidad o tratamiento te gustaría continuar tu sesión hoy?`;
         
         fetchAudio(serviceQuestion, "bot-1", () => {
           const extraChips = categories.length > 3 ? categories.slice(3, 5).map((c: { name: string }) => c.name) : ["Agendar Videollamada", "Más información"];
@@ -336,7 +344,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const photoUrl = match ? match.img : (fallbackImages[activeNiche] || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop');
         const pitchText = match ? match.text : `En ${currentService} garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`;
         
-        const docPitch = `${pitchText} <break time="200ms"/> ¿Quieres ver al equipo médico, <break time="100ms"/> o prefieres que agendemos tu valoración ahora?`;
+        const docPitch = `${pitchText} <break time="200ms"/> ¿Quieres ver al equipo médico? ¿O prefieres que agendemos tu valoración ahora?`;
         
         fetchAudio(docPitch, "bot-2", () => {
            setStepInfo({ options: ["Agendar Cita", "Ver Especialistas"], stepId: 25 });
@@ -357,7 +365,27 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            const seenImages = new Set<string>();
            const docPayload = rawDocs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
              const baseName = typeof d === 'string' ? d : d.name;
-             const isFemale = /^(Dra\.|Doctora|María|Ana|Laura|Sof[ií]a|Carmen|Luc[ií]a|Elena|Paula|Claudia|Blanca|Sara|Marta)/i.test(baseName);
+             
+             let finalName = baseName;
+             let isFemale = /^(Dra\.|Doctora|María|Ana|Laura|Sof[ií]a|Carmen|Luc[ií]a|Elena|Paula|Claudia|Blanca|Sara|Marta)/i.test(finalName);
+             const hairSpecialties = ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"];
+             let assignedSpecialty = hairSpecialties[idx % hairSpecialties.length];
+
+             // If the scraped "name" is actually a generic medical title...
+             if (/^(Médico|Cirujan[oa]|Especialista|Tricólog[oa]|Director[a]?|Docente|Experto|Asesor)/i.test(finalName) && finalName.split(' ').length <= 4) {
+                 assignedSpecialty = finalName; // Use the generic title as the specialty
+                 
+                 const femaleNames = ["Dra. Elena Martín", "Dra. Sofía Navarro", "Dra. Carmen Ríos"];
+                 const maleNames = ["Dr. Alejandro Gómez", "Dr. Carlos Ruiz", "Dr. Javier López"];
+                 
+                 isFemale = /(Cirujana|Doctora|Médica|Tricóloga|Directora|Experta|Asesora)/i.test(finalName);
+                 if (!/(Cirujano|Médico|Tricólogo|Director|Experto|Asesor)/i.test(finalName) && !isFemale) {
+                     isFemale = Math.random() > 0.5; // Randomize if gender neutral like "Especialista"
+                 }
+                 
+                 finalName = isFemale ? femaleNames[idx % femaleNames.length] : maleNames[idx % maleNames.length];
+             }
+
              const gender = isFemale ? 'women' : 'men';
              const seed = Math.floor(Math.random() * 80) + 10 + idx;
              const genericImage = `https://randomuser.me/api/portraits/${gender}/${seed}.jpg`;
@@ -370,13 +398,10 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                 }
              }
 
-             const hairSpecialties = ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"];
-             const assignedSpecialty = hairSpecialties[idx % hairSpecialties.length];
-
              if (typeof d === 'string') {
-               return { name: d, specialty: assignedSpecialty, image: finalImg, bio: 'Especialista titular con miles de folículos trasplantados, apostando por el diseño 100% natural.' };
+               return { name: finalName, specialty: assignedSpecialty, image: finalImg, bio: 'Especialista titular con miles de folículos trasplantados, apostando por el diseño 100% natural.' };
              } else {
-               return { ...d, specialty: d.specialty || assignedSpecialty, image: finalImg, bio: d.bio || 'Reconocida especialista internacional con gran experiencia en casos complejos de alopecia.' };
+               return { ...d, name: finalName, specialty: d.specialty || assignedSpecialty, image: finalImg, bio: d.bio || 'Reconocida especialista internacional con gran experiencia en casos complejos de alopecia.' };
              }
            });
            

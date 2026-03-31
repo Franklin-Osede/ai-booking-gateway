@@ -13,7 +13,7 @@ const polly = new PollyClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, voiceId = "Lucia" } = await req.json(); // Lucia is the premium realistic female es-ES voice
+    const { text, voiceId = "Lucia", provider = "polly", voiceType = "guided" } = await req.json(); // Lucia is the premium realistic female es-ES voice
 
     if (!text) {
        return NextResponse.json({ error: "Missing text payload" }, { status: 400 });
@@ -21,6 +21,60 @@ export async function POST(req: NextRequest) {
 
     // 1. Sanitize for XML but ALLOW <break> tags to pass through for highly realistic pacing
     const cleanText = text.replace(/&/g, "&amp;");
+
+    if (provider === "elevenlabs") {
+      let elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL"; // Example default
+      if (voiceType === "free" && process.env.ELEVENLABS_VOICE_ID_FREE) {
+        elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID_FREE;
+      } else if (voiceType === "guided" && process.env.ELEVENLABS_VOICE_ID_GUIDED) {
+        elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID_GUIDED;
+      }
+      const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
+
+      if (!elevenLabsApiKey) {
+        console.error("ElevenLabs request failed: Missing API Key");
+      } else {
+        // Convert SSML tags to ElevenLabs-friendly text formatting
+        // - <break> becomes an em-dash for clean, conversational pauses (ellipsis drops tone too much)
+        // - <say-as interpret-as="characters">FUE</say-as> becomes F-U-E
+        const noSsmlText = cleanText
+          .replace(/<say-as[^>]*>([^<]+)<\/say-as>/g, (match: string, word: string) => word.split('').join('-'))
+          .replace(/<break[^>]*>/g, ' — ')
+          .replace(/<[^>]*>/g, '');
+          
+        const elRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}`, {
+          method: "POST",
+          headers: {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": elevenLabsApiKey
+          },
+          body: JSON.stringify({
+            text: noSsmlText,
+            model_id: "eleven_turbo_v2_5",
+            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+          })
+        });
+
+        console.log(`ElevenLabs response status: ${elRes.status} for voiceId: ${elevenLabsVoiceId}`);
+        if (elRes.ok) {
+          const arrayBuffer = await elRes.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          return new NextResponse(buffer, {
+            status: 200,
+            headers: {
+              "Content-Type": "audio/mpeg",
+              "Content-Length": buffer.length.toString(),
+              "Cache-Control": "public, max-age=31536000",
+            },
+          });
+        } else {
+           const errText = await elRes.text();
+           console.error("ElevenLabs error:", errText);
+        }
+      }
+      // If ElevenLabs fails or is not configured, we gracefully fallback to Polly below
+    }
 
     // 2. Wrap in SSML and slightly reduce the reading speed to make it sound more relaxed and conversational
     const ssmlText = `<speak><prosody rate="90%">${cleanText}</prosody></speak>`;
