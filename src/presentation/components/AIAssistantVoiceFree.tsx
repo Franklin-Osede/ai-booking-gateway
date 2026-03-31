@@ -66,7 +66,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         let parsed = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
         parsed = parsed.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
         if (!parsed) parsed = "Especializada";
-        parsed = parsed.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, "$1 $2");
+        parsed = parsed.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, (_, p1, p2) => p1.toUpperCase() + '. ' + p2.charAt(0).toUpperCase() + p2.slice(1));
         setBrandName("la clínica " + parsed.charAt(0).toUpperCase() + parsed.slice(1));
       }
     } catch {
@@ -113,7 +113,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
             let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
             parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
             if (!parsedName) parsedName = "especializada";
-            parsedName = parsedName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, "$1 $2");
+            parsedName = parsedName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, (_, p1, p2) => p1.toUpperCase() + '. ' + p2.charAt(0).toUpperCase() + p2.slice(1));
             currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
          }
       } catch {

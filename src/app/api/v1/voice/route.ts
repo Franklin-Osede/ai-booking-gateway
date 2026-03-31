@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
           .replace(/<break[^>]*>/g, ' — ')
           .replace(/<[^>]*>/g, '');
           
-        const elRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}`, {
+        const elRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}?optimize_streaming_latency=2`, {
           method: "POST",
           headers: {
             "Accept": "audio/mpeg",
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             text: noSsmlText,
-            model_id: "eleven_turbo_v2_5",
+            model_id: "eleven_multilingual_v2",
             voice_settings: { stability: 0.5, similarity_boost: 0.75 }
           })
         });
