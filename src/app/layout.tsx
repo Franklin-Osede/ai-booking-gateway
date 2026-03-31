@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "B2B Widget Injector",
+  title: "Soluciones Automatizadas",
   description: "Growth Hacking MVP Injector",
   icons: {
-    icon: "/icon.svg",
+    icon: "/icon.svg?v=3",
   },
 };
 

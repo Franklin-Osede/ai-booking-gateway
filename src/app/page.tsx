@@ -9,7 +9,7 @@ import { InjectorDashboard } from "@/presentation/components/InjectorDashboard";
 import { AIAssistantWidgetCapilar } from "@/presentation/components/AIAssistantWidgetCapilar";
 
 export const metadata: Metadata = {
-  title: "B2B Widget Injector Demo",
+  title: "Soluciones Automatizadas",
   description: "Growth Hacking Injector MVP",
 };
 
