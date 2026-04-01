@@ -34,15 +34,11 @@ export async function POST(req: NextRequest) {
       if (!elevenLabsApiKey) {
         console.error("ElevenLabs request failed: Missing API Key");
       } else {
-        // Convert SSML tags to ElevenLabs-friendly text formatting
-        // - <break> becomes an em-dash for clean, conversational pauses (ellipsis drops tone too much)
-        // - <say-as interpret-as="characters">FUE</say-as> becomes F-U-E
-        const noSsmlText = cleanText
-          .replace(/<say-as[^>]*>([^<]+)<\/say-as>/g, (match: string, word: string) => word.split('').join('-'))
-          .replace(/<break[^>]*>/g, ' — ')
-          .replace(/<[^>]*>/g, '');
+        // We now receive pristine natural text structured specifically for ElevenLabs natively from the Strategy
+        // Just strip any accidental HTML/XML tags that might bleed through from the LLM in free-flow mode
+        const noSsmlText = cleanText.replace(/<[^>]*>/g, '');
           
-        const elRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}?optimize_streaming_latency=2`, {
+        const elRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}?optimize_streaming_latency=3`, {
           method: "POST",
           headers: {
             "Accept": "audio/mpeg",

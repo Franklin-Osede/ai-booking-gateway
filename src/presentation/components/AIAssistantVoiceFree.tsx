@@ -62,7 +62,10 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   useEffect(() => {
     try {
       const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
-      if (storedSite) {
+      const brandParam = new URLSearchParams(window.location.search).get('brand');
+      if (brandParam) {
+        setBrandName(brandParam);
+      } else if (storedSite) {
         let parsed = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
         parsed = parsed.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
         if (!parsed) parsed = "Especializada";
@@ -109,7 +112,10 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       let currentBrand = "la Clínica Capilar";
       try {
          const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
-         if (storedSite) {
+         const brandParam = new URLSearchParams(window.location.search).get('brand');
+         if (brandParam) {
+            currentBrand = brandParam;
+         } else if (storedSite) {
             let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
             parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
             if (!parsedName) parsedName = "especializada";
@@ -120,7 +126,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         // Ignore
       }
 
-      const greeting = `Hola. Bienvenido a ${currentBrand}. Soy Laura, tu asesora médica. Sé que dar el paso es una decisión importante. ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+      const greeting = `¡Hola! Bienvenido a ${currentBrand}. Soy Laura, tu asesora médica. Sé que dar el paso es una decisión importante. ¿Qué te gustaría saber sobre nuestros tratamientos?`;
       try {
         let voiceProvider = "polly";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
@@ -287,7 +293,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
     setTimeout(() => {
       if (nextStepId === 0) {
-        const greeting = `Hola. Bienvenido a ${brandName}. Soy Laura, tu asesora médica. Sé que dar el paso es una decisión importante. ¿Qué te gustaría saber sobre nuestros tratamientos?`;
+        const greeting = `¡Hola! Bienvenido a ${brandName}. Soy Laura, tu asesora médica. Sé que dar el paso es una decisión importante. ¿Qué te gustaría saber sobre nuestros tratamientos?`;
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: [], stepId: 1 });
         });

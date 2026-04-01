@@ -6,11 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function InjectorDashboard() {
   const [siteUrl, setSiteUrl] = useState("");
+  const [brandName, setBrandName] = useState("");
   const [widgetType, setWidgetType] = useState("voice");
   const [niche, setNiche] = useState("hair_transplant");
   const [brandColor, setBrandColor] = useState("#FFD700");
   const [pos, setPos] = useState("left");
-  const [voiceProvider, setVoiceProvider] = useState("polly");
+  const [voiceProvider, setVoiceProvider] = useState("elevenlabs");
   const [demoUrl, setDemoUrl] = useState("");
 
   const generateLink = () => {
@@ -22,6 +23,9 @@ export function InjectorDashboard() {
       url.searchParams.set("color", brandColor.replace("#", ""));
       url.searchParams.set("pos", pos);
       url.searchParams.set("voice", voiceProvider);
+      if (brandName.trim()) {
+        url.searchParams.set("brand", brandName.trim());
+      }
       setDemoUrl(url.toString());
     } catch { }
   };
@@ -60,6 +64,18 @@ export function InjectorDashboard() {
               value={siteUrl}
               onChange={(e) => setSiteUrl(e.target.value)}
               placeholder="https://su-web.com"
+              className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white placeholder-neutral-500 transition-shadow text-lg"
+            />
+          </div>
+
+          {/* Brand Name Input */}
+          <div>
+            <label className="block text-sm font-semibold text-neutral-300 mb-3">1b. Nombre Exacto de la Marca (Para la Voz IA)</label>
+            <input 
+              type="text"
+              value={brandName}
+              onChange={(e) => setBrandName(e.target.value)}
+              placeholder="Ej. Imas Salud Capilar"
               className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white placeholder-neutral-500 transition-shadow text-lg"
             />
           </div>
@@ -155,8 +171,8 @@ export function InjectorDashboard() {
                 onChange={(e) => setVoiceProvider(e.target.value)}
                 className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white text-lg cursor-pointer appearance-none px-5"
               >
-                <option value="polly">AWS Polly (Estándar, Muy rápido)</option>
                 <option value="elevenlabs">ElevenLabs (Premium, Ultra-realista)</option>
+                <option value="polly">AWS Polly (Estándar, Muy rápido)</option>
               </select>
             </div>
           </div>

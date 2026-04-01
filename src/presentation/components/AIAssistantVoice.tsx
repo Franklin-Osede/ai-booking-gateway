@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Play, Menu } from "lucide-react";
 import { NICHE_CONFIGS } from "../config/nicheConfig";
+import { VoiceIntent } from "../../domain/voice/VoiceIntent";
+import { VoicePromptService } from "../../domain/voice/VoicePromptService";
 
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
@@ -47,7 +49,10 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       let currentBrand = "la Clínica Capilar";
       try {
          const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
-         if (storedSite) {
+         const brandParam = new URLSearchParams(window.location.search).get('brand');
+         if (brandParam) {
+            currentBrand = brandParam;
+         } else if (storedSite) {
             let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
             parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
             if (!parsedName) parsedName = "especializada";
@@ -59,10 +64,11 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         // Ignore
       }
 
-      const greeting = `Hola. Bienvenido a ${currentBrand}. Soy Laura, tu asesora virtual. Sé que dar el paso es una decisión importante. ¿De qué servicios te gustaría recibir más información?`;
+      let voiceProvider = "polly";
+      try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+      const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand }, voiceProvider);
+      
       try {
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -118,8 +124,13 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   useEffect(() => {
     try {
       const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
-      if (storedSite) {
+      const brandParam = new URLSearchParams(window.location.search).get('brand');
+      if (brandParam) {
+        setTimeout(() => setBrandName(brandParam), 0);
+      } else if (storedSite) {
         setTimeout(() => setBrandName(new URL(storedSite).hostname.replace('www.', '').split('.')[0]), 0);
+      }
+      if (storedSite) {
         fetch('/api/v1/scrape-team?url=' + encodeURIComponent(storedSite) + '&t=' + Date.now())
           .then(res => res.json())
           .then(data => {
@@ -273,9 +284,14 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
     setTimeout(() => {
       if (nextStepId === 0) {
-        const parsedName = brandName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, (_, p1, p2) => p1.toUpperCase() + '. ' + p2.charAt(0).toUpperCase() + p2.slice(1));
-        const formattedBrand = parsedName !== 'nuestra clínica' ? parsedName.charAt(0).toUpperCase() + parsedName.slice(1) : 'la clínica';
-        const greeting = `Hola. Bienvenido a ${formattedBrand}. Soy Laura, tu asesora virtual. ¿De qué servicios te gustaría recibir más información?`;
+        let formattedBrand = brandName;
+        if (!new URLSearchParams(window.location.search).get('brand')) {
+          const parsedName = brandName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, (_, p1, p2) => p1.toUpperCase() + '. ' + p2.charAt(0).toUpperCase() + p2.slice(1));
+          formattedBrand = parsedName !== 'nuestra clínica' ? parsedName.charAt(0).toUpperCase() + parsedName.slice(1) : 'la clínica';
+        }
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: formattedBrand }, voiceProvider);
         
         fetchAudio(greeting, "bot-0", () => {
           const initialChips = categories.slice(0, 3).map((c: { name: string }) => c.name);
@@ -285,20 +301,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       else if (nextStepId === 1) {
         const isHT = activeNiche === 'hair_transplant';
 
-        let htIntro = "En tu valoración médica gratuita analizaremos tu caso particular sin compromiso.";
-        if (isHT) {
-           if (userSelection === "Técnica FUE / DHI") {
-              htIntro = "La técnica <say-as interpret-as=\"characters\">FUE</say-as> trasplanta los folículos pelo a pelo, sin dolor ni cicatrices, aportando una densidad completamente natural. <break time=\"200ms\"/> En tu valoración médica gratuita analizaremos tu caso particular al milímetro.";
-           } else if (userSelection === "Tratamientos Preventivos") {
-              htIntro = "Nuestros tratamientos frenan de raíz la caída y estimulan el crecimiento de pelo nuevo, multiplicando toda tu densidad. <break time=\"200ms\"/> En tu valoración gratuita analizaremos las causas de tu caso particular.";
-           } else if (userSelection === "Seguimiento Postoperatorio") {
-              htIntro = "El correcto seguimiento posoperatorio es la clave maestra para garantizar que esos nuevos cabellos crezcan sanos y fuertes tras la cirugía. <break time=\"200ms\"/> En tu valoración gratuita podemos analizar tu evolución.";
-           }
-        }
-
-        const serviceQuestion = isHT 
-          ? `Estupendo. ${htIntro} ¿Te gustaría agendar una videollamada con el doctor? ¿O prefieres más información de nuestros servicios en clínica?`
-          : `Perfecto. ¿Con qué especialidad o tratamiento te gustaría continuar tu sesión hoy?`;
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        const serviceQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_SERVICE, { isHT, userSelection }, voiceProvider);
         
         fetchAudio(serviceQuestion, "bot-1", () => {
           const extraChips = categories.length > 3 ? categories.slice(3, 5).map((c: { name: string }) => c.name) : ["Agendar Videollamada", "Más información"];
@@ -344,22 +349,28 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const photoUrl = match ? match.img : (fallbackImages[activeNiche] || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop');
         const pitchText = match ? match.text : `En ${currentService} garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`;
         
-        const docPitch = `${pitchText} <break time="200ms"/> ¿Quieres ver al equipo médico? ¿O prefieres que agendemos tu valoración ahora?`;
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        const docPitch = VoicePromptService.getPrompt(VoiceIntent.DOCTOR_PITCH, { pitchText }, voiceProvider);
         
         fetchAudio(docPitch, "bot-2", () => {
            setStepInfo({ options: ["Agendar Cita", "Ver Especialistas"], stepId: 25 });
         }, { image: photoUrl });
       }
       else if (nextStepId === 25) {
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+
         if (userSelection === "Ahora no") {
-           fetchAudio("No te preocupes. Estoy aquí cuando me necesites para dar ese gran paso.", "bot-bye", () => {
+           const byeMsg = VoicePromptService.getPrompt(VoiceIntent.BYE, {}, voiceProvider);
+           fetchAudio(byeMsg, "bot-bye", () => {
              setStepInfo({ options: [], stepId: 0 });
            });
            return;
         }
 
         if (userSelection === "Ver Especialistas" || userSelection === "Ver otros Especialistas") {
-           const othersMsg = "Claro, aquí tienes al resto del equipo titular. Dime con quién prefieres agendar.";
+           const othersMsg = VoicePromptService.getPrompt(VoiceIntent.OTHERS, {}, voiceProvider);
            const category = categories[0];
            const rawDocs = category.docs.slice(0, 3);
            const seenImages = new Set<string>();
@@ -411,25 +422,26 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            return;
         }
 
-        let pQuestion = `Excelente decisión. Antes de abrir el calendario, ¿podrías subir 3 fotos rápidas de tu caso? Así el equipo médico podrá evaluarlas antes de tu cita.`;
-
+        let docNameExtracted = "equipo médico";
         if (userSelection && userSelection.startsWith("Reservar")) {
-           const docNameExtracted = userSelection.replace("Reservar con ", "");
+           docNameExtracted = userSelection.replace("Reservar con ", "");
            setSelectedDoctor(docNameExtracted);
-           pQuestion = `Excelente elección. Antes de abrir la agenda de ${docNameExtracted}, ¿podrías subir 3 fotos de tu caso? Así las revisará antes de conectarse.`;
         } else if (userSelection && userSelection !== "Cualquiera disponible" && userSelection !== "Agendar Cita") {
            setSelectedDoctor(userSelection);
+           docNameExtracted = userSelection;
         }
+
+        const pQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_PHOTOS, { userSelection, doctorName: docNameExtracted }, voiceProvider);
 
         fetchAudio(pQuestion, "bot-photos", () => {
            setStepInfo({ options: ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
         });
       }
       else if (nextStepId === 3) {
-        let calQuestion = "De acuerdo, accede al calendario y selecciona la fecha y hora que prefieras.";
-        if (userSelection === "Fotos subidas") {
-           calQuestion = "¡Perfecto! Las he adjuntado a tu expediente seguro. Ahora sí, elige el día y la hora que mejor te vengan aquí abajo.";
-        }
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        
+        const calQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_CALENDAR, { userSelection }, voiceProvider);
         
         fetchAudio(calQuestion, "bot-3", () => {
            setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
@@ -470,9 +482,11 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
      setTimeout(() => {
         const docName = selectedDoctor || 'nuestro experto';
         const isHT = activeNiche === 'hair_transplant';
-        const confirmMsg = isHT 
-             ? `¡Estupendo! <break time="400ms"/> Tu reserva con ${docName} en nuestra clínica ha quedado confirmada. <break time="300ms"/> Te esperamos.`
-             : `¡Estupendo! Tu reserva con ${docName} para el día ${selectedDate} a las ${spokenTime} ha quedado confirmada, te esperamos.`;
+        let voiceProvider = "polly";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        
+        const confirmMsg = VoicePromptService.getPrompt(VoiceIntent.CONFIRM_BOOKING, { isHT, doctorName: docName, selectedDate: selectedDate || 1, spokenTime }, voiceProvider);
+        
         fetchAudio(confirmMsg, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
      }, 600);
   };
