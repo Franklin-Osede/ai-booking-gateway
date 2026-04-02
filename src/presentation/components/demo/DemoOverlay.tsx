@@ -15,7 +15,7 @@ interface DemoOverlayProps {
   videoPitchUrl?: string;
 }
 
-export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = true, videoPitchUrl }: DemoOverlayProps) {
+export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = false, videoPitchUrl }: DemoOverlayProps) {
   const [activeMode, setActiveMode] = useState<"triage" | "text" | "voice" | "phone">("voice");
   const [isPitchOpen, setIsPitchOpen] = useState(false);
   const [useIframeFallback, setUseIframeFallback] = useState(false);
