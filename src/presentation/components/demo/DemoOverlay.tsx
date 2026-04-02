@@ -16,8 +16,10 @@ interface DemoOverlayProps {
 }
 
 export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = true, videoPitchUrl }: DemoOverlayProps) {
-  const [activeMode, setActiveMode] = useState<"triage" | "text" | "voice" | "phone">("triage");
+  const [activeMode, setActiveMode] = useState<"triage" | "text" | "voice" | "phone">("voice");
   const [isPitchOpen, setIsPitchOpen] = useState(false);
+  const [useIframeFallback, setUseIframeFallback] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Forzar que el agente de voz use ElevenLabs mediante un param en la URL
   useEffect(() => {
@@ -52,7 +54,7 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
 
       {/* 3. The Full Screen Target Website (Plan B o Iframe) */}
       <div className="absolute inset-0 z-0 bg-gray-50 grayscale flex items-center justify-center">
-        {useImageMode ? (
+        {useImageMode && !useIframeFallback ? (
            <>
              {/* Loading State underneath the image */}
              <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full z-0">
@@ -63,13 +65,15 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
              <img 
                src={screenshotApiUrl}
                alt="Clinic Background"
-               className="relative z-10 w-full h-full object-cover object-top transition-opacity duration-1000 opacity-90"
+               className={`relative z-10 w-full h-full object-cover object-top transition-opacity duration-1000 ${isLoaded ? 'opacity-90' : 'opacity-0'}`}
+               onLoad={() => setIsLoaded(true)}
                onError={(e) => {
                  if (!e.currentTarget.src.includes('thum.io')) {
                    // Fallback mágico gratuito anti-límites
                    e.currentTarget.src = `https://image.thum.io/get/width/1200/crop/1000/noanimate/${clinicUrl}`;
                  } else {
-                   e.currentTarget.style.display = 'none';
+                   // Si fallan ambos, metemos por cojones el Iframe para que NO se quede cargando
+                   setUseIframeFallback(true);
                  }
                }}
              />
