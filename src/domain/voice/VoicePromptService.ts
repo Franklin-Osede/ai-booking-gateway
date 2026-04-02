@@ -17,6 +17,13 @@ export class VoicePromptService {
   static getPrompt(intent: VoiceIntent, params: VoiceContextParams, provider: string = 'polly'): string {
     const key = provider.toLowerCase();
     const strategy = this.strategies[key] || this.strategies['polly'];
-    return strategy.getPrompt(intent, params);
+    
+    // Force perfect Spanish pronunciation of 'clínica' even if the user forgets the accent mark
+    const safeParams = { ...params };
+    if (safeParams.brandName) {
+      safeParams.brandName = safeParams.brandName.replace(/clinica/gi, 'Clínica');
+    }
+    
+    return strategy.getPrompt(intent, safeParams);
   }
 }

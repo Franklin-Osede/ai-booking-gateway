@@ -4,7 +4,7 @@ export class ElevenLabsStrategy implements IVoiceStrategy {
   getPrompt(intent: VoiceIntent, params: VoiceContextParams): string {
     switch (intent) {
       case VoiceIntent.GREETING:
-        return `¡Hola! Bienvenido a ${params.brandName}. Soy Laura, tu asesora virtual. ¿De qué servicios te gustaría recibir más información?`;
+        return `¡Hola! Bienvenido a ${params.brandName}. Soy Laura, tu asesora virtual... ¿De qué servicios te gustaría recibir más información?`;
       
       case VoiceIntent.ASK_SERVICE: {
         let htIntro = "En tu valoración médica gratuita analizaremos tu caso particular sin compromiso.";

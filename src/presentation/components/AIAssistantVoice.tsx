@@ -56,8 +56,6 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
             let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
             parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
             if (!parsedName) parsedName = "especializada";
-            // Fix TTS stuttering for domains like "mcapilar" perfectly by using initials
-            parsedName = parsedName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, (_, p1, p2) => p1.toUpperCase() + '. ' + p2.charAt(0).toUpperCase() + p2.slice(1));
             currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
          }
       } catch {
@@ -286,7 +284,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       if (nextStepId === 0) {
         let formattedBrand = brandName;
         if (!new URLSearchParams(window.location.search).get('brand')) {
-          const parsedName = brandName.replace(/^([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz][a-z]+)/i, (_, p1, p2) => p1.toUpperCase() + '. ' + p2.charAt(0).toUpperCase() + p2.slice(1));
+          const parsedName = brandName;
           formattedBrand = parsedName !== 'nuestra clínica' ? parsedName.charAt(0).toUpperCase() + parsedName.slice(1) : 'la clínica';
         }
         let voiceProvider = "polly";
