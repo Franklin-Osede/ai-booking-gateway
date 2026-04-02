@@ -53,11 +53,11 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
       />
 
       {/* 3. The Full Screen Target Website (Plan B o Iframe) */}
-      <div className="absolute inset-0 z-0 bg-gray-50 grayscale flex items-center justify-center">
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
         {useImageMode && !useIframeFallback ? (
            <>
              {/* Loading State underneath the image */}
-             <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full z-0">
+             <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full z-0 bg-gray-50">
                 <div className="w-10 h-10 rounded-full border-4 border-gray-200 border-t-gray-800 animate-spin mb-4" />
                 <p className="text-gray-500 font-bold animate-pulse text-sm uppercase tracking-widest">Generando Fondo (10-20s)...</p>
              </div>
