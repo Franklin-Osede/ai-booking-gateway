@@ -63,9 +63,14 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
              <img 
                src={screenshotApiUrl}
                alt="Clinic Background"
-               className="relative z-10 w-full h-full object-cover object-top opacity-90 transition-opacity duration-1000"
+               className="relative z-10 w-full h-full object-cover object-top transition-opacity duration-1000 opacity-90"
                onError={(e) => {
-                 e.currentTarget.style.display = 'none';
+                 if (!e.currentTarget.src.includes('thum.io')) {
+                   // Fallback mágico gratuito anti-límites
+                   e.currentTarget.src = `https://image.thum.io/get/width/1200/crop/1000/noanimate/${clinicUrl}`;
+                 } else {
+                   e.currentTarget.style.display = 'none';
+                 }
                }}
              />
            </>

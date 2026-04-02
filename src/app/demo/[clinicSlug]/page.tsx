@@ -1,5 +1,7 @@
 import { DemoOverlay } from "../../../presentation/components/demo/DemoOverlay";
 import { Metadata } from 'next';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic'; // Desactiva la caché agresiva de Next.js 15 para esta ruta
 
@@ -39,11 +41,19 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
     }
   };
 
-  const dbConfig = mockDatabase[clinicSlug] || mockDatabase["default"];
+  let clinicsDb: Record<string, { url: string, color: string }> = {};
+  try {
+    const dbPath = path.join(process.cwd(), 'src/app/demo/clinics_db.json');
+    if (fs.existsSync(dbPath)) {
+      clinicsDb = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+    }
+  } catch (_) { }
+
+  const defaultFallback = { url: "https://drsanmartin.com/", color: "#8c1a1a" };
+  const dbConfig = clinicsDb[clinicSlug] || mockDatabase[clinicSlug] || defaultFallback;
   
-  // TRUCO MÁGICO: Si pasas por parámetros ?site=LA-WEB-DE-LA-CLINICA , pisará a la base de datos
-  const customSiteUrl = typeof resolvedSearchParams.site === 'string' ? resolvedSearchParams.site : dbConfig.url;
-  const customColor = typeof resolvedSearchParams.color === 'string' ? `#${resolvedSearchParams.color}` : dbConfig.color;
+  const customSiteUrl = dbConfig.url;
+  const customColor = dbConfig.color;
 
   const customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
 
