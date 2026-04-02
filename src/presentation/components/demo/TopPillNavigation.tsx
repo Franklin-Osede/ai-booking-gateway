@@ -46,14 +46,7 @@ export function TopPillNavigation({ onOpenPitch, activeMode, onModeChange, prima
         onClick={() => onModeChange("voice")}
         className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'voice' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
       >
-        <Mic size={16} /> <span className="hidden sm:inline">Voz (Widget)</span>
-      </button>
-
-      <button
-        onClick={() => onModeChange("phone")}
-        className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'phone' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
-      >
-        <Phone size={16} /> <span className="hidden sm:inline">Voz (Llamada)</span>
+        <Mic size={16} /> <span className="hidden sm:inline">Agente Voz Libre</span>
       </button>
       
       <button
