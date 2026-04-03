@@ -126,8 +126,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
       const greeting = `¡Hola! Bienvenido a ${currentBrand}. Soy Laura, tu asesora médica... Sé que dar el paso es una decisión importante... ¿Qué te gustaría saber sobre nuestros tratamientos?`;
       try {
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -232,8 +232,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       if (msgId === "bot-0" && preloadedGreetingRef.current) {
         audioUrl = preloadedGreetingRef.current;
       } else {
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
