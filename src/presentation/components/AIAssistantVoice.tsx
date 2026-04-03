@@ -62,8 +62,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         // Ignore
       }
 
-      let voiceProvider = "polly";
-      try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+      let voiceProvider = "elevenlabs";
+      try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
       const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand }, voiceProvider);
       
       try {
@@ -194,8 +194,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       const displayText = text.replace(/<[^>]*>/g, '');
       setMessages(prev => [...prev, { id: msgId, text: displayText, sender: "bot", playing: true, ...extraParams }]);
       
-      let voiceProvider = "polly";
-      try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+      let voiceProvider = "elevenlabs";
+      try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
 
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
@@ -287,8 +287,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
           const parsedName = brandName;
           formattedBrand = parsedName !== 'nuestra clínica' ? parsedName.charAt(0).toUpperCase() + parsedName.slice(1) : 'la clínica';
         }
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: formattedBrand }, voiceProvider);
         
         fetchAudio(greeting, "bot-0", () => {
@@ -299,8 +299,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       else if (nextStepId === 1) {
         const isHT = activeNiche === 'hair_transplant';
 
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         const serviceQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_SERVICE, { isHT, userSelection }, voiceProvider);
         
         fetchAudio(serviceQuestion, "bot-1", () => {
@@ -347,8 +347,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const photoUrl = match ? match.img : (fallbackImages[activeNiche] || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop');
         const pitchText = match ? match.text : `En ${currentService} garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`;
         
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         const docPitch = VoicePromptService.getPrompt(VoiceIntent.DOCTOR_PITCH, { pitchText }, voiceProvider);
         
         fetchAudio(docPitch, "bot-2", () => {
@@ -356,8 +356,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         }, { image: photoUrl });
       }
       else if (nextStepId === 25) {
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
 
         if (userSelection === "Ahora no") {
            const byeMsg = VoicePromptService.getPrompt(VoiceIntent.BYE, {}, voiceProvider);
@@ -436,8 +436,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         });
       }
       else if (nextStepId === 3) {
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         
         const calQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_CALENDAR, { userSelection }, voiceProvider);
         
@@ -480,8 +480,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
      setTimeout(() => {
         const docName = selectedDoctor || 'nuestro experto';
         const isHT = activeNiche === 'hair_transplant';
-        let voiceProvider = "polly";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "polly"; } catch {}
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         
         const confirmMsg = VoicePromptService.getPrompt(VoiceIntent.CONFIRM_BOOKING, { isHT, doctorName: docName, selectedDate: selectedDate || 1, spokenTime }, voiceProvider);
         

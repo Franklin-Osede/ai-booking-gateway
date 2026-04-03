@@ -21,16 +21,7 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
   const [useIframeFallback, setUseIframeFallback] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Forzar que el agente de voz use ElevenLabs mediante un param en la URL
-  useEffect(() => {
-    if (activeMode === "voice" || activeMode === "phone") {
-       const url = new URL(window.location.href);
-       if (url.searchParams.get('voice') !== 'elevenlabs') {
-          url.searchParams.set('voice', 'elevenlabs');
-          window.history.replaceState({}, '', url.toString());
-       }
-    }
-  }, [activeMode]);
+
 
   const screenshotApiUrl = `https://api.microlink.io/?url=${encodeURIComponent(clinicUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
 
