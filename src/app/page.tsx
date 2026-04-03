@@ -7,6 +7,7 @@ import { AIAssistantVoiceFree } from "@/presentation/components/AIAssistantVoice
 import { AIAssistantPhone } from "@/presentation/components/AIAssistantPhone";
 import { InjectorDashboard } from "@/presentation/components/InjectorDashboard";
 import { AIAssistantWidgetCapilar } from "@/presentation/components/AIAssistantWidgetCapilar";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Soluciones Automatizadas",
@@ -16,14 +17,32 @@ export const metadata: Metadata = {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ site?: string; widget?: string; color?: string; niche?: string; pos?: string }>;
+  searchParams: Promise<{ site?: string; widget?: string; color?: string; niche?: string; pos?: string; c?: string }>;
 }) {
   const params = await searchParams;
-  const siteUrl = params.site;
-  const widgetType = params.widget || "form";
-  const niche = params.niche || "default";
+  let siteUrl = params.site;
+  let widgetType = params.widget || "form";
+  let niche = params.niche || "default";
+  let brandColor = params.color ? `#${params.color}` : "#FFD700";
   const pos = "left";
-  const brandColor = params.color ? `#${params.color}` : "#FFD700";
+
+  const clinicId = params.c;
+
+  if (clinicId) {
+    try {
+      const clinic = await prisma.clinic.findUnique({
+        where: { id: clinicId },
+        include: { websites: true, brandings: true }
+      });
+      if (clinic) {
+        siteUrl = clinic.websites?.[0]?.url || siteUrl;
+        brandColor = clinic.brandings?.[0]?.primaryColor || brandColor;
+        niche = clinic.industry?.toLowerCase().includes("capilar") ? "hair_transplant" : "default";
+      }
+    } catch (e) {
+      console.error("Failed to fetch clinic by ID", e);
+    }
+  }
 
   if (!siteUrl) {
     return <InjectorDashboard />;

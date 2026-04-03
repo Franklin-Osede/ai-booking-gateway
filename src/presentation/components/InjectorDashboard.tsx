@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, ExternalLink, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 export function InjectorDashboard() {
   const [siteUrl, setSiteUrl] = useState("");
@@ -14,20 +15,36 @@ export function InjectorDashboard() {
   const [voiceProvider, setVoiceProvider] = useState("elevenlabs");
   const [demoUrl, setDemoUrl] = useState("");
 
-  const generateLink = () => {
+  const [loading, setLoading] = useState(false);
+
+  const generateLink = async () => {
+    if (!siteUrl) return;
     try {
+      setLoading(true);
+      const res = await fetch("/api/clinics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: brandName || siteUrl.replace(/https?:\/\/(www\.)?/, '').split('/')[0].replace('.com', '').replace('.es', ''),
+          industry: niche,
+          siteUrl: siteUrl,
+          brandColor: brandColor.startsWith('#') ? brandColor : `#${brandColor}`
+        })
+      });
+      const data = await res.json();
+      
       const url = new URL(window.location.href);
-      url.searchParams.set("site", siteUrl);
-      url.searchParams.set("widget", widgetType);
-      url.searchParams.set("niche", niche);
-      url.searchParams.set("color", brandColor.replace("#", ""));
-      url.searchParams.set("pos", pos);
-      url.searchParams.set("voice", voiceProvider);
-      if (brandName.trim()) {
-        url.searchParams.set("brand", brandName.trim());
+      if (data.success && data.data?.id) {
+         url.search = `?c=${data.data.id}&widget=${widgetType}&pos=${pos}&voice=${voiceProvider}`;
+      } else {
+         // Fallback if DB insert fails
+         url.search = `?site=${siteUrl}&widget=${widgetType}&niche=${niche}&color=${brandColor.replace("#", "")}&pos=${pos}&voice=${voiceProvider}`;
       }
       setDemoUrl(url.toString());
-    } catch { }
+      setLoading(false);
+    } catch { 
+      setLoading(false);
+    }
   };
 
   const copyLink = () => {
@@ -45,14 +62,19 @@ export function InjectorDashboard() {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-3xl bg-neutral-900 rounded-4xl p-8 shadow-2xl border border-neutral-800"
       >
-        <div className="flex items-center gap-4 mb-10">
-           <div className="p-4 bg-neutral-800 rounded-2xl text-yellow-500 shadow-lg">
-             <Sparkles size={28} />
-           </div>
-           <div>
-             <h1 className="text-3xl font-bold tracking-tight">Widget Injector Panel</h1>
-             <p className="text-neutral-400 mt-1">Genera URLs mágicas de demostración para tus prospectos.</p>
-           </div>
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-4">
+             <div className="p-4 bg-neutral-800 rounded-2xl text-yellow-500 shadow-lg">
+               <Sparkles size={28} />
+             </div>
+             <div>
+               <h1 className="text-3xl font-bold tracking-tight">Widget Injector Panel</h1>
+               <p className="text-neutral-400 mt-1">Genera URLs mágicas de demostración para tus prospectos.</p>
+             </div>
+          </div>
+          <Link href="/admin" className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 border border-neutral-700 whitespace-nowrap">
+            Abrir Admin
+          </Link>
         </div>
 
         <div className="space-y-8">
@@ -177,12 +199,12 @@ export function InjectorDashboard() {
             </div>
           </div>
 
-          {/* Action */}
           <button 
              onClick={generateLink}
-             className="w-full bg-white text-black font-extrabold text-xl py-5 rounded-2xl hover:bg-neutral-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] mt-4"
+             disabled={loading}
+             className="w-full bg-white text-black font-extrabold text-xl py-5 rounded-2xl hover:bg-neutral-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] mt-4 disabled:opacity-50"
           >
-            Generar Enlace Mágico
+            {loading ? "Creando lead en Base de Datos..." : "Generar Enlace Mágico DB"}
           </button>
 
           {/* Result */}

@@ -20,40 +20,48 @@ export async function generateMetadata({ params }: DemoProps): Promise<Metadata>
   };
 }
 
+import { prisma } from "@/lib/prisma";
+
 export default async function DemoPage({ params, searchParams }: DemoProps) {
   const { clinicSlug } = await params;
   const resolvedSearchParams = await searchParams;
   
-  // MOCK DATA TEMPORAL
-  const mockDatabase: Record<string, { url: string, color: string }> = {
-    "instituto-capilar": {
-      url: "https://institutocapilar.es",
-      color: "#1a4b8c"
-    },
-    "clinica-arbelaez": {
-      url: "https://www.clinicaarbelaez.com/",
-      color: "#ededed" // Color solicitado
-    },
-    // Fallback genérico para que no salga 'Example Domain' si escribes mal
-    "default": {
-       url: "https://drsanmartin.com/", // Web real capilar que permite Iframes
-       color: "#8c1a1a" // Granate
-    }
-  };
+  let customSiteUrl = "https://drsanmartin.com/";
+  let customColor = "#8c1a1a";
 
-  let clinicsDb: Record<string, { url: string, color: string }> = {};
   try {
-    const dbPath = path.join(process.cwd(), 'src/app/demo/clinics_db.json');
-    if (fs.existsSync(dbPath)) {
-      clinicsDb = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-    }
-  } catch (_) { }
+    const clinic = await prisma.clinic.findUnique({
+      where: { id: clinicSlug },
+      include: { websites: true, brandings: true }
+    });
+    
+    if (clinic) {
+      customSiteUrl = clinic.websites?.[0]?.url || customSiteUrl;
+      customColor = clinic.brandings?.[0]?.primaryColor || customColor;
+    } else {
+      // Legacy Mock Fallback
+      const mockDatabase: Record<string, { url: string, color: string }> = {
+        "instituto-capilar": { url: "https://institutocapilar.es", color: "#1a4b8c" },
+        "clinica-arbelaez": { url: "https://www.clinicaarbelaez.com/", color: "#ededed" },
+      };
+      
+      let clinicsDb: Record<string, { url: string, color: string }> = {};
+      try {
+        const dbPath = path.join(process.cwd(), 'src/app/demo/clinics_db.json');
+        if (fs.existsSync(dbPath)) {
+          clinicsDb = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+        }
+      } catch (_) { }
 
-  const defaultFallback = { url: "https://drsanmartin.com/", color: "#8c1a1a" };
-  const dbConfig = clinicsDb[clinicSlug] || mockDatabase[clinicSlug] || defaultFallback;
-  
-  const customSiteUrl = dbConfig.url;
-  const customColor = dbConfig.color;
+      const dbConfig = clinicsDb[clinicSlug] || mockDatabase[clinicSlug];
+      if (dbConfig) {
+        customSiteUrl = dbConfig.url;
+        customColor = dbConfig.color;
+      }
+    }
+  } catch (error) {
+     console.error("Failed to load clinic in demo hub", error);
+  }
 
   const customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
 

@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Clinic {
+  id        String   @id @default(uuid())
+  name      String
+  industry  String
+  location  String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  websites       Website[]
+  brandings      Branding[]
+  widgetConfigs  WidgetConfig[]
+  outreachLogs   OutreachLog[]
+}
+
+model Website {
+  id              String    @id @default(uuid())
+  clinicId        String
+  url             String
+  screenshotUrl   String?
+  lastScrapedAt   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  clinic          Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
+
+model Branding {
+  id              String   @id @default(uuid())
+  clinicId        String
+  primaryColor    String
+  secondaryColor  String?
+  buttonStyle     String?
+  logoUrl         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  clinic          Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
+
+model WidgetConfig {
+  id                String   @id @default(uuid())
+  clinicId          String
+  demoLink          String?
+  selectedProducts  Json?
+  formType          String?
+  voiceAgent        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
+
+model OutreachLog {
+  id                String   @id @default(uuid())
+  clinicId          String
+  status            String
+  channel           String?
+  nextStep          String?
+  owner             String?
+  lastContactedAt   DateTime?
+  createdAt         DateTime @default(now())
+
+  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
