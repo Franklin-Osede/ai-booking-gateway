@@ -79,25 +79,24 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
         )}
       </div>
 
-      {/* 4. Dynamic Widget Rendering */}
-      <div className="absolute z-50 pointer-events-auto">
-        {activeMode === "triage" && (
+      {/* 4. Dynamic Widget Rendering - All preloaded in background for zero-latency startups */}
+      <div className="absolute z-50 pointer-events-auto w-full h-full">
+        <div className={activeMode === "triage" ? "block" : "hidden"}>
           <AIAssistantWidgetCapilar color={themeColor} pos="right" />
-        )}
-        {activeMode === "text" && (
+        </div>
+        <div className={activeMode === "text" ? "block" : "hidden"}>
           <AIAssistantChat color={themeColor} pos="right" niche="hair_transplant" />
-        )}
-        {activeMode === "voice" && (
+        </div>
+        <div className={activeMode === "voice" ? "block" : "hidden"}>
           <AIAssistantVoice color={themeColor} pos="right" niche="hair_transplant" />
-        )}
-        {activeMode === "voice-free" && (
+        </div>
+        <div className={activeMode === "voice-free" ? "block" : "hidden"}>
           <AIAssistantVoiceFree color={themeColor} pos="right" niche="hair_transplant" />
-        )}
-        {activeMode === "phone" && (
+        </div>
+        <div className={activeMode === "phone" ? "block" : "hidden"}>
           <AIAssistantPhone color={themeColor} pos="right" niche="hair_transplant" />
-        )}
+        </div>
       </div>
-
     </div>
   );
 }
