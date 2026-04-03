@@ -62,10 +62,13 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   const useProxy = resolvedSearchParams.proxy === 'true';
   const finalUrl = useProxy ? `/api/v1/proxy?url=${encodeURIComponent(customSiteUrl)}` : customSiteUrl;
 
+  const forceImageMode = resolvedSearchParams.image === 'true';
+
   return (
     <DemoOverlay 
       clinicUrl={finalUrl} 
       themeColor={customColor} 
+      useImageMode={forceImageMode}
       videoPitchUrl={customVideo}
     />
   );
