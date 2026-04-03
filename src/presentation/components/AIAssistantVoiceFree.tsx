@@ -61,10 +61,10 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const [brandName, setBrandName] = useState("la Clínica Capilar");
   const times = ["09:00", "10:30", "12:00", "16:00", "17:30", "18:45"];
 
-  const [activeVoiceId, setActiveVoiceId] = useState("f_laura");
+  const [activeVoiceId, setActiveVoiceId] = useState("f_elena");
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
   
-  const activeVoice: VoiceProfile = CLINIC_VOICES.find(v => v.id === activeVoiceId) || CLINIC_VOICES[0];
+  const activeVoice: VoiceProfile = CLINIC_VOICES.find(v => v.id === activeVoiceId) || CLINIC_VOICES[3];
 
   useEffect(() => {
     try {
@@ -112,7 +112,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     setChatHistory([]);
     setStepInfo({ options: [], stepId: 0 });
 
-    const selectedVoice = CLINIC_VOICES.find(v => v.id === id) || CLINIC_VOICES[0];
+    const selectedVoice = CLINIC_VOICES.find(v => v.id === id) || CLINIC_VOICES[3];
     const newGreeting = `¡Hola! Bienvenido a ${brandName}. Soy ${name}. Cuéntame con tus palabras, ¿en qué te puedo ayudar o qué es lo que más te preocupa de tu cabello?`;
     setChatHistory([{ role: "assistant", content: newGreeting }]);
 
@@ -170,7 +170,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free', gender: CLINIC_VOICES[0].gender, elevenlabs_voice_id: CLINIC_VOICES[0].elevenLabsId })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free', gender: CLINIC_VOICES[3].gender, elevenlabs_voice_id: CLINIC_VOICES[3].elevenLabsId })
         });
         if (res.ok) {
           const blob = await res.blob();
