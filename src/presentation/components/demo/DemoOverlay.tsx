@@ -6,6 +6,7 @@ import { VideoPitchModal } from "./VideoPitchModal";
 import { AIAssistantWidgetCapilar } from "../AIAssistantWidgetCapilar";
 import { AIAssistantVoice } from "../AIAssistantVoice";
 import { AIAssistantChat } from "../AIAssistantChat";
+import { AIAssistantVoiceFree } from "../AIAssistantVoiceFree";
 import { AIAssistantPhone } from "../AIAssistantPhone";
 
 interface DemoOverlayProps {
@@ -16,7 +17,7 @@ interface DemoOverlayProps {
 }
 
 export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = false, videoPitchUrl }: DemoOverlayProps) {
-  const [activeMode, setActiveMode] = useState<"triage" | "text" | "voice" | "phone">("voice");
+  const [activeMode, setActiveMode] = useState<"triage" | "text" | "voice" | "voice-free" | "phone">("voice");
   const [isPitchOpen, setIsPitchOpen] = useState(false);
   const [useIframeFallback, setUseIframeFallback] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -88,6 +89,9 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
         )}
         {activeMode === "voice" && (
           <AIAssistantVoice color={themeColor} pos="right" niche="hair_transplant" />
+        )}
+        {activeMode === "voice-free" && (
+          <AIAssistantVoiceFree color={themeColor} pos="right" niche="hair_transplant" />
         )}
         {activeMode === "phone" && (
           <AIAssistantPhone color={themeColor} pos="right" niche="hair_transplant" />

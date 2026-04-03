@@ -16,8 +16,8 @@ function getContrastColor(hexcolor: string) {
 
 interface TopPillNavigationProps {
   onOpenPitch: () => void;
-  activeMode: "triage" | "text" | "voice" | "phone";
-  onModeChange: (mode: "triage" | "text" | "voice" | "phone") => void;
+  activeMode: "triage" | "text" | "voice" | "voice-free" | "phone";
+  onModeChange: (mode: "triage" | "text" | "voice" | "voice-free" | "phone") => void;
   primaryColor?: string;
 }
 
@@ -50,8 +50,8 @@ export function TopPillNavigation({ onOpenPitch, activeMode, onModeChange, prima
       </button>
 
       <button
-        onClick={() => onModeChange("phone")}
-        className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'phone' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
+        onClick={() => onModeChange("voice-free")}
+        className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'voice-free' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
       >
         <Phone size={16} /> <span className="hidden sm:inline">Agente de Voz 2</span>
       </button>
