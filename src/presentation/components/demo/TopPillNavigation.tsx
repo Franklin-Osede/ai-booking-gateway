@@ -1,6 +1,6 @@
 "use client";
 
-import { PlayCircle, Phone, Calendar, Stethoscope, MessageCircle, Mic } from "lucide-react";
+import { PlayCircle, Calendar } from "lucide-react";
 
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
@@ -16,8 +16,8 @@ function getContrastColor(hexcolor: string) {
 
 interface TopPillNavigationProps {
   onOpenPitch: () => void;
-  activeMode: "triage" | "text" | "voice" | "voice-free" | "phone";
-  onModeChange: (mode: "triage" | "text" | "voice" | "voice-free" | "phone") => void;
+  activeMode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone";
+  onModeChange: (mode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone") => void;
   primaryColor?: string;
 }
 
@@ -26,12 +26,17 @@ export function TopPillNavigation({ onOpenPitch, activeMode, onModeChange, prima
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-9000 flex items-center bg-black/40 backdrop-blur-md rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-white/20 p-1.5 transition-all">
-      <button
-        onClick={() => onModeChange("triage")}
-        className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'triage' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
-      >
-        <Stethoscope size={16} /> <span className="hidden sm:inline">Triaje Médico</span>
-      </button>
+      {activeMode !== "hub" && (
+        <>
+          <button
+            onClick={() => onModeChange("hub")}
+            className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-colors text-white hover:bg-white/20"
+          >
+            <span className="w-2 h-2 rounded-full animate-pulse mr-1" style={{ backgroundColor: primaryColor }} /> Menú Principal
+          </button>
+          <div className="w-px h-6 bg-white/20 mx-1"></div>
+        </>
+      )}
 
       <button 
         onClick={onOpenPitch}
@@ -39,31 +44,6 @@ export function TopPillNavigation({ onOpenPitch, activeMode, onModeChange, prima
       >
         <PlayCircle size={16} /> <span className="hidden sm:inline">Vídeo Pitch</span>
       </button>
-
-      <div className="w-px h-6 bg-white/20 mx-1"></div>
-
-      <button
-        onClick={() => onModeChange("voice")}
-        className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'voice' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
-      >
-        <Mic size={16} /> <span className="hidden sm:inline">Agente de Voz 1</span>
-      </button>
-
-      <button
-        onClick={() => onModeChange("voice-free")}
-        className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'voice-free' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
-      >
-        <Phone size={16} /> <span className="hidden sm:inline">Agente de Voz 2</span>
-      </button>
-      
-      <button
-        onClick={() => onModeChange("text")}
-        className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-semibold transition-colors ${activeMode === 'text' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
-      >
-        <MessageCircle size={16} /> <span className="hidden sm:inline">Chat IA</span>
-      </button>
-
-      <div className="w-px h-6 bg-white/20 mx-1"></div>
 
       <button 
         onClick={() => window.open("https://calendly.com/agentminds", "_blank")}

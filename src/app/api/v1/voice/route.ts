@@ -13,21 +13,29 @@ const polly = new PollyClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, voiceId = "Lucia", provider = "polly", voiceType = "guided" } = await req.json(); // Lucia is the premium realistic female es-ES voice
+    const { text, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F" } = await req.json(); // Lucia is the premium realistic female es-ES voice
 
     if (!text) {
        return NextResponse.json({ error: "Missing text payload" }, { status: 400 });
     }
 
     // 1. Sanitize for XML but ALLOW <break> tags to pass through for highly realistic pacing
-    const cleanText = text.replace(/&/g, "&amp;");
+    const cleanText = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/&lt;break(.*?)\/?&gt;/g, "<break$1/>");
 
     if (provider === "elevenlabs") {
-      let elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL"; // Example default
-      if (voiceType === "free" && process.env.ELEVENLABS_VOICE_ID_FREE) {
-        elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID_FREE;
-      } else if (voiceType === "guided" && process.env.ELEVENLABS_VOICE_ID_GUIDED) {
-        elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID_GUIDED;
+      let elevenLabsVoiceId = elevenlabs_voice_id;
+      if (!elevenLabsVoiceId) {
+        if (voiceType === "free" && process.env.ELEVENLABS_VOICE_ID_FREE) {
+          elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID_FREE;
+        } else if (voiceType === "guided" && process.env.ELEVENLABS_VOICE_ID_GUIDED) {
+          elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID_GUIDED;
+        } else {
+          elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL";
+        }
       }
       const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
 
@@ -74,6 +82,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Wrap in SSML and slightly reduce the reading speed to make it sound more relaxed and conversational
     const ssmlText = `<speak><prosody rate="90%">${cleanText}</prosody></speak>`;
+    const fallbackVoiceId = gender === "M" ? "Sergio" : "Lucia";
 
     const command = new SynthesizeSpeechCommand({
       Engine: "neural",
@@ -81,7 +90,7 @@ export async function POST(req: NextRequest) {
       OutputFormat: "mp3",
       Text: ssmlText,
       TextType: "ssml",
-      VoiceId: voiceId,
+      VoiceId: fallbackVoiceId,
     });
 
     const response = await polly.send(command);

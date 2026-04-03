@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft, Upload, UserCircle2, ShieldCheck, Calendar as CalendarIcon, Check, Shield, MessageCircle } from "lucide-react";
 function getContrastColor(hexcolor: string) {
@@ -48,6 +48,14 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
 
   const contrastText = getContrastColor(color);
   const TOTAL_STEPS = 11;
+  const blobTrackerRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    const urlsToClean = blobTrackerRef.current;
+    return () => {
+      urlsToClean.forEach((url: string) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -79,7 +87,11 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newUrls = Array.from(e.target.files).map(f => URL.createObjectURL(f));
+      const newUrls = Array.from(e.target.files).map(f => {
+        const url = URL.createObjectURL(f);
+        blobTrackerRef.current.push(url);
+        return url;
+      });
       setUploadedPhotos(prev => [...prev, ...newUrls].slice(0, 3));
     }
   };
@@ -112,22 +124,22 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                     <span className="opacity-0 cursor-default">Atrás</span>
                   )}
                </div>
-               {step < 10 && (
+               {step <= TOTAL_STEPS && (
                  <div className="flex items-center gap-1">
                    <span className="text-gray-400 font-extrabold text-xl tracking-tighter" style={{color}}>{step}</span> 
-                   <span className="text-gray-400 font-bold text-sm">/ 10</span>
+                   <span className="text-gray-400 font-bold text-sm">/ {TOTAL_STEPS}</span>
                  </div>
                )}
              </div>
 
              {/* Progress Line */}
-             {step < 10 && (
+             {step <= TOTAL_STEPS && (
                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                  <motion.div 
                    className="h-full rounded-full"
                    style={{ backgroundColor: color }}
                    initial={{ width: 0 }}
-                   animate={{ width: `${(step / 10) * 100}%` }}
+                   animate={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
                    transition={{ duration: 0.4, ease: "easeOut" }}
                  />
                </div>
@@ -147,7 +159,7 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                         Paso 1 de 10
+                         Paso 1 de {TOTAL_STEPS}
                       </div>
 
                       <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Háblanos de ti</h2>
@@ -222,7 +234,7 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 2 de 10
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 2 de {TOTAL_STEPS}
                       </div>
 
                       <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Historial Genético</h2>
@@ -276,7 +288,7 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 3 de 10
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 3 de {TOTAL_STEPS}
                       </div>
 
                       <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Identifica tu Patrón</h2>
@@ -329,7 +341,7 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 4 de 10
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 4 de {TOTAL_STEPS}
                       </div>
 
                       <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Historial de Medicación</h2>
@@ -383,7 +395,7 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 5 de 10
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 5 de {TOTAL_STEPS}
                       </div>
 
                       <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Zona Donante & Salud</h2>
@@ -474,7 +486,7 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 6 de 10
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 6 de {TOTAL_STEPS}
                       </div>
 
                       <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Sube tus fotos</h2>
@@ -656,7 +668,7 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 9 de 10
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 9 de {TOTAL_STEPS}
                       </div>
 
                       <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Elige tu Cita</h2>

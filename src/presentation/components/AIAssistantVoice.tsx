@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Play, Menu } from "lucide-react";
+import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Play, Menu, ChevronDown, Check } from "lucide-react";
 import { NICHE_CONFIGS } from "../config/nicheConfig";
+import { CLINIC_VOICES, VoiceProfile } from "../config/voiceConfig";
 import { VoiceIntent } from "../../domain/voice/VoiceIntent";
 import { VoicePromptService } from "../../domain/voice/VoicePromptService";
 
@@ -42,6 +43,18 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const endRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const preloadedGreetingRef = useRef<string | null>(null);
+  const blobTrackerRef = useRef<string[]>([]);
+
+  const [activeVoiceId, setActiveVoiceId] = useState("f_laura");
+  const [showVoiceSelector, setShowVoiceSelector] = useState(false);
+  const activeVoice: VoiceProfile = CLINIC_VOICES.find(v => v.id === activeVoiceId) || CLINIC_VOICES[0];
+
+  // Clean up all localized blobs on unmount
+  useEffect(() => {
+    return () => {
+      blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   useEffect(() => {
     // Pre-fetch greeting for instantaneous startup
@@ -70,11 +83,13 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided' })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: activeVoice.elevenLabsId })
         });
         if (res.ok) {
           const blob = await res.blob();
-          preloadedGreetingRef.current = URL.createObjectURL(blob);
+          const url = URL.createObjectURL(blob);
+          blobTrackerRef.current.push(url);
+          preloadedGreetingRef.current = url;
         }
       } catch (e) {
         console.error("Polly Preload Error:", e);
@@ -107,6 +122,43 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const monthNameStr = displayedDate.toLocaleString('es-ES', { month: 'long' });
   const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
   const monthShort = monthNameStr.substring(0, 3);
+
+  const handleVoiceSelection = (id: string, name: string) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setActiveVoiceId(id);
+    setShowVoiceSelector(false);
+    
+    // Wipe Context
+    setMessages([]);
+    setStepInfo({ options: [], stepId: 0 });
+
+    let currentBrand = "la Clínica Capilar";
+    try {
+      const brandParam = new URLSearchParams(window.location.search).get('brand');
+      const storedSite = localStorage.getItem('onboarding_site_url');
+      if (brandParam) currentBrand = brandParam;
+      else if (storedSite) currentBrand = "la clínica " + new URL(storedSite).hostname.replace('www.', '').split('.')[0];
+    } catch {}
+        
+    let voiceProvider = "elevenlabs";
+    try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
+    const selectedVoice = CLINIC_VOICES.find(v => v.id === id) || CLINIC_VOICES[0];
+
+    const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand }, voiceProvider);
+    let greeting = rawGreeting.replace(/Soy [a-zA-ZáéíóúÁÉÍÓÚñÑ]+/, `Soy ${name}`);
+    if (selectedVoice.gender === 'M') {
+        greeting = greeting.replace(/asesora/gi, 'asesor');
+    }
+    
+    setTimeout(() => {
+       fetchAudio(greeting, "bot-res-" + Date.now(), () => {
+         setStepInfo({ options: ["¿Cuánto cuesta?", "Quiero ver resultados", "Agendar cita"], stepId: 1 });
+       }, { overrideVoice: selectedVoice });
+    }, 100);
+  };
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
@@ -177,6 +229,11 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       setSelectedTime("");
       setSelectedService("");
       setSelectedDoctor("");
+      blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
+      blobTrackerRef.current = [];
+      if (preloadedGreetingRef.current) {
+        blobTrackerRef.current.push(preloadedGreetingRef.current);
+      }
     } else {
       setIsOpen(true);
       triggerFlowStep(0);
@@ -187,7 +244,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen, stepInfo, selectedDate, selectedTime]);
 
-  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraParams?: { isSuccess?: boolean; isFinalCard?: boolean; image?: string; isDoctorList?: boolean; doctorListData?: DoctorData[] }) => {
+  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraParams?: { isSuccess?: boolean; isFinalCard?: boolean; image?: string; isDoctorList?: boolean; doctorListData?: DoctorData[], overrideVoice?: VoiceProfile }) => {
     try {
       setIsProcessing(true);
       // Remove SSML tags for the visual chat bubble
@@ -197,16 +254,18 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       let voiceProvider = "elevenlabs";
       try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
 
+      const voiceToUse = extraParams?.overrideVoice || activeVoice;
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided' })
+        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender })
       });
       
       if (!res.ok) throw new Error("Voice API Error");
       
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
+      blobTrackerRef.current.push(url);
       const audio = new Audio(url);
       audioRef.current = audio;
       
@@ -217,7 +276,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       };
       
       audio.onended = () => {
-         setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: false } : m));
+         let finalDur = audio.duration;
+         if (finalDur === Infinity || isNaN(finalDur)) finalDur = audio.currentTime || 10;
+         setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: false, duration: Math.floor(finalDur) } : m));
          setIsProcessing(false);
          onEnd();
       };
@@ -238,16 +299,15 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       if (isPlaying) {
         setElapsed(0);
         timer = setInterval(() => {
-          setElapsed(prev => {
-            if (duration && prev >= duration) return duration;
-            return prev + 1;
-          });
-        }, 1000);
+          if (audioRef.current && !audioRef.current.paused) {
+             setElapsed(audioRef.current.currentTime);
+          }
+        }, 250);
       } else {
         setElapsed(0);
       }
       return () => clearInterval(timer);
-    }, [isPlaying, duration]);
+    }, [isPlaying]);
 
     const display = isPlaying ? elapsed : (duration || 0);
     const m = Math.floor(display / 60);
@@ -289,7 +349,11 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         }
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-        const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: formattedBrand }, voiceProvider);
+        const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: formattedBrand }, voiceProvider);
+        let greeting = rawGreeting.replace(/Soy [a-zA-ZáéíóúÁÉÍÓÚñÑ]+/, `Soy ${activeVoice.name}`);
+        if (activeVoice.gender === 'M') {
+            greeting = greeting.replace(/asesora/gi, 'asesor');
+        }
         
         fetchAudio(greeting, "bot-0", () => {
           const initialChips = categories.slice(0, 3).map((c: { name: string }) => c.name);
@@ -532,26 +596,91 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
             className={`fixed bottom-4 sm:bottom-6 ${posClass} w-[280px] sm:w-[330px] h-[400px] sm:h-[460px] max-h-[60vh] sm:max-h-[85vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col z-50 ring-1 ring-black/5`}
           >
             {/* Header */}
-            <div className="px-6 py-4 text-black flex justify-between items-center bg-gray-50/80 backdrop-blur-md border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full shrink-0 relative overflow-hidden shadow-sm border border-gray-200">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Asesora" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex flex-col">
-                  <h3 className="font-bold text-[14px] sm:text-[15px] leading-tight text-gray-900 whitespace-nowrap">Laura · Asesora Capilar</h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <p className="text-[12px] text-green-600 font-medium tracking-tight">{isProcessing ? "Hablando..." : "En línea"}</p>
+            <div className="relative z-50">
+              <div className="px-5 py-3 text-black flex justify-between items-center bg-gray-50/95 backdrop-blur-md border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full shrink-0 relative overflow-hidden shadow-sm border border-gray-200">
+                    <img src={activeVoice.avatarUrl} alt={activeVoice.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex flex-col">
+                    <h3 className="font-bold text-[13px] sm:text-[14px] leading-tight text-gray-900 whitespace-nowrap">{activeVoice.fullName}</h3>
+                    <div className="flex flex-col mt-1.5">
+                        <div 
+                         onClick={() => setShowVoiceSelector(!showVoiceSelector)}
+                         className="cursor-pointer group flex items-center w-fit"
+                        >
+                          <span className={`px-2 py-[2px] rounded-md text-[10px] sm:text-[11px] font-semibold transition-colors flex items-center gap-1.5 ${isProcessing ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-gray-100 hover:bg-gray-200 border border-transparent text-gray-600'}`}>
+                            {isProcessing ? (
+                               <>
+                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                 Escribiendo...
+                               </>
+                            ) : (
+                               <>
+                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                 Cambiar Asistente <ChevronDown size={10} className="text-gray-400 group-hover:text-gray-600" />
+                               </>
+                            )}
+                          </span>
+                        </div>
+                    </div>
                   </div>
                 </div>
+                
+                <div className="flex items-center shrink-0">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); toggleVoice(); }}
+                    className="p-1.5 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
               </div>
-              <button 
-                onClick={toggleVoice}
-                className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
-              >
-                <X size={20} />
-              </button>
+
+              <AnimatePresence>
+                 {showVoiceSelector && (
+                    <motion.div 
+                       initial={{ opacity: 0, y: -10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       exit={{ opacity: 0, y: -10 }}
+                       className="absolute left-0 right-0 top-full bg-white border-b border-gray-100 shadow-lg max-h-[300px] overflow-y-auto z-40 rounded-b-xl"
+                    >
+                       <div className="p-2">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 pt-1">Mujeres</p>
+                          {CLINIC_VOICES.slice(0, 3).map(v => (
+                             <div 
+                               key={v.id}
+                               onClick={() => handleVoiceSelection(v.id, v.name)}
+                               className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
+                             >
+                                <img src={v.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                                <div className="flex-1 min-w-0">
+                                   <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
+                                   <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>
+                                </div>
+                                {activeVoiceId === v.id && <Check size={16} className="text-blue-600 mr-2 shrink-0" />}
+                             </div>
+                          ))}
+                          
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-4 mb-2 px-2">Hombres</p>
+                          {CLINIC_VOICES.slice(6, 9).map(v => (
+                             <div 
+                               key={v.id}
+                               onClick={() => handleVoiceSelection(v.id, v.name)}
+                               className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
+                             >
+                                <img src={v.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-gray-200 opacity-90" />
+                                <div className="flex-1 min-w-0">
+                                   <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
+                                   <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>
+                                </div>
+                                {activeVoiceId === v.id && <Check size={16} className="text-blue-600 mr-2 shrink-0" />}
+                             </div>
+                          ))}
+                       </div>
+                    </motion.div>
+                 )}
+              </AnimatePresence>
             </div>
 
             {/* Chat Body */}
