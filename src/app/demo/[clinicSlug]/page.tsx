@@ -30,8 +30,13 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   let customColor = "#8c1a1a";
 
   try {
-    const clinic = await prisma.clinic.findUnique({
-      where: { id: clinicSlug },
+    const clinic = await prisma.clinic.findFirst({
+      where: {
+        OR: [
+          { slug: clinicSlug },
+          ...(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(clinicSlug) ? [{ id: clinicSlug }] : [])
+        ]
+      },
       include: { websites: true, brandings: true }
     });
     
@@ -51,7 +56,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
         if (fs.existsSync(dbPath)) {
           clinicsDb = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
         }
-      } catch (_) { }
+      } catch { }
 
       const dbConfig = clinicsDb[clinicSlug] || mockDatabase[clinicSlug];
       if (dbConfig) {

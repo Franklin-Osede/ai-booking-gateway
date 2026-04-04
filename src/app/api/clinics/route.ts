@@ -8,9 +8,20 @@ export async function POST(req: Request) {
     
     if (!name) return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 });
 
+    let baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    if (!baseSlug) baseSlug = 'clinic';
+    let slug = baseSlug;
+    
+    let counter = 1;
+    while (await prisma.clinic.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
     const clinic = await prisma.clinic.create({
       data: {
         name,
+        slug,
         industry: industry || 'Sector General',
         location: location || null,
         websites: siteUrl ? { create: { url: siteUrl } } : undefined,
@@ -19,8 +30,11 @@ export async function POST(req: Request) {
       }
     });
     return NextResponse.json({ success: true, data: clinic });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
   }
 }
 
@@ -28,6 +42,12 @@ export async function GET() {
   try {
     const clinics = await prisma.clinic.findMany({
       orderBy: { createdAt: "desc" },
+      include: {
+        outreachLogs: {
+          orderBy: { createdAt: "desc" },
+          take: 1
+        }
+      }
     });
     return NextResponse.json({ success: true, data: clinics });
   } catch (error) {

@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Plus, Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2 } from "lucide-react";
 
 export default function ClinicDetail({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter();
   const unwrappedParams = use(params);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [clinic, setClinic] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"config" | "outreach">("config");
@@ -30,6 +28,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
 
   useEffect(() => {
     fetchClinic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unwrappedParams.id]);
 
   const handleAddLog = async () => {
@@ -113,7 +112,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                </div>
             ) : (
                <div className="space-y-4">
-                 {clinic.outreachLogs?.map((log: any) => (
+                 {clinic.outreachLogs?.map((log: { id: string, status: string, createdAt: string | Date, nextStep: string | null }) => (
                    <div key={log.id} className="bg-neutral-900 border border-neutral-800 p-5 rounded-2xl flex items-start justify-between gap-4 group">
                      <div className="flex items-start gap-4">
                        <div className="bg-neutral-800 p-2 rounded-lg text-yellow-500 shrink-0"><Check size={20}/></div>
@@ -190,13 +189,46 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
              <h3 className="text-xl font-bold mb-3">Enlace Mágico Universitario</h3>
              <div className="flex items-center gap-4 bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
                 <div className="flex-1 overflow-hidden">
-                   <p className="text-yellow-500 font-mono text-sm truncate">{`${typeof window !== 'undefined' ? window.location.origin : ''}/demo/${clinic.id}`}</p>
+                   <p className="text-yellow-500 font-mono text-sm truncate">{`${typeof window !== 'undefined' ? window.location.origin : ''}/demo/${clinic.slug || clinic.id}`}</p>
                 </div>
-                <a href={`/demo/${clinic.id}`} target="_blank" className="bg-yellow-500 text-black px-4 py-2 text-sm font-bold rounded-xl hover:bg-yellow-400 transition-colors shrink-0 flex items-center gap-2">
+                <a href={`/demo/${clinic.slug || clinic.id}`} target="_blank" className="bg-white text-black px-4 py-2 text-sm font-bold rounded-xl hover:bg-neutral-200 transition-colors shrink-0 flex items-center gap-2">
                   <ExternalLink size={16}/> Probar Hub Completo
                 </a>
              </div>
-             <p className="text-neutral-500 text-xs py-2 mt-1">Este enlace Premium carga el menú "Demo Hub" para elegir entre Modos de IA.</p>
+
+             <div className="mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+               <div>
+                 <p className="text-xs text-neutral-400 font-bold uppercase tracking-wider mb-1">🌍 URL Real de Producción (Vercel)</p>
+                 <a 
+                   href={`https://agentminds.ai/demo/${clinic.slug || clinic.id}`}
+                   target="_blank"
+                   rel="noreferrer"
+                   className="block text-white font-mono text-sm opacity-90 truncate hover:text-yellow-500 hover:underline mt-1"
+                 >
+                   https://agentminds.ai/demo/{clinic.slug || clinic.id}
+                 </a>
+               </div>
+               <div className="flex items-center gap-2 shrink-0 mt-3 sm:mt-0">
+                 <button 
+                   onClick={() => {
+                     navigator.clipboard.writeText(`https://agentminds.ai/demo/${clinic.slug || clinic.id}`);
+                     alert("¡URL de Producción copiada!");
+                   }}
+                   className="bg-neutral-900 border border-neutral-700 text-white hover:text-yellow-500 hover:border-yellow-500/30 font-semibold px-4 py-2 rounded-xl transition-colors text-sm"
+                 >
+                   Copiar
+                 </button>
+                 <a 
+                   href={`https://agentminds.ai/demo/${clinic.slug || clinic.id}`} 
+                   target="_blank" 
+                   className="bg-yellow-500 text-black hover:bg-yellow-400 font-bold px-4 py-2 rounded-xl transition-colors text-sm flex items-center gap-1"
+                 >
+                   Visitar <ExternalLink size={14}/>
+                 </a>
+               </div>
+             </div>
+
+             <p className="text-neutral-500 text-xs py-2 mt-2">Este enlace Premium carga el menú &quot;Demo Hub&quot; para elegir entre Modos de IA.</p>
            </div>
 
            <div>

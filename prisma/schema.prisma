@@ -8,6 +8,7 @@ datasource db {
 
 model Clinic {
   id        String   @id @default(uuid())
+  slug      String?  @unique
   name      String
   industry  String
   location  String?
@@ -19,6 +20,10 @@ model Clinic {
   brandings      Branding[]
   widgetConfigs  WidgetConfig[]
   outreachLogs   OutreachLog[]
+
+  @@index([name])
+  @@index([slug])
+  @@index([industry])
 }
 
 model Website {
@@ -31,6 +36,8 @@ model Website {
   updatedAt       DateTime  @updatedAt
 
   clinic          Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
 }
 
 model Branding {
@@ -44,6 +51,8 @@ model Branding {
   updatedAt       DateTime @updatedAt
 
   clinic          Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
 }
 
 model WidgetConfig {
@@ -57,6 +66,8 @@ model WidgetConfig {
   updatedAt         DateTime @updatedAt
 
   clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
 }
 
 model OutreachLog {
@@ -70,4 +81,6 @@ model OutreachLog {
   createdAt         DateTime @default(now())
 
   clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
 }
