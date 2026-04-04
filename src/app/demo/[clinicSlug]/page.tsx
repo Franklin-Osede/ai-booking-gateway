@@ -44,10 +44,10 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       customSiteUrl = clinic.websites?.[0]?.url || customSiteUrl;
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
     } else {
-      // Legacy Mock Fallback
       const mockDatabase: Record<string, { url: string, color: string }> = {
         "instituto-capilar": { url: "https://institutocapilar.es", color: "#1a4b8c" },
         "clinica-arbelaez": { url: "https://www.clinicaarbelaez.com/", color: "#ededed" },
+        "info-mncapilar": { url: "https://info.mncapilar.com/", color: "#1a4b8c" },
       };
       
       let clinicsDb: Record<string, { url: string, color: string }> = {};
