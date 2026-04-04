@@ -13,9 +13,9 @@ export async function POST(req: Request) {
       select: { name: true, websites: { select: { url: true } } }
     });
 
-    const existingNames = new Set(existingClinics.map(c => c.name.toLowerCase().trim()));
+    const existingNames = new Set(existingClinics.map((c: { name: string }) => c.name.toLowerCase().trim()));
     const existingUrls = new Set(
-      existingClinics.flatMap(c => c.websites.map(w => w.url.toLowerCase().trim()))
+      existingClinics.flatMap((c: { websites: { url: string }[] }) => c.websites.map((w: { url: string }) => w.url.toLowerCase().trim()))
     );
 
     let added = 0;
