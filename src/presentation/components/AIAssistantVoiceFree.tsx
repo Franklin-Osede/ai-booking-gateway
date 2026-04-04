@@ -438,7 +438,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
        }
     } catch (e) {
        console.warn("Permiso de micrófono denegado:", e);
-       alert("Por favor, permite el acceso al micrófono en tu navegador.");
+       setMessages(prev => [...prev, { id: "error-" + Date.now(), text: "No he podido acceder a tu micrófono. Revisa los permisos de 'Micrófono' en los Ajustes de Safari/iOS para esta página.", sender: "bot" }]);
        return;
     }
 
