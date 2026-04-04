@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const [isExcelUploading, setIsExcelUploading] = useState(false);
   const [pendingExcelClinics, setPendingExcelClinics] = useState<ParsedClinic[]>([]);
   const [isExcelPreviewOpen, setIsExcelPreviewOpen] = useState(false);
+  const [excelResult, setExcelResult] = useState<{added: number, skipped: number} | null>(null);
 
   const extractNameFromUrl = (url: string) => {
     try {
@@ -394,65 +395,97 @@ export default function AdminDashboard() {
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 bg-neutral-900/50">
-              <table className="w-full text-left">
-                <thead className="text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800">
-                  <tr>
-                    <th className="pb-3 pr-4">Nombre (Cliente)</th>
-                    <th className="pb-3 pr-4">URL</th>
-                    <th className="pb-3 pr-4">Ubicación</th>
-                    <th className="pb-3 text-right">Pestaña (Nicho)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-800/50 text-sm">
-                  {pendingExcelClinics.map((clinic, idx) => (
-                    <tr key={idx} className="hover:bg-neutral-800/20 transition-colors">
-                      <td className="py-3 pr-4 font-bold text-white">{clinic.name}</td>
-                      <td className="py-3 pr-4 text-neutral-400 truncate max-w-[200px]">{clinic.url || '-'}</td>
-                      <td className="py-3 pr-4 text-neutral-400">{clinic.location || '-'}</td>
-                      <td className="py-3 text-right text-yellow-500 font-bold text-xs">{clinic.industry}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {excelResult ? (
+              <div className="p-10 flex flex-col items-center justify-center text-center space-y-6 bg-neutral-900/50 flex-1">
+                 <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-2">
+                   <CheckCircle size={40} className="text-green-500" />
+                 </div>
+                 <div>
+                   <h2 className="text-2xl font-bold text-white mb-2">¡Inyección Completada!</h2>
+                   <p className="text-neutral-400">Las clínicas han sido añadidas a la base de datos B2B.</p>
+                 </div>
+                 <div className="flex gap-6 mt-4 bg-neutral-950 p-6 rounded-2xl border border-neutral-800 w-full max-w-sm">
+                    <div className="flex flex-col items-center flex-1">
+                       <span className="text-4xl font-bold text-white">{excelResult.added}</span>
+                       <span className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">Añadidas</span>
+                    </div>
+                    <div className="w-px bg-neutral-800"></div>
+                    <div className="flex flex-col items-center flex-1">
+                       <span className="text-4xl font-bold text-neutral-600">{excelResult.skipped}</span>
+                       <span className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">Omitidas</span>
+                    </div>
+                 </div>
+                 <div className="pt-6 w-full max-w-sm">
+                   <button 
+                     onClick={() => { setIsExcelPreviewOpen(false); setExcelResult(null); }}
+                     className="w-full bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-neutral-200 transition-colors"
+                     >
+                     Volver al Dashboard
+                   </button>
+                 </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto p-6 bg-neutral-900/50">
+                  <table className="w-full text-left">
+                    <thead className="text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800">
+                      <tr>
+                        <th className="pb-3 pr-4">Nombre (Cliente)</th>
+                        <th className="pb-3 pr-4">URL</th>
+                        <th className="pb-3 pr-4">Ubicación</th>
+                        <th className="pb-3 text-right">Pestaña (Nicho)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-800/50 text-sm">
+                      {pendingExcelClinics.map((clinic, idx) => (
+                        <tr key={idx} className="hover:bg-neutral-800/20 transition-colors">
+                          <td className="py-3 pr-4 font-bold text-white">{clinic.name}</td>
+                          <td className="py-3 pr-4 text-neutral-400 truncate max-w-[200px]">{clinic.url || '-'}</td>
+                          <td className="py-3 pr-4 text-neutral-400">{clinic.location || '-'}</td>
+                          <td className="py-3 text-right text-yellow-500 font-bold text-xs">{clinic.industry}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-            <div className="p-6 border-t border-neutral-800 bg-neutral-950 flex justify-between items-center">
-               <button 
-                 onClick={() => setIsExcelPreviewOpen(false)}
-                 className="px-6 py-3 font-bold text-neutral-400 hover:text-white transition-colors"
-               >
-                 Cancelar
-               </button>
-               <button 
-                 disabled={isExcelUploading}
-                 onClick={async () => {
-                    setIsExcelUploading(true);
-                    try {
-                      const res = await fetch("/api/clinics/bulk", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ clinics: pendingExcelClinics })
-                      });
-                      const data = await res.json();
-                      if (res.ok) {
-                        alert(`¡Archivo procesado!\n\n✅ Añadidas: ${data.added}\n⏭️ Omitidas (Duplicados): ${data.skipped}`);
-                        setIsExcelPreviewOpen(false);
-                        fetch("/api/clinics").then((r) => r.json()).then((d) => setClinics(d?.data || []));
-                      } else {
-                        alert(`Error al guardar: ${data.error}`);
-                      }
-                    } catch (err: unknown) {
-                      alert("Error de conexión");
-                    } finally {
-                      setIsExcelUploading(false);
-                    }
-                 }}
-                 className="bg-white text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50"
-               >
-                 {isExcelUploading ? "Inyectando Base de Datos..." : "Confirmar Inyección Segura"}
-               </button>
-            </div>
+                <div className="p-6 border-t border-neutral-800 bg-neutral-950 flex justify-between items-center">
+                   <button 
+                     onClick={() => setIsExcelPreviewOpen(false)}
+                     className="px-6 py-3 font-bold text-neutral-400 hover:text-white transition-colors"
+                   >
+                     Cancelar
+                   </button>
+                   <button 
+                     disabled={isExcelUploading}
+                     onClick={async () => {
+                        setIsExcelUploading(true);
+                        try {
+                          const res = await fetch("/api/clinics/bulk", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ clinics: pendingExcelClinics })
+                          });
+                          const data = await res.json();
+                          if (res.ok) {
+                            setExcelResult({ added: data.added, skipped: data.skipped });
+                            fetch("/api/clinics").then((r) => r.json()).then((d) => setClinics(d?.data || []));
+                          } else {
+                            alert(`Error al guardar: ${data.error}`);
+                          }
+                        } catch (err: unknown) {
+                          alert("Error de conexión");
+                        } finally {
+                          setIsExcelUploading(false);
+                        }
+                     }}
+                     className="bg-white text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50"
+                   >
+                     {isExcelUploading ? "Inyectando Base de Datos..." : "Confirmar Inyección Segura"}
+                   </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
