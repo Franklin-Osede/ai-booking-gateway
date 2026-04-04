@@ -43,6 +43,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   
   let customSiteUrl = "https://institutocapilar.es";
   let customColor = "#1a4b8c";
+  let customIndustry = "Clínica Capilar";
 
   try {
     const clinic = await prisma.clinic.findFirst({
@@ -58,6 +59,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
     if (clinic) {
       customSiteUrl = clinic.websites?.[0]?.url || customSiteUrl;
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
+      customIndustry = clinic.industry || customIndustry;
     } else {
       const mockDatabase: Record<string, { url: string, color: string }> = {
         "instituto-capilar": { url: "https://institutocapilar.es", color: "#1a4b8c" },
@@ -98,6 +100,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       themeColor={customColor} 
       useImageMode={forceImageMode}
       videoPitchUrl={customVideo}
+      niche={customIndustry}
     />
   );
 }

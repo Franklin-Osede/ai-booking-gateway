@@ -6,7 +6,7 @@ import { AIAssistantVoice } from "@/presentation/components/AIAssistantVoice";
 import { AIAssistantVoiceFree } from "@/presentation/components/AIAssistantVoiceFree";
 import { AIAssistantPhone } from "@/presentation/components/AIAssistantPhone";
 import { InjectorDashboard } from "@/presentation/components/InjectorDashboard";
-import { AIAssistantWidgetCapilar } from "@/presentation/components/AIAssistantWidgetCapilar";
+import { AIAssistantWidgetProxy } from "@/presentation/components/widgets/AIAssistantWidgetProxy";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -66,7 +66,7 @@ export default async function Home({
       >
         <div className="h-full w-full relative *:pointer-events-auto">
           {widgetType === "form" && <AIAssistantWidget color={brandColor} niche={niche} pos={pos} />}
-          {widgetType === "capilar" && <AIAssistantWidgetCapilar color={brandColor} pos={pos} />}
+          {widgetType === "capilar" && <AIAssistantWidgetProxy color={brandColor} niche={niche === "hair_transplant" ? "Clínica Capilar" : niche} isOpen={true} setIsOpen={() => {}} />}
           {widgetType === "chat" && <AIAssistantChat color={brandColor} niche={niche} pos={pos} />}
           {widgetType === "banner" && <LeadGenBanner color={brandColor} pos={pos} />}
           {widgetType === "voice" && <AIAssistantVoice color={brandColor} niche={niche} pos="right" />}
