@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -52,7 +54,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: clinics });
   } catch (error) {
     console.error("Error fetching clinics:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch clinics" }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error), stack: error instanceof Error ? error.stack : undefined }, { status: 500 });
   }
 }
 
