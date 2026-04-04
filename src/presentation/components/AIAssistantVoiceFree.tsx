@@ -64,6 +64,9 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const [activeVoiceId, setActiveVoiceId] = useState("f_elena");
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
   
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
+  
   const activeVoice: VoiceProfile = CLINIC_VOICES.find(v => v.id === activeVoiceId) || CLINIC_VOICES[3];
 
   useEffect(() => {
@@ -420,79 +423,74 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     
     if (isListening) {
        setIsListening(false);
-       if ((window as any).recognitionInstance) {
-          (window as any).recognitionInstance.stop();
-       } else {
-          // Fallback simulation (si no hay Speech API)
-          triggerFlowStep(1, "Háblame de los precios o agendemos.");
+       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+          mediaRecorderRef.current.stop();
        }
        return;
     }
 
     try {
        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-         // Safari iOS necesita este permiso explícito ANTES de lanzar el SpeechRecognition
-         // Si no, parpadea y nunca registra audio.
-         await navigator.mediaDevices.getUserMedia({ audio: true });
-         // No cerramos el stream aquí para mantener el micrófono activo para rec
+         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+         
+         setIsListening(true);
+         setMicTime(0);
+         
+         // Fallback mime types para Safari iOS
+         let options = {};
+         if (MediaRecorder.isTypeSupported('audio/webm')) {
+            options = { mimeType: 'audio/webm' };
+         } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            options = { mimeType: 'audio/mp4' };
+         }
+         
+         const mediaRecorder = new MediaRecorder(stream, options);
+         mediaRecorderRef.current = mediaRecorder;
+         audioChunksRef.current = [];
+
+         mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              audioChunksRef.current.push(event.data);
+            }
+         };
+
+         mediaRecorder.onstop = async () => {
+            setIsListening(false);
+            setIsProcessing(true);
+            const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
+            
+            const formData = new FormData();
+            formData.append("file", audioBlob, "audio.webm"); // Whisper doesn't care much about ext if format is valid
+
+            try {
+               const res = await fetch('/api/v1/stt', {
+                 method: 'POST',
+                 body: formData
+               });
+               if (!res.ok) throw new Error("STT Failed");
+               const data = await res.json();
+               if (data.text && data.text.trim().length > 0) {
+                 triggerFlowStep(stepInfo.stepId, data.text.trim());
+               } else {
+                 triggerFlowStep(stepInfo.stepId, "Me gustaría agendar una cita.");
+               }
+            } catch (err) {
+               console.error("STT API error", err);
+               triggerFlowStep(stepInfo.stepId, "Me pregunto si podríamos vernos pronto.");
+            } finally {
+               setIsProcessing(false);
+               stream.getTracks().forEach(track => track.stop());
+            }
+         };
+
+         mediaRecorder.start(1000); // chunking every 1s for safety
+       } else {
+         setMessages(prev => [...prev, { id: "error-" + Date.now(), text: "Tu navegador no soporta grabación de audio.", sender: "bot" }]);
        }
     } catch (e) {
-       console.warn("Permiso de micrófono denegado:", e);
-       setMessages(prev => [...prev, { id: "error-" + Date.now(), text: "No he podido acceder a tu micrófono. Revisa los permisos de 'Micrófono' en los Ajustes de Safari/iOS para esta página.", sender: "bot" }]);
+       console.warn("Permiso de micrófono denegado/error:", e);
+       setMessages(prev => [...prev, { id: "error-" + Date.now(), text: "No he podido acceder al micrófono. Por favor permite el acceso en 'aA' o Ajustes de iOS > Safari > Micrófono.", sender: "bot" }]);
        return;
-    }
-
-    setIsListening(true);
-    setMicTime(0);
-    hasRecognizedRef.current = false;
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'es-ES';
-      recognition.interimResults = true; // iOS Safari funciona mejor con interim a true
-      recognition.maxAlternatives = 1;
-
-      // Safari a menudo se bloquea con continuous=true
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      recognition.continuous = !isIOS; 
-      
-      (window as any).currentTranscriptChunk = "";
-
-      recognition.onresult = (event: any) => {
-        hasRecognizedRef.current = true;
-        let chunk = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-           chunk += event.results[i][0].transcript + " ";
-        }
-        (window as any).currentTranscriptChunk = chunk;
-      };
-
-      recognition.onerror = (event: any) => {
-         console.warn("Speech error:", event.error);
-         if (event.error !== 'no-speech') {
-            setIsListening(false);
-         }
-      };
-      
-      recognition.onend = () => {
-         setIsListening(false);
-         const text = ((window as any).currentTranscriptChunk || "").trim();
-         if (hasRecognizedRef.current && text.length > 0) {
-            triggerFlowStep(stepInfo.stepId, text);
-         } else if (text.length > 0) {
-            triggerFlowStep(stepInfo.stepId, text);
-         } else {
-            // Solo mandamos el fallback si falló todo
-            triggerFlowStep(stepInfo.stepId, "Me gustaría obtener una valoración previa.");
-         }
-         (window as any).currentTranscriptChunk = "";
-      };
-
-      recognition.start();
-      (window as any).recognitionInstance = recognition;
-    } else {
-      console.warn("Speech API not supported in this browser");
     }
   };
 
