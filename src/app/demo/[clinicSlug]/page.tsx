@@ -16,7 +16,22 @@ export async function generateMetadata({ params }: DemoProps): Promise<Metadata>
   const prettyName = clinicSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   return {
     title: `Demo IA - Clínica ${prettyName}`,
-    description: "Demostración interactiva de Inteligencia Artificial Capilar",
+    description: "Demostración interactiva de sistemas automatizados",
+    icons: {
+      icon: "/logo.png", // Aseguramos que cargará tu logo si lo subes a public/logo.png
+    },
+    openGraph: {
+      title: `Demo IA - Clínica ${prettyName}`,
+      description: "Demostración interactiva de sistemas automatizados",
+      images: [
+        {
+          url: "/logo.png", // Imagen para la previsualización en WhatsApp/Slack
+          width: 512,
+          height: 512,
+          alt: "Logo",
+        },
+      ],
+    },
   };
 }
 

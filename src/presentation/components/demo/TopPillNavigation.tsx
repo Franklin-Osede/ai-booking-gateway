@@ -21,22 +21,18 @@ interface TopPillNavigationProps {
   primaryColor?: string;
 }
 
-export function TopPillNavigation({ onOpenPitch, activeMode, onModeChange, primaryColor = "#1a4b8c" }: TopPillNavigationProps) {
+export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#1a4b8c" }: TopPillNavigationProps) {
   const contrastColor = getContrastColor(primaryColor);
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-9000 flex items-center bg-black/40 backdrop-blur-md rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-white/20 p-1.5 transition-all">
-      {activeMode !== "hub" && (
-        <>
-          <button
-            onClick={() => onModeChange("hub")}
-            className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-colors text-white hover:bg-white/20"
-          >
-            <span className="w-2 h-2 rounded-full animate-pulse mr-1" style={{ backgroundColor: primaryColor }} /> Menú Principal
-          </button>
-          <div className="w-px h-6 bg-white/20 mx-1"></div>
-        </>
-      )}
+    <div className="fixed top-6 right-4 sm:top-6 sm:right-6 z-[9000] flex items-center bg-black/40 backdrop-blur-md rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-white/20 p-2 transition-all">
+      <button
+        onClick={() => onModeChange("hub")}
+        className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-colors text-white hover:bg-white/20"
+      >
+        <span className="w-2 h-2 rounded-full animate-pulse mr-1" style={{ backgroundColor: primaryColor }} /> Asistentes
+      </button>
+      <div className="w-px h-6 bg-white/20 mx-1"></div>
 
       <button 
         onClick={onOpenPitch}
@@ -47,7 +43,7 @@ export function TopPillNavigation({ onOpenPitch, activeMode, onModeChange, prima
 
       <button 
         onClick={() => window.open("https://calendly.com/agentminds", "_blank")}
-        className="flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all shadow-md hover:scale-105 active:scale-95 ml-1"
+        className="flex items-center gap-1.5 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all shadow-md hover:scale-105 active:scale-95 ml-2"
         style={{ backgroundColor: primaryColor, color: contrastColor }}
       >
         <Calendar size={16} /> Agendar
