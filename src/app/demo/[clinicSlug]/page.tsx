@@ -26,8 +26,8 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   const { clinicSlug } = await params;
   const resolvedSearchParams = await searchParams;
   
-  let customSiteUrl = "https://drsanmartin.com/";
-  let customColor = "#8c1a1a";
+  let customSiteUrl = "https://institutocapilar.es";
+  let customColor = "#1a4b8c";
 
   try {
     const clinic = await prisma.clinic.findFirst({
