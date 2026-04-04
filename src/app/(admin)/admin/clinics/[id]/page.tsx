@@ -200,18 +200,18 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                <div>
                  <p className="text-xs text-neutral-400 font-bold uppercase tracking-wider mb-1">🌍 URL Real de Producción (Vercel)</p>
                  <a 
-                   href={`https://agentminds.ai/demo/${clinic.slug || clinic.id}`}
+                   href={`https://demos.agentminds.io/${clinic.slug || clinic.id}`}
                    target="_blank"
                    rel="noreferrer"
                    className="block text-white font-mono text-sm opacity-90 truncate hover:text-yellow-500 hover:underline mt-1"
                  >
-                   https://agentminds.ai/demo/{clinic.slug || clinic.id}
+                   https://demos.agentminds.io/{clinic.slug || clinic.id}
                  </a>
                </div>
                <div className="flex items-center gap-2 shrink-0 mt-3 sm:mt-0">
                  <button 
                    onClick={() => {
-                     navigator.clipboard.writeText(`https://agentminds.ai/demo/${clinic.slug || clinic.id}`);
+                     navigator.clipboard.writeText(`https://demos.agentminds.io/${clinic.slug || clinic.id}`);
                      alert("¡URL de Producción copiada!");
                    }}
                    className="bg-neutral-900 border border-neutral-700 text-white hover:text-yellow-500 hover:border-yellow-500/30 font-semibold px-4 py-2 rounded-xl transition-colors text-sm"
@@ -219,7 +219,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                    Copiar
                  </button>
                  <a 
-                   href={`https://agentminds.ai/demo/${clinic.slug || clinic.id}`} 
+                   href={`https://demos.agentminds.io/${clinic.slug || clinic.id}`} 
                    target="_blank" 
                    className="bg-yellow-500 text-black hover:bg-yellow-400 font-bold px-4 py-2 rounded-xl transition-colors text-sm flex items-center gap-1"
                  >
