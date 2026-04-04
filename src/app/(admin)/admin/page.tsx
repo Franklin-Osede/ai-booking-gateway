@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin, FileSpreadsheet } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { parseExcelBuffer, ParsedClinic } from "@/lib/excel-parser";
 
 type Clinic = {
   id: string;
@@ -27,6 +27,12 @@ export default function AdminDashboard() {
   const [bulkUrls, setBulkUrls] = useState("");
   const [bulkNiche, setBulkNiche] = useState("Clínica Capilar");
   const [results, setResults] = useState<{name: string; id: string; url:string}[]>([]);
+
+  // Excel Bulk State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isExcelUploading, setIsExcelUploading] = useState(false);
+  const [pendingExcelClinics, setPendingExcelClinics] = useState<ParsedClinic[]>([]);
+  const [isExcelPreviewOpen, setIsExcelPreviewOpen] = useState(false);
 
   const extractNameFromUrl = (url: string) => {
     try {
@@ -102,12 +108,54 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Gestión de Clínicas</h1>
-        <button 
-          onClick={() => { setIsModalOpen(true); setProcessState("idle"); setBulkUrls(""); setResults([]); }}
-          className="bg-white text-black px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors"
-        >
-          <Plus size={18} /> Nueva Clínica
-        </button>
+        <div className="flex items-center gap-3">
+          <input 
+             type="file" 
+             accept=".xlsx, .xls, .csv" 
+             hidden 
+             ref={fileInputRef} 
+             onChange={async (e) => {
+               const file = e.target.files?.[0];
+               if (!file) return;
+
+               setIsExcelUploading(true);
+               try {
+                 const arrayBuffer = await file.arrayBuffer();
+                 const clinicsToUpload = parseExcelBuffer(arrayBuffer);
+
+                 if (clinicsToUpload.length === 0) {
+                   alert("No se detectaron clínicas válidas en el archivo.");
+                   setIsExcelUploading(false);
+                   return;
+                 }
+
+                 setPendingExcelClinics(clinicsToUpload);
+                 setIsExcelPreviewOpen(true);
+                 setIsExcelUploading(false);
+                 if (fileInputRef.current) fileInputRef.current.value = "";
+               } catch (err: unknown) {
+                 const errMsg = err instanceof Error ? err.message : String(err);
+                 alert("Error leyendo el archivo: " + errMsg);
+                 setIsExcelUploading(false);
+                 if (fileInputRef.current) fileInputRef.current.value = "";
+               }
+             }}
+          />
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isExcelUploading}
+            className="hidden sm:flex bg-neutral-900 border border-neutral-700 text-white px-4 py-2 rounded-xl font-bold items-center gap-2 hover:border-yellow-500 hover:text-yellow-500 transition-colors disabled:opacity-50"
+          >
+            <FileSpreadsheet size={18} /> {isExcelUploading ? "Cargando..." : "Subir Excel"}
+          </button>
+          
+          <button 
+            onClick={() => { setIsModalOpen(true); setProcessState("idle"); setBulkUrls(""); setResults([]); }}
+            className="bg-white text-black px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors"
+          >
+            <Plus size={18} /> Nueva Clínica
+          </button>
+        </div>
       </div>
 
       <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6">
@@ -327,6 +375,84 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {isExcelPreviewOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-100 flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-6 border-b border-neutral-800 flex justify-between items-center bg-neutral-950">
+              <div>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <FileSpreadsheet className="text-yellow-500" /> Previsualización del Excel
+                </h2>
+                <p className="text-neutral-400 text-sm mt-1">Se han detectado {pendingExcelClinics.length} filas válidas.</p>
+              </div>
+              <button onClick={() => setIsExcelPreviewOpen(false)} className="text-neutral-500 hover:text-white transition-colors bg-neutral-800 rounded-full p-2">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 bg-neutral-900/50">
+              <table className="w-full text-left">
+                <thead className="text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800">
+                  <tr>
+                    <th className="pb-3 pr-4">Nombre (Cliente)</th>
+                    <th className="pb-3 pr-4">URL</th>
+                    <th className="pb-3 pr-4">Ubicación</th>
+                    <th className="pb-3 text-right">Pestaña (Nicho)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-800/50 text-sm">
+                  {pendingExcelClinics.map((clinic, idx) => (
+                    <tr key={idx} className="hover:bg-neutral-800/20 transition-colors">
+                      <td className="py-3 pr-4 font-bold text-white">{clinic.name}</td>
+                      <td className="py-3 pr-4 text-neutral-400 truncate max-w-[200px]">{clinic.url || '-'}</td>
+                      <td className="py-3 pr-4 text-neutral-400">{clinic.location || '-'}</td>
+                      <td className="py-3 text-right text-yellow-500 font-bold text-xs">{clinic.industry}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="p-6 border-t border-neutral-800 bg-neutral-950 flex justify-between items-center">
+               <button 
+                 onClick={() => setIsExcelPreviewOpen(false)}
+                 className="px-6 py-3 font-bold text-neutral-400 hover:text-white transition-colors"
+               >
+                 Cancelar
+               </button>
+               <button 
+                 disabled={isExcelUploading}
+                 onClick={async () => {
+                    setIsExcelUploading(true);
+                    try {
+                      const res = await fetch("/api/clinics/bulk", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ clinics: pendingExcelClinics })
+                      });
+                      const data = await res.json();
+                      if (res.ok) {
+                        alert(`¡Archivo procesado!\n\n✅ Añadidas: ${data.added}\n⏭️ Omitidas (Duplicados): ${data.skipped}`);
+                        setIsExcelPreviewOpen(false);
+                        fetch("/api/clinics").then((r) => r.json()).then((d) => setClinics(d?.data || []));
+                      } else {
+                        alert(`Error al guardar: ${data.error}`);
+                      }
+                    } catch (err: unknown) {
+                      alert("Error de conexión");
+                    } finally {
+                      setIsExcelUploading(false);
+                    }
+                 }}
+                 className="bg-white text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50"
+               >
+                 {isExcelUploading ? "Inyectando Base de Datos..." : "Confirmar Inyección Segura"}
+               </button>
+            </div>
           </div>
         </div>
       )}
