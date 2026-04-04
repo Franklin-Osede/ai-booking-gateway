@@ -14,40 +14,67 @@ export function parseExcelBuffer(buffer: ArrayBuffer): ParsedClinic[] {
 
   for (const sheetName of workbook.SheetNames) {
     const sheet = workbook.Sheets[sheetName];
-    // Defval ensures empty cells are loaded as empty strings instead of missing keys
-    const rows = xlsx.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
+    // header: 1 reads the raw array of arrays
+    const rows = xlsx.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: '' });
 
-    for (const row of rows) {
-      const keys = Object.keys(row);
-      if (keys.length === 0) continue;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (!Array.isArray(row)) continue;
 
-      // Smart Fuzzy Matcher for Headers
-      const nameKey = keys.find(k => /client|cliente|name|nombre|empresa/i.test(k));
-      const urlKey = keys.find(k => /url|web|link|dominio/i.test(k));
-      const locKey = keys.find(k => /location|loc|ciudad|lugar|ubicacion/i.test(k));
-      const phoneKey = keys.find(k => /telef|phone|movil/i.test(k));
+      // Get non-empty cells
+      const cells = row.map(cell => cell.toString().trim()).filter(Boolean);
+      if (cells.length === 0) continue;
 
-      const nameRaw = nameKey ? row[nameKey] : row[keys[0]]; // Fallback to column 1 if no header matches
-      const urlRaw = urlKey ? row[urlKey] : '';
-      const locationRaw = locKey ? row[locKey] : '';
-      const phoneRaw = phoneKey ? row[phoneKey] : '';
+      // Identify URL
+      const urlRegex = /(https?:\/\/|www\.)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}|[a-zA-Z0-9-]+\.(com|es|co|org|net)(\/.*)?$/i;
+      const urlIndex = row.findIndex(cell => urlRegex.test(cell.toString().trim()));
+      const urlRaw = urlIndex !== -1 ? row[urlIndex].toString().trim() : '';
 
-      const name = nameRaw ? nameRaw.toString().trim() : '';
-      if (!name) continue; // Skip invalid rows entirely
+      // Find the first string that is NOT the URL, to be the Name
+      let nameRaw = '';
+      for (let j = 0; j < row.length; j++) {
+         const val = row[j].toString().trim();
+         if (j !== urlIndex && val.length > 1 && !val.includes('@')) { 
+            nameRaw = val;
+            break;
+         }
+      }
 
-      const url = urlRaw ? urlRaw.toString().trim() : undefined;
-      const location = locationRaw ? locationRaw.toString().trim() : undefined;
-      const phone = phoneRaw ? phoneRaw.toString().trim() : undefined;
+      // If no name found (like in column A being empty), extract from URL
+      if (!nameRaw && urlRaw) {
+         try {
+           const u = new URL(urlRaw.startsWith('http') ? urlRaw : `https://${urlRaw}`);
+           nameRaw = u.hostname.replace('www.', '').split('.')[0];
+         } catch {
+           nameRaw = urlRaw.replace(/https?:\/\/(www\.)?/, '').split('/')[0].replace('.com', '').replace('.es', '');
+         }
+      }
 
-      clinics.push({
-        name,
-        url,
-        location,
-        phone,
-        industry: sheetName.trim() // Tab logic
-      });
+      const name = nameRaw.trim();
+      
+      // Skip if it feels like a header row (e.g. name = "url" and url = "url")
+      if (/^url|^web|^link|^cliente|^nombre/i.test(name) && urlRaw === '') continue;
+
+      if (name || urlRaw) {
+         clinics.push({
+           name: name || "Clínica Desconocida",
+           url: urlRaw || undefined,
+           industry: sheetName.trim()
+         });
+      }
     }
   }
 
-  return clinics;
+  // Remove duplicates by name/url
+  const uniqueClinics: ParsedClinic[] = [];
+  const seen = new Set();
+  for (const c of clinics) {
+     const id = (c.url || c.name).toLowerCase();
+     if (!seen.has(id)) {
+        seen.add(id);
+        uniqueClinics.push(c);
+     }
+  }
+
+  return uniqueClinics;
 }
