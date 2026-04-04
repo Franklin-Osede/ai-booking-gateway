@@ -70,9 +70,9 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
 
   const customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
 
-  // Por defecto NO usamos proxy porque rompe algunas webs como Squarespace.
-  // Solo usar proxy si pasamos ?proxy=true
-  const useProxy = resolvedSearchParams.proxy === 'true';
+  // Por defecto usamos proxy para saltar las protecciones X-Frame-Options.
+  // Solo desactivamos proxy si pasamos ?proxy=false
+  const useProxy = resolvedSearchParams.proxy !== 'false';
   const finalUrl = useProxy ? `/api/v1/proxy?url=${encodeURIComponent(customSiteUrl)}` : customSiteUrl;
 
   const forceImageMode = resolvedSearchParams.image === 'true';
