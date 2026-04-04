@@ -83,7 +83,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: activeVoice.elevenLabsId })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName || null })
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -96,6 +96,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       }
     };
     preloadGreeting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // Inline Calendar & Flow States
@@ -220,6 +221,18 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   };
 
   const toggleVoice = () => {
+    // SILENT AUDIO UNLOCK FOR SAFARI/IOS AUTOPLAY POLICY
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        ctx.resume();
+      }
+      const silentAudio = new Audio("data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+      silentAudio.play().catch(() => {});
+    } catch (_) {}
+
     if (isOpen) {
       stopAudio();
       setIsOpen(false);
@@ -258,7 +271,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender })
+        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender, niche: activeNiche, clinicId: brandName || null })
       });
       
       if (!res.ok) throw new Error("Voice API Error");

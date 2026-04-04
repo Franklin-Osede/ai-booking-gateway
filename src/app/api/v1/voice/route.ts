@@ -1,5 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
+import { prisma } from "@/lib/prisma";
+
+// --- TTS DICTIONARY MIDDLEWARE ---
+type TermRule = { match: string; replace: string; priority?: number };
+const dictCache = new Map<string, { compiled: { regex: RegExp; replace: string; priority: number }[], timestamp: number }>();
+
+async function applyTTSDictionary(text: string, clinicId?: string, niche: string = "hair_transplant", locale: string = "es-ES"): Promise<string> {
+  const cacheKey = `${clinicId || 'none'}_${niche}_${locale}`;
+  const now = Date.now();
+  let cached = dictCache.get(cacheKey);
+
+  // Cache busting every 5 minutes
+  if (!cached || now - cached.timestamp > 5 * 60 * 1000) {
+    try {
+      const nicheRules = await prisma.pronunciationProfile.findFirst({
+        where: { scopeType: 'niche', scopeId: niche, locale }
+      });
+      const clinicRules = clinicId ? await prisma.pronunciationProfile.findFirst({
+        where: { scopeType: 'clinic', scopeId: clinicId, locale }
+      }) : null;
+
+      const merged = new Map<string, TermRule>();
+      const nRules = (nicheRules?.rules as TermRule[]) || [];
+      const cRules = (clinicRules?.rules as TermRule[]) || [];
+
+      // Merge niche rules first
+      for (const rule of nRules) {
+        merged.set(rule.match, { ...rule, priority: rule.priority || 0 });
+      }
+      // Override with clinic rules
+      for (const rule of cRules) {
+        merged.set(rule.match, { ...rule, priority: rule.priority || 0 });
+      }
+
+      const ordered = [...merged.values()].sort((a, b) => (b.priority || 0) - (a.priority || 0));
+      const compiled = ordered.map(r => ({
+        regex: new RegExp(r.match, 'g'),
+        replace: r.replace,
+        priority: r.priority || 0
+      }));
+
+      cached = { compiled, timestamp: now };
+      dictCache.set(cacheKey, cached);
+    } catch(e) {
+      console.error("Failed to load TTS Dict from DB:", e);
+      return text;
+    }
+  }
+
+  let processed = text;
+  for (const rule of cached.compiled) {
+    processed = processed.replace(rule.regex, rule.replace);
+  }
+  return processed;
+}
+// --- FIN DICTIONARY ---
 
 export const runtime = "nodejs";
 
@@ -13,18 +69,21 @@ const polly = new PollyClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F" } = await req.json(); // Lucia is the premium realistic female es-ES voice
+    const { text, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F", clinicId, niche } = await req.json(); // Lucia is the premium realistic female es-ES voice
 
     if (!text) {
        return NextResponse.json({ error: "Missing text payload" }, { status: 400 });
     }
 
     // 1. Sanitize for XML but ALLOW <break> tags to pass through for highly realistic pacing
-    const cleanText = text
+    let cleanText = text
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/&lt;break(.*?)\/?&gt;/g, "<break$1/>");
+      
+    // Apply Pronunciation Middleware correctly here
+    cleanText = await applyTTSDictionary(cleanText, clinicId, niche);
 
     if (provider === "elevenlabs") {
       let elevenLabsVoiceId = elevenlabs_voice_id;

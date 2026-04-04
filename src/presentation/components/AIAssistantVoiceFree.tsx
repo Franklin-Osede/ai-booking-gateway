@@ -170,7 +170,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free', gender: CLINIC_VOICES[3].gender, elevenlabs_voice_id: CLINIC_VOICES[3].elevenLabsId })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName })
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -183,6 +183,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       }
     };
     preloadGreeting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const AudioTimer = ({ isPlaying, duration }: { isPlaying?: boolean, duration?: number }) => {
@@ -247,6 +248,17 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   };
 
   const toggleVoice = () => {
+    // SILENT AUDIO UNLOCK FOR SAFARI/IOS AUTOPLAY POLICY
+    try {
+      const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (AudioContext) {
+        const ctx = new AudioContext();
+        ctx.resume();
+      }
+      const silentAudio = new Audio("data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+      silentAudio.play().catch(() => {});
+    } catch (_) {}
+
     if (isOpen) {
       stopAudio();
       setIsOpen(false);
@@ -403,7 +415,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
   const isBotPlaying = messages.some(m => m.playing);
 
-  const handleMicClick = () => {
+  const handleMicClick = async () => {
     if (isProcessing || isBotPlaying) return;
     
     if (isListening) {
@@ -417,6 +429,19 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
        return;
     }
 
+    try {
+       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+         // Safari iOS necesita este permiso explícito ANTES de lanzar el SpeechRecognition
+         // Si no, parpadea y nunca registra audio.
+         await navigator.mediaDevices.getUserMedia({ audio: true });
+         // No cerramos el stream aquí para mantener el micrófono activo para rec
+       }
+    } catch (e) {
+       console.warn("Permiso de micrófono denegado:", e);
+       alert("Por favor, permite el acceso al micrófono en tu navegador.");
+       return;
+    }
+
     setIsListening(true);
     setMicTime(0);
     hasRecognizedRef.current = false;
@@ -425,10 +450,13 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-ES';
-      recognition.interimResults = false;
+      recognition.interimResults = true; // iOS Safari funciona mejor con interim a true
       recognition.maxAlternatives = 1;
 
-      recognition.continuous = true;
+      // Safari a menudo se bloquea con continuous=true
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      recognition.continuous = !isIOS; 
+      
       (window as any).currentTranscriptChunk = "";
 
       recognition.onresult = (event: any) => {
@@ -442,7 +470,9 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
       recognition.onerror = (event: any) => {
          console.warn("Speech error:", event.error);
-         setIsListening(false);
+         if (event.error !== 'no-speech') {
+            setIsListening(false);
+         }
       };
       
       recognition.onend = () => {
@@ -450,8 +480,11 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
          const text = ((window as any).currentTranscriptChunk || "").trim();
          if (hasRecognizedRef.current && text.length > 0) {
             triggerFlowStep(stepInfo.stepId, text);
+         } else if (text.length > 0) {
+            triggerFlowStep(stepInfo.stepId, text);
          } else {
-            triggerFlowStep(stepInfo.stepId, "¿Podemos agendar una cita?");
+            // Solo mandamos el fallback si falló todo
+            triggerFlowStep(stepInfo.stepId, "Me gustaría obtener una valoración previa.");
          }
          (window as any).currentTranscriptChunk = "";
       };

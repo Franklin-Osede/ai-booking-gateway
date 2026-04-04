@@ -25,7 +25,7 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
   const contrastColor = getContrastColor(primaryColor);
 
   return (
-    <div className="fixed top-6 right-4 sm:top-6 sm:right-6 z-[9000] flex items-center bg-black/40 backdrop-blur-md rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-white/20 p-2 transition-all">
+    <div className={`fixed top-4 sm:top-6 right-4 sm:right-6 z-9000 flex items-center bg-white/70 backdrop-blur-xl border border-white/60 p-1.5 sm:p-2 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] ring-1 ring-black/5`}>
       <button
         onClick={() => onModeChange("hub")}
         className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-colors text-white hover:bg-white/20"
