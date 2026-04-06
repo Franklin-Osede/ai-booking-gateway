@@ -14,10 +14,10 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
   const [targetRect, setTargetRect] = useState<{ top: number; left: number; width: number; height: number; } | null>(null);
 
   const steps = [
-    { targetId: 'center', title: '¡Bienvenido a tu demo!', text: 'Te enseño cómo probar tu infraestructura de Inteligencia Artificial en 30 segundos.' },
+    { targetId: 'center', title: '¡Bienvenido a tu demo!', text: 'Te enseño cómo probar esta infraestructura de Inteligencia Artificial en 30 segundos.' },
+    { targetId: 'tour-asistentes-hub', title: 'Sistemas de IA', text: 'Aquí tienes los diferentes agentes. Haz click en "Voz Guiada" para interactuar con la consultora clínica, avanzando paso a paso.' },
     { targetId: 'tour-video-intro', title: 'Vídeo Intro', text: 'Aquí encontrarás una breve explicación en vídeo sobre cómo funciona la arquitectura.' },
-    { targetId: 'tour-agendar', title: 'Agendar Llamada', text: 'Si esta operativa os ahorra tiempo de filtrado, agenda una reunión corta desde aquí para verlo a fondo.' },
-    { targetId: 'tour-asistentes-hub', title: 'La Magia de la Inteligencia Artificial', text: 'Haz clic en la "Voz Guiada" e interactúa con el micrófono simulando ser un paciente.' }
+    { targetId: 'tour-agendar', title: 'Agendar Llamada', text: 'Si esta operativa os ahorra tiempo de filtrado, agenda una reunión corta para verlo a fondo.' }
   ];
 
   useEffect(() => {
@@ -76,38 +76,41 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
   const currentStepInfo = steps[step];
   const isCenter = !targetRect;
 
-  // Determine popover position relatively to target
-  let popoverStyle: React.CSSProperties = {
+  // Real CSS wrapper avoids motion transforming conflicts
+  let wrapperStyle: React.CSSProperties = {
+    position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: 'translate(-50%, -50%)'
+    transform: 'translate(-50%, -50%)',
+    zIndex: 9999
   };
 
   let arrowClass = "hidden";
 
   if (targetRect) {
-    if (currentStepInfo.targetId === 'tour-video-intro' || currentStepInfo.targetId === 'tour-agendar') {
-      // Place below
-      popoverStyle = {
-        top: targetRect.top + targetRect.height + 15 + 'px',
-        left: targetRect.left + (targetRect.width / 2) + 'px',
-        transform: 'translateX(-50%)'
-      };
-      arrowClass = "absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100";
-    } else {
-      // Place below but might need adjustment
-      popoverStyle = {
-        top: targetRect.top + targetRect.height + 15 + 'px',
-        left: targetRect.left + (targetRect.width / 2) + 'px',
-        transform: 'translateX(-50%)'
-      };
-      arrowClass = "absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100";
+    let topPos = targetRect.top + targetRect.height + 15;
+    let leftPos = targetRect.left + (targetRect.width / 2);
+    
+    // Safety check for mobile (prevent overflow right)
+    if (typeof window !== 'undefined') {
+       if (leftPos + 160 > window.innerWidth) {
+           leftPos = window.innerWidth - 170;
+       }
     }
+
+    wrapperStyle = {
+      position: 'absolute',
+      top: topPos + 'px',
+      left: leftPos + 'px',
+      transform: 'translateX(-50%)',
+      zIndex: 9999
+    };
+    arrowClass = "absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100";
   }
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] pointer-events-none">
+      <div className="fixed inset-0 z-9999 pointer-events-none">
         
         {/* Subtle backdrop highlight */}
         {targetRect && (
@@ -128,15 +131,15 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
           />
         )}
 
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300, mass: 0.8 }}
-          style={popoverStyle}
-          className="absolute z-[9999] pointer-events-auto bg-white/95 backdrop-blur-xl border border-gray-100 rounded-3xl p-5 shadow-2xl w-[320px]"
-        >
+        <div style={wrapperStyle}>
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300, mass: 0.8 }}
+            className="relative pointer-events-auto bg-white/95 backdrop-blur-xl border border-gray-100 rounded-3xl p-5 shadow-2xl w-[320px]"
+          >
           <div className={arrowClass} />
           
           <div className="flex justify-between items-start mb-3">
@@ -174,7 +177,8 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
                 </button>
              </div>
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </AnimatePresence>
   );
