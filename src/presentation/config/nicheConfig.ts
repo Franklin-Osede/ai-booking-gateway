@@ -13,6 +13,14 @@ export type NicheConfig = {
     name: string;
     docs: (string | { name: string; image?: string })[];
   }[];
+  voice_scripts?: {
+    ask_service_intro: string;
+    ask_service_options: Record<string, string>;
+    deep_dive_chips?: Record<string, string[]>;
+    deep_dive_scripts?: Record<string, string>;
+    ask_service_fallback: string;
+    confirm_booking: string;
+  };
 };
 
 export const NICHE_CONFIGS: Record<string, NicheConfig> = {
@@ -45,7 +53,34 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Sparkles, name: "Blanqueamiento Dental", docs: ["Odontólogo Estético", "Higienista Dental"] },
       { icon: Activity, name: "Implantología", docs: ["Cirujano Maxilofacial", "Implantólogo Titular"] },
       { icon: ShieldCheck, name: "Odontopediatría", docs: ["Odontopediatra", "Especialista Infantil"] }
-    ]
+    ],
+    voice_scripts: {
+      ask_service_intro: "En tu primera visita gratuita realizaremos un diseño y diagnóstico clínico completo.",
+      ask_service_options: {
+         "Ortodoncia": "Alinearemos tu sonrisa con tecnología 3D... Para enfocar mejor tu primera visita, ¿qué valoras más: la invisibilidad o la rapidez?",
+         "Blanqueamiento Dental": "Recuperaremos el blanco natural de tus dientes cuidando el esmalte. Cuéntame, ¿sientes que tus dientes tienen manchas, o simplemente han perdido su color original?",
+         "Implantología": "Utilizamos implantes de titanio de altísima gama. Para enfocar tu diagnóstico, ¿estás buscando reemplazar un solo diente o una arcada completa?",
+         "Odontopediatría": "Cuidaremos la sonrisa de los más pequeños con el máximo mimo... ¿Estás buscando una primera revisión general, o hay algún dolor específico?"
+      },
+      deep_dive_chips: {
+         "Ortodoncia": ["Estética Invisible", "Máxima Rapidez", "Ver Especialistas"],
+         "Blanqueamiento Dental": ["Tengo Manchas", "Pérdida de Color", "Ver Especialistas"],
+         "Implantología": ["Un solo diente", "Arcada Completa", "Ver Especialistas"],
+         "Odontopediatría": ["Revisión General", "Dolor Específico", "Ver Especialistas"]
+      },
+      deep_dive_scripts: {
+         "Estética Invisible": "Excelente. Contamos con alineadores invisibles de primer nivel que nadie notará que llevas puestos.",
+         "Máxima Rapidez": "Entendido. Nuestros brackets Damon reducen los tiempos de tratamiento estandarizados casi a la mitad.",
+         "Tengo Manchas": "Comprendo. Nuestro blanqueamiento clínico desincrusta hasta las manchas más profundas de café o tabaco desde la primera sesión.",
+         "Pérdida de Color": "Perfecto. Revitalizaremos el esmalte devolviéndole su brillo natural con una técnica nada invasiva.",
+         "Un solo diente": "Estupendo. Realizaremos un TAC tridimensional gratuito para medir milimétricamente el hueso e insertar el implante el mismo día.",
+         "Arcada Completa": "Comprendo. Con la técnica All-on-4 podemos recuperar toda tu dentadura en apenas 24 horas y con sedación consciente.",
+         "Revisión General": "Genial. Les enseñaremos técnicas de cepillado preventivo mientras revisamos que no haya caries invisibles.",
+         "Dolor Específico": "Uy, no te preocupes. Haremos una radiografía de baja intensidad para detectar exactamente el foco del dolor sin hacerles daño."
+      },
+      ask_service_fallback: "TEXT_INTRO ¿Te gustaría agendar una cita de valoración... o prefieres más información de nuestros tratamientos?",
+      confirm_booking: "¡Estupendo! Tu reserva con DR_NAME para el día SELECTED_DATE a las SPOKEN_TIME ha quedado confirmada."
+    }
   },
   beauty: {
     title: "Elige tu estilista",
@@ -60,7 +95,34 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Sparkles, name: "Tratamientos Faciales", docs: ["Especialista Facial", "Cosmetóloga Titular"] },
       { icon: Droplet, name: "Manicura & Pedicura", docs: ["Técnico de Uñas", "Especialista Manicura"] },
       { icon: UserCheck, name: "Masajes Relajantes", docs: ["Masajista Terapeuta", "Especialista Spa"] }
-    ]
+    ],
+    voice_scripts: {
+      ask_service_intro: "Analizaremos tus necesidades en profundidad para ofrecerte el mejor resultado.",
+      ask_service_options: {
+         "Peluquería": "Nuestros estilistas son expertos en colorimetría y diseño de corte. ¿Estás buscando un cambio de look radical o simplemente retocar tu estilo habitual?",
+         "Tratamientos Faciales": "Nuestros tratamientos faciales te devolverán la luz y firmeza natural... Cuéntame, ¿te preocupan más las líneas de expresión o la falta de luminosidad?",
+         "Manicura & Pedicura": "Usamos esmaltes orgánicos de ultra-duración. ¿Prefieres una manicura semipermanente clásica o atreverte con Nail Art y extensiones?",
+         "Masajes Relajantes": "Conseguiremos que desconectes al 100%. ¿Sientes mucha tensión muscular acumulada, o buscas pura relajación antiestrés?"
+      },
+      deep_dive_chips: {
+         "Peluquería": ["Cambio Radical", "Retoque", "Ver Especialistas"],
+         "Tratamientos Faciales": ["Líneas de expresión", "Falta de luz", "Ver Especialistas"],
+         "Manicura & Pedicura": ["Semipermanente", "Nail Art", "Ver Especialistas"],
+         "Masajes Relajantes": ["Tensión Muscular", "Relajación Pura", "Ver Especialistas"]
+      },
+      deep_dive_scripts: {
+         "Cambio Radical": "¡Me encanta la idea! Estudiaremos tus facciones para diseñar el corte y tono que más te realce.",
+         "Retoque": "Genial, mantendremos la esencia de tu estilo asegurándonos de que tu cabello luzca perfecto y sano.",
+         "Líneas de expresión": "Perfecto, tenemos protocolos con Radiofrecuencia e hidratación profunda que alisan la piel desde la primera sesión.",
+         "Falta de luz": "Reactivaremos la circulación y renovaremos la capa superficial de tu piel para un efecto 'glow' inmediato.",
+         "Semipermanente": "Nuestra manicura semipermanente cuida la uña natural y te garantizará un brillo impecable por semanas.",
+         "Nail Art": "¡Qué divertido! Nuestras técnicas en esculpido y diseño crearán resultados únicos en tus manos.",
+         "Tensión Muscular": "Aplicaremos un masaje descontracturante profundo en espalda y cuello para liberar cargas.",
+         "Relajación Pura": "Usaremos aromaterapia y pases lentos sedativos para que tu mente y tu cuerpo fluyan absolutamente."
+      },
+      ask_service_fallback: "TEXT_INTRO ¿Buscamos un hueco en nuestra agenda para que vengas a cuidarte?",
+      confirm_booking: "¡Estupendo! Tu sesión para el día SELECTED_DATE a las SPOKEN_TIME ha quedado súper confirmada."
+    }
   },
   legal: {
     title: "Selecciona tu área legal",
@@ -130,7 +192,31 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: User, name: "Técnica FUE / DHI", docs: ["Médico Cirujano Capilar", "Especialista FUE"] },
       { icon: Sparkles, name: "Tratamientos Preventivos", docs: ["Dermatólogo Tricólogo", "Especialista PRP"] },
       { icon: HeartPulse, name: "Seguimiento Postoperatorio", docs: ["Equipo Médico Seguimiento", "Asesor Post-Cirugía"] }
-    ]
+    ],
+    voice_scripts: {
+      ask_service_intro: "En tu valoración médica analizaremos tu caso particular sin compromiso.",
+      ask_service_options: {
+         "Técnica FUE / DHI": "La técnica F-U-E trasplanta pelo a pelo sin dolor... Cuéntame brevemente, ¿Notas más pérdida en la zona de las entradas, o en la coronilla?",
+         "Tratamientos Preventivos": "Nuestros tratamientos estimulan el crecimiento... ¿Estás notando simplemente un pelo más fino y débil, o una caída abundante de más de 100 pelos diarios?",
+         "Seguimiento Postoperatorio": "El correcto seguimiento es clave... ¿Te operaste recientemente y quieres revisión, o sientes molestias tras la cirugía?"
+      },
+      deep_dive_chips: {
+         "Técnica FUE / DHI": ["En las Entradas", "En la Coronilla", "Ambas zonas"],
+         "Tratamientos Preventivos": ["Pelo fino y débil", "Caída abundante", "Hablar con Asesor"],
+         "Seguimiento Postoperatorio": ["Revisión Mensual", "Tengo molestias", "Hablar con Asesor"]
+      },
+      deep_dive_scripts: {
+         "En las Entradas": "Comprendo. Reconstruir la primera línea frontal requiere de mucho arte y precisión matemática para que sea indetectable.",
+         "En la Coronilla": "Entendido. La coronilla requiere mayor número de unidades foliculares y paciencia porque el riego sanguíneo allí es diferente.",
+         "Ambas zonas": "Perfecto. Necesitaremos realizar un diseño integral que redensifique ambas áreas conservando una zona donante sana.",
+         "Pelo fino y débil": "Para ese adelgazamiento miniaturizado, la mesoterapia con vitaminas da un chute de energía directo al folículo logrando engrosarlo rápidamente.",
+         "Caída abundante": "Esa caída en fase telógena la frenamos radicalmente combinando fármacos orales y PRP directamente en el cuero cabelludo.",
+         "Revisión Mensual": "Llevar un control fotográfico mensual es fundamental para comprobar que los folículos han arraigado bien y están creciendo.",
+         "Tengo molestias": "No te preocupes en absoluto, es totalmente normal en la fase de cicatrización; nuestro equipo médico te recetará lo adecuado."
+      },
+      ask_service_fallback: "TEXT_INTRO ¿Te gustaría ver nuestro calendario para agendar tu consulta particular?",
+      confirm_booking: "¡Estupendo! Tu reserva de valoración capilar con DR_NAME ha quedado confirmada. Te esperamos."
+    }
   },
   regenerative: {
     title: "Medicina Regenerativa",
@@ -144,6 +230,66 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: HeartPulse, name: "Terapia de Células Madre", docs: ["Dr. Especialista Stem Cells", "Biólogo Clínico"] },
       { icon: Activity, name: "Plasma Rico en Plaquetas (PRP)", docs: ["Especialista PRP", "Dermatólogo"] },
       { icon: Sparkles, name: "Rejuvenecimiento Celular", docs: ["Medicina Antiaging", "Médico Estético"] }
-    ]
+    ],
+    voice_scripts: {
+      ask_service_intro: "Evaluaremos tu estado celular para personalizar tu terapia.",
+      ask_service_options: {
+         "Terapia de Células Madre": "Extraemos células madre mesenquimales puras... ¿Buscas aplicarlo para tratar desgaste articular, o como terapia antienvejecimiento intravenosa?",
+         "Plasma Rico en Plaquetas (PRP)": "El PRP utiliza los factores de crecimiento de tu propio cuerpo... ¿Estás buscando este tratamiento para regeneración capilar o para antienvejecimiento facial?",
+         "Rejuvenecimiento Celular": "Reduciremos tu edad biológica... ¿Te sientes crónicamente fatigado últimamente, o buscas mejorar tu estética y longevidad?"
+      },
+      deep_dive_chips: {
+         "Terapia de Células Madre": ["Desgaste Articular", "Terapia Intravenosa", "Ver Especialistas"],
+         "Plasma Rico en Plaquetas (PRP)": ["Regeneración Capilar", "Rejuvenecimiento Facial", "Ver Especialistas"],
+         "Rejuvenecimiento Celular": ["Fatiga Crónica", "Longevidad Estética", "Ver Especialistas"]
+      },
+      deep_dive_scripts: {
+         "Desgaste Articular": "Excelente, inyectar células madre en articulaciones como la rodilla regenera el cartílago evitando cirugías invasivas.",
+         "Terapia Intravenosa": "Genial, la inyección intravenosa reparte las células por todo el torrente sanguíneo reparando órganos internos y mejorando tu vitalidad general.",
+         "Regeneración Capilar": "El plasma nutrirá tus folículos inactivos, acelerando el crecimiento y frenando la caída del pelo de manera 100% natural.",
+         "Rejuvenecimiento Facial": "Aplicaremos tu plasma en rostro y cuello induciendo la creación de colágeno nuevo para borrar líneas finas y ganar muchísima luminosidad.",
+         "Fatiga Crónica": "Reactivaremos la eficiencia de tus mitocondrias con sueroterapia especializada para devolverte los niveles de energía de hace 10 años.",
+         "Longevidad Estética": "Sincronizaremos tu edad biológica con terapias ortomoleculares y exosomas para lograr un bienestar estético que se note desde el interior."
+      },
+      ask_service_fallback: "Perfecto. TEXT_INTRO Es uno de los procedimientos más vanguardistas que existen. ¿Quieres bloquear una primera cita para analizar tu idoneidad?",
+      confirm_booking: "¡Estupendo! Tu sesión de valoración con DR_NAME para el día SELECTED_DATE a las SPOKEN_TIME ha quedado confirmada."
+    }
+  },
+  hair_salon: {
+    title: "Encuentra tu Estilista",
+    subtitle: "Reserva con los mejores profesionales en peluquería, colorimetría y diseño de corte.",
+    buttonLabel: "Estilistas",
+    chatGreeting: "¡Hola! Soy tu asistente virtual de peluquería. ¿Qué cambio de look te apetece hoy?",
+    chatThinking: "Buscando sillones disponibles en la peluquería...",
+    chatOffer: "Perfecto. Veo hueco con nuestros mejores estilistas. ¿Reservamos de una vez tu sesión?",
+    chatCta: "Reservar Cita",
+    categories: [
+      { icon: Scissors, name: "Corte y Peinado", docs: ["Director Creativo", "Estilista Senior"] },
+      { icon: Sparkles, name: "Color y Mechas", docs: ["Experto Colorista", "Estilista Titular"] },
+      { icon: Droplet, name: "Tratamientos Capilares", docs: ["Especialista en Keratina", "Técnico Capilar"] }
+    ],
+    voice_scripts: {
+      ask_service_intro: "Nuestros estilistas evaluarán tu tipo de cabello antes de empezar.",
+      ask_service_options: {
+         "Corte y Peinado": "Diseñaremos el corte que mejor favorezca a tus facciones... ¿Estás pensando en mantener el largo saneando puntas, o quieres un corte radical?",
+         "Color y Mechas": "Utilizamos tintes sin amoniaco fantásticos. ¿Te apetece probar unas mechas Balayage naturales, o un baño de color uniforme?",
+         "Tratamientos Capilares": "Cuidar la salud del cabello es clave. ¿Sientes el cabello muy encrespado, o demasiado seco y quebradizo?"
+      },
+      deep_dive_chips: {
+         "Corte y Peinado": ["Sanear Puntas", "Corte Radical", "Ver Estilistas"],
+         "Color y Mechas": ["Balayage", "Baño de Color", "Ver Coloristas"],
+         "Tratamientos Capilares": ["Pelo Encrespado", "Pelo Quebradizo", "Ver Especialistas"]
+      },
+      deep_dive_scripts: {
+         "Sanear Puntas": "Perfecto, aplicaremos un corte técnico que eliminará las puntas abiertas sin robarte ni un solo centímetro de largura que no quieras perder.",
+         "Corte Radical": "¡Me encanta tu valentía! Estudiaremos la forma de tu rostro ovalado o cuadrado para dar con el estilo rompedor perfecto.",
+         "Balayage": "Genial. Nuestros coloristas dominarán la técnica a mano alzada para dejarte un degradado superluminoso y nada artificial.",
+         "Baño de Color": "Fantástico, el baño de color aportará una uniformidad increíble y un brillo espejo espectacular a toda tu melena.",
+         "Pelo Encrespado": "Para ese encrespamiento indomable te irá genial nuestra Taninoplastia. Alisa y relaja la onda dejándote un pelo brillante a prueba de humedad.",
+         "Pelo Quebradizo": "En ese caso, nuestra cauterización con ácido hialurónico sellará tu cutícula de inmediato frenando la rotura."
+      },
+      ask_service_fallback: "TEXT_INTRO ¿Vamos revisando el calendario para reservar un hueco y dejarte espectacular?",
+      confirm_booking: "¡Genial! Tu cita con DR_NAME para el día SELECTED_DATE a las SPOKEN_TIME está confirmadísima."
+    }
   }
 };

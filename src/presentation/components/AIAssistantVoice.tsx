@@ -378,11 +378,24 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-        const serviceQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_SERVICE, { isHT, userSelection }, voiceProvider);
+        const serviceQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_SERVICE, { isHT, userSelection, niche: activeNiche }, voiceProvider);
         
         fetchAudio(serviceQuestion, "bot-1", () => {
-          const extraChips = categories.length > 3 ? categories.slice(3, 5).map((c: { name: string }) => c.name) : ["Agendar Videollamada", "Más información"];
-          setStepInfo({ options: extraChips, stepId: 2 });
+          const nicheConf = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS['default'];
+          if (userSelection && nicheConf?.voice_scripts?.deep_dive_chips && nicheConf.voice_scripts.deep_dive_chips[userSelection]) {
+             setStepInfo({ options: nicheConf.voice_scripts.deep_dive_chips[userSelection], stepId: 15 });
+          } else {
+             setStepInfo({ options: ["Agendar Cita", "Más información"], stepId: 2 });
+          }
+        });
+      }
+      else if (nextStepId === 15) {
+        let voiceProvider = "elevenlabs";
+        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
+        const deepDivePrompt = VoicePromptService.getPrompt(VoiceIntent.SERVICE_DEEP_DIVE, { userSelection, niche: activeNiche }, voiceProvider);
+        
+        fetchAudio(deepDivePrompt, "bot-15", () => {
+          setStepInfo({ options: ["Agendar Cita", "Más información"], stepId: 2 });
         });
       }
       else if (nextStepId === 2) {

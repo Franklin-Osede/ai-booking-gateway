@@ -1,25 +1,54 @@
 import { IVoiceStrategy, VoiceIntent, VoiceContextParams } from './VoiceIntent';
+import { NICHE_CONFIGS } from '../../presentation/config/nicheConfig';
 
 export class ElevenLabsStrategy implements IVoiceStrategy {
   getPrompt(intent: VoiceIntent, params: VoiceContextParams): string {
+    const nicheConfig = NICHE_CONFIGS[params.niche || 'hair_transplant'] || NICHE_CONFIGS.hair_transplant;
+    const scripts = nicheConfig.voice_scripts;
+    
     switch (intent) {
       case VoiceIntent.GREETING:
         return `¡Hola! Bienvenido a ${params.brandName}. Soy Laura, tu asesora virtual... ¿De qué servicios te gustaría recibir más información?`;
       
       case VoiceIntent.ASK_SERVICE: {
-        let htIntro = "En tu valoración médica gratuita analizaremos tu caso particular sin compromiso.";
-        if (params.isHT) {
-           if (params.userSelection === "Técnica FUE / DHI") {
-              htIntro = "La técnica F-U-E trasplanta los folículos pelo a pelo, sin dolor ni cicatrices, aportando una densidad completamente natural... En tu valoración médica gratuita analizaremos tu caso particular al milímetro.";
-           } else if (params.userSelection === "Tratamientos Preventivos") {
-              htIntro = "Nuestros tratamientos frenan de raíz la caída y estimulan el crecimiento de pelo nuevo, multiplicando toda tu densidad... En tu valoración gratuita analizaremos las causas de tu caso particular.";
-           } else if (params.userSelection === "Seguimiento Postoperatorio") {
-              htIntro = "El correcto seguimiento posoperatorio es la clave maestra para garantizar que esos nuevos cabellos crezcan sanos y fuertes tras la cirugía... En tu valoración gratuita podemos analizar tu evolución.";
-           }
+        if (!scripts) {
+          // Fallback legacy logic
+          return params.isHT 
+            ? `Estupendo. En tu valoración médica gratuita analizaremos tu caso particular. ¿Te gustaría agendar una videollamada con el doctor... o prefieres más información de nuestros servicios en clínica?`
+            : `Perfecto. ¿Con qué especialidad o tratamiento te gustaría continuar tu sesión hoy?`;
         }
-        return params.isHT 
-          ? `Estupendo. ${htIntro} ¿Te gustaría agendar una videollamada con el doctor... o prefieres más información de nuestros servicios en clínica?`
-          : `Perfecto. ¿Con qué especialidad o tratamiento te gustaría continuar tu sesión hoy?`;
+
+        const exactMatch = params.userSelection && scripts.ask_service_options[params.userSelection];
+        const introText = exactMatch || scripts.ask_service_intro;
+        
+        // Si la categoría tiene Deep Dive, el texto introductorio YA TIENE la pregunta de cualificación final
+        if (params.userSelection && scripts.deep_dive_chips && scripts.deep_dive_chips[params.userSelection]) {
+           return introText;
+        }
+
+        let customFallback = scripts.ask_service_fallback;
+        if (customFallback.includes('TEXT_INTRO')) {
+           customFallback = customFallback.replace('TEXT_INTRO', introText);
+           return customFallback;
+        } else {
+           if (exactMatch) {
+              return customFallback.replace('Perfecto.', introText);
+           }
+           return customFallback;
+        }
+      }
+      
+      case VoiceIntent.SERVICE_DEEP_DIVE: {
+        if (!scripts) return "Perfecto. ¿Te gustaría agendar una cita o ver a nuestros especialistas?";
+        
+        const fallbackMsg = scripts.ask_service_fallback;
+        const deepDiveText = (params.userSelection && scripts.deep_dive_scripts && scripts.deep_dive_scripts[params.userSelection]) || "Excelente elección.";
+        
+        if (fallbackMsg.includes("TEXT_INTRO")) {
+           return fallbackMsg.replace("TEXT_INTRO", deepDiveText);
+        } else {
+           return `${deepDiveText} ${fallbackMsg}`.trim();
+        }
       }
       
       case VoiceIntent.DOCTOR_PITCH:
@@ -45,13 +74,22 @@ export class ElevenLabsStrategy implements IVoiceStrategy {
         }
         return "De acuerdo, accede al calendario y selecciona la fecha y la hora que prefieras.";
       
-      case VoiceIntent.CONFIRM_BOOKING:
-        return params.isHT 
+      case VoiceIntent.CONFIRM_BOOKING: {
+        if (!scripts) {
+           return params.isHT 
              ? `¡Estupendo!... Tu reserva con ${params.doctorName} en nuestra clínica ha quedado confirmada... Te esperamos.`
              : `¡Estupendo! Tu reserva con ${params.doctorName} para el día ${params.selectedDate} a las ${params.spokenTime} ha quedado confirmada, te esperamos.`;
+        }
+        let msg = scripts.confirm_booking;
+        msg = msg.replace('DR_NAME', params.doctorName || 'nuestro experto');
+        msg = msg.replace('SELECTED_DATE', params.selectedDate?.toString() || 'hoy');
+        msg = msg.replace('SPOKEN_TIME', params.spokenTime || 'la hora indicada');
+        return msg;
+      }
              
       default:
         return "";
     }
   }
 }
+
