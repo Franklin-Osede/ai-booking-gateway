@@ -11,6 +11,7 @@ type Clinic = {
   industry: string;
   location: string | null;
   createdAt: string;
+  websites?: { url: string }[];
 };
 
 export default function AdminDashboard() {
@@ -114,8 +115,10 @@ export default function AdminDashboard() {
 
   const filteredClinics = clinics.filter(clinic => {
     const s = searchQuery.toLowerCase();
+    const urlMatch = clinic.websites?.some(w => w.url.toLowerCase().includes(s)) || false;
     const matchesSearch = clinic.name.toLowerCase().includes(s) || 
-                          clinic.industry.toLowerCase().includes(s);
+                          clinic.industry.toLowerCase().includes(s) ||
+                          urlMatch;
     const matchesIndustry = selectedIndustry === "All" || clinic.industry === selectedIndustry;
     const matchesLocation = selectedLocation === "All" || (selectedLocation === "SinEspecificar" && !clinic.location) || clinic.location === selectedLocation;
     return matchesSearch && matchesIndustry && matchesLocation;

@@ -17,15 +17,12 @@ export async function generateMetadata({ params }: DemoProps): Promise<Metadata>
   return {
     title: `Demo IA - Clínica ${prettyName}`,
     description: "Demostración interactiva de sistemas automatizados",
-    icons: {
-      icon: "/logo.png", // Aseguramos que cargará tu logo si lo subes a public/logo.png
-    },
     openGraph: {
       title: `Demo IA - Clínica ${prettyName}`,
       description: "Demostración interactiva de sistemas automatizados",
       images: [
         {
-          url: "/logo.png", // Imagen para la previsualización en WhatsApp/Slack
+          url: "/icon.svg", // Imagen para la previsualización en WhatsApp/Slack
           width: 512,
           height: 512,
           alt: "Logo",

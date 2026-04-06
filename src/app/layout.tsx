@@ -15,9 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Soluciones Automatizadas",
   description: "Growth Hacking MVP Injector",
-  icons: {
-    icon: "/icon.svg?v=3",
-  },
 };
 
 export default function RootLayout({

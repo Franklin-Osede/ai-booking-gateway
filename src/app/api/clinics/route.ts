@@ -48,7 +48,8 @@ export async function GET() {
         outreachLogs: {
           orderBy: { createdAt: "desc" },
           take: 1
-        }
+        },
+        websites: true
       }
     });
     return NextResponse.json({ success: true, data: clinics });
