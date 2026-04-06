@@ -110,7 +110,7 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-9999 pointer-events-none">
+      <div className="fixed inset-0 z-9999 pointer-events-auto">
         
         {/* Subtle backdrop highlight */}
         {targetRect && (
@@ -127,7 +127,6 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm pointer-events-auto"
-            onClick={handleClose}
           />
         )}
 
