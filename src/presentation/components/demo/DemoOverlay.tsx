@@ -9,6 +9,7 @@ import { AIAssistantVoiceFree } from "../AIAssistantVoiceFree";
 import { AIAssistantPhone } from "../AIAssistantPhone";
 import { DemoSelectorHub } from "./DemoSelectorHub";
 import { AIAssistantWidgetProxy } from "../widgets/AIAssistantWidgetProxy";
+import { ProductTour } from "./ProductTour";
 
 interface DemoOverlayProps {
   clinicUrl: string;
@@ -30,9 +31,14 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 0);
+    const timer = setTimeout(() => {
+      setMounted(true);
+      if (typeof window !== 'undefined' && clinicUrl) {
+         localStorage.setItem('onboarding_site_url', clinicUrl);
+      }
+    }, 0);
     return () => clearTimeout(timer);
-  }, []);
+  }, [clinicUrl]);
 
   const handleModeChange = (mode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone") => {
     setActiveMode(mode);
@@ -58,6 +64,11 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
         onClose={() => setIsPitchOpen(false)} 
         videoUrl={videoPitchUrl}
       />
+
+      {/* 2.5. Product Tour (Only show when hub is active so elements exist) */}
+      {mounted && activeMode === "hub" && (
+        <ProductTour primaryColor={themeColor} />
+      )}
 
       {/* 3. The Full Screen Target Website (Plan B o Iframe) */}
       <div className="absolute inset-0 z-0 flex items-center justify-center">
@@ -100,10 +111,21 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
           <div className="pointer-events-auto h-full w-full opacity-100 transition-opacity duration-300">
             {activeMode === "hub" && <DemoSelectorHub color={themeColor} niche={niche || "Clínica Capilar"} onSelect={handleModeChange} />}
             {activeMode === "triage" && <AIAssistantWidgetProxy color={themeColor} niche={niche || "Clínica Capilar"} isOpen={true} setIsOpen={(b: boolean) => { if (!b) setActiveMode("hub"); }} />}
-            {activeMode === "text" && <AIAssistantChat color={themeColor} pos="right" niche="hair_transplant" />}
-            {activeMode === "voice" && <AIAssistantVoice color={themeColor} pos="right" niche="hair_transplant" />}
-            {activeMode === "voice-free" && <AIAssistantVoiceFree color={themeColor} pos="right" niche="hair_transplant" />}
-            {activeMode === "phone" && <AIAssistantPhone color={themeColor} pos="right" niche="hair_transplant" />}
+            
+            {/* Dynamic niche resolver logic for text & voice components */}
+            {(() => {
+                const normalized = (niche || "capilar").toLowerCase();
+                const isDental = normalized.includes("dental") || normalized.includes("dentist") || normalized.includes("odont");
+                const mappedNiche = isDental ? "dental" : "hair_transplant";
+                return (
+                 <>
+                   {activeMode === "text" && <AIAssistantChat color={themeColor} pos="right" niche={mappedNiche} />}
+                   {activeMode === "voice" && <AIAssistantVoice color={themeColor} pos="right" niche={mappedNiche} />}
+                   {activeMode === "voice-free" && <AIAssistantVoiceFree color={themeColor} pos="right" niche={mappedNiche} />}
+                   {activeMode === "phone" && <AIAssistantPhone color={themeColor} pos="right" niche={mappedNiche} />}
+                 </>
+               );
+            })()}
           </div>
         )}
       </div>

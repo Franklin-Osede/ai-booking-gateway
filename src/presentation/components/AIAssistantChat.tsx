@@ -161,9 +161,15 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
       const category = categories.find((c: { name: string }) => c.name === userSelection) || categories[0];
       const docsObj = category.docs ? category.docs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
          const hairSpecialties = ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"];
-         const assignedSpecialty = hairSpecialties[idx % hairSpecialties.length];
-         if (typeof d === 'string') return { name: d, specialty: assignedSpecialty, bio: 'Especialista con miles de folículos trasplantados, apostando por técnica indolora.' };
-         return { ...d, specialty: d.specialty || assignedSpecialty };
+         const dentalSpecialties = ["Implantóloga", "Ortodoncista Invisible", "Odontología Estética", "Odontólogo General", "Directora Médica", "Cirujano Maxilofacial"];
+         
+         const assignedSpecialty = activeNiche === 'dental' ? dentalSpecialties[idx % dentalSpecialties.length] : hairSpecialties[idx % hairSpecialties.length];
+         const fallbackBio = activeNiche === 'dental' 
+            ? 'Especialista con cientos de sonrisas diseñadas, utilizando tecnología de precisión 3D y enfoques mínimamente invasivos.' 
+            : 'Especialista con miles de folículos trasplantados, apostando por técnica indolora y diseño natural.';
+            
+         if (typeof d === 'string') return { name: d, specialty: assignedSpecialty, bio: fallbackBio };
+         return { ...d, specialty: d.specialty || assignedSpecialty, bio: d.bio || fallbackBio };
       }) : [];
       pushBotMessage(`He revisado disponibilidad y tengo a varios de nuestros mejores especialistas listos para ayudarte. ¿Con cuál preferirías agendar?`, 1200, () => {
          setStepInfo({ options: ["Cualquiera disponible"], stepId: 25 });
@@ -245,6 +251,14 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
            pushBotMessage("Es normal que compares. El modelo 'Low Cost' suele ser más barato, pero nosotros garantizamos un diseño médico personalizado superior, densidad máxima y seguimiento presencial a tu lado si hay cualquier imprevisto. Además, ofrecemos financiación al 100% por solo 99€ al mes.", 1500, () => {
               pushBotMessage("¿Quieres agendar una videollamada de 10 minutos para que el doctor te valore?", 500, () => {
                  setStepInfo({ options: ["Agendar videollamada", "Lo pensaré"], stepId: 10 });
+              });
+           });
+         });
+       } else if (activeNiche === 'dental' && (lowerTxt.includes("precio") || lowerTxt.includes("caro") || lowerTxt.includes("barato") || lowerTxt.includes("coste") || lowerTxt.includes("presupuesto") || lowerTxt.includes("financiaci"))) {
+         pushBotMessage(config.chatThinking, 800, () => {
+           pushBotMessage("Es comprensible fijarse en el coste. Nosotros no somos una franquicia 'low-cost': priorizamos la salud a largo plazo usando los mejores materiales (implantes titanio, escáner 3D intraoral) para asegurar resultados definitivos. Además ofrecemos planes de pago y financiación al 100%.", 1500, () => {
+              pushBotMessage("¿Te gustaría agendar una valoración sin coste y te damos un diagnóstico real adaptado a ti?", 500, () => {
+                 setStepInfo({ options: ["Agendar primera cita", "Lo pensaré"], stepId: 10 });
               });
            });
          });

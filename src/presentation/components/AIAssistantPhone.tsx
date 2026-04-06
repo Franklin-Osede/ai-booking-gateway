@@ -6,7 +6,7 @@ import { Mic, Volume2, Phone, MessageCircle } from "lucide-react";
 
 type Msg = { id: string; text: string; sender: "bot" | "user"; playing?: boolean; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean };
 
-export function AIAssistantPhone({ color, pos = "right" }: { color: string, niche?: string, pos?: string }): ReactNode {
+export function AIAssistantPhone({ color, niche, pos = "right" }: { color: string, niche?: string, pos?: string }): ReactNode {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,7 +18,10 @@ export function AIAssistantPhone({ color, pos = "right" }: { color: string, nich
   const [brandName, setBrandName] = useState("nuestra clínica");
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
 
+  const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string }[] } | null>(null);
+
+  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
 
   useEffect(() => {
     try {
@@ -30,6 +33,9 @@ export function AIAssistantPhone({ color, pos = "right" }: { color: string, nich
           .then(data => {
             if (data && data.success) {
               setScrapedData(data);
+              if (data.detectedNiche) setDetectedNiche(data.detectedNiche);
+            } else if (data && data.detectedNiche) {
+              setDetectedNiche(data.detectedNiche);
             }
           })
           .catch(e => console.error(e));
@@ -138,7 +144,11 @@ export function AIAssistantPhone({ color, pos = "right" }: { color: string, nich
         });
       } 
       else if (nextStepId === 1) {
-        const catNames = scrapedData?.categories?.map(c => c.name) || ["Odontología general", "Ortodoncia", "Implantología"];
+        const fallbacks = activeNiche === 'dental' 
+           ? ["Odontología Estética", "Ortodoncia", "Implantología Avanzada"] 
+           : ["Injerto Capilar FUE", "Tratamiento DHI", "Mesoterapia"];
+           
+        const catNames = scrapedData?.categories?.map(c => c.name) || fallbacks;
         const listedCats = catNames.slice(0, 3).join(", ");
         const serviceQuestion = `Claro, contamos con especialistas excelentes en áreas como ${listedCats}, ¿te gustaría agendar una cita con alguno de ellos para esta semana?`;
         fetchAudio(serviceQuestion, "bot-1", () => {

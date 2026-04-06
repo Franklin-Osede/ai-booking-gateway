@@ -97,6 +97,7 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
             {modules.map((mod) => (
               <button
                 key={mod.id}
+                id={mod.id === 'voice' ? 'tour-asistentes-hub' : undefined}
                 onClick={() => onSelect(mod.id)}
                 className={`group text-left p-4 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col justify-between h-full bg-white hover:shadow-xl hover:-translate-y-1 relative overflow-hidden ${mod.highlight ? 'border-transparent' : 'border-gray-100/80 hover:border-gray-200'}`}
                 style={mod.highlight ? { borderColor: color, boxShadow: `0 10px 30px -10px ${color}40` } : {}}

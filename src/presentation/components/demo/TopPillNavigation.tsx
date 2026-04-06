@@ -35,6 +35,7 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
       <div className="w-px h-6 bg-gray-200 mx-1"></div>
 
       <button 
+        id="tour-video-intro"
         onClick={onOpenPitch}
         className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 px-3 py-2 sm:py-2.5 rounded-full text-xs font-medium transition-colors hover:bg-gray-100"
       >
@@ -42,6 +43,7 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
       </button>
 
       <button 
+        id="tour-agendar"
         onClick={() => window.open("https://calendly.com/agentminds", "_blank")}
         className="flex items-center gap-1.5 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all shadow-md hover:scale-105 active:scale-95 ml-2"
         style={{ backgroundColor: primaryColor, color: contrastColor }}
