@@ -26,7 +26,13 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
   const TOTAL_STEPS = 4; // Urgency, Quadrant, Booking, Success
 
   const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s - 1);
+  const prevStep = () => {
+    if (step === 3 && urgency === "Dolor Agudo / Urgencia") {
+      setStep(1);
+    } else {
+      setStep(s => s - 1);
+    }
+  };
   const contrastText = getContrastColor(color);
 
   const sharedProps = {
@@ -57,7 +63,7 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
       {/* STEP 1: Urgency / Main Pain */}
       {step === 1 && (
         <motion.div key="1" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-           <div className="bg-white rounded-[2rem] p-5 border border-gray-200 shadow-sm relative overflow-hidden">
+           <div className="bg-white rounded-4xl p-5 border border-gray-200 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
               
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
@@ -117,7 +123,7 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
       {/* STEP 2: Quadrant selector */}
       {step === 2 && (
         <motion.div key="2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-           <div className="bg-white rounded-[2rem] p-5 border border-gray-200 shadow-sm relative overflow-hidden">
+           <div className="bg-white rounded-4xl p-5 border border-gray-200 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
               
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-4">

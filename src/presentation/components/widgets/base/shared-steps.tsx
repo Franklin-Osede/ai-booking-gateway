@@ -26,7 +26,7 @@ export function BookingCheckoutStep({ color, contrastText, nextStep, stepName, t
 
   return (
     <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}>
-       <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 border border-gray-200 shadow-sm relative overflow-hidden">
+       <div className="bg-white rounded-4xl sm:rounded-[2.5rem] p-5 sm:p-6 border border-gray-200 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
           
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">

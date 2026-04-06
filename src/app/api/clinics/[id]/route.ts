@@ -7,6 +7,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const clinic = await prisma.clinic.findUnique({
       where: { id },
       include: {
+        websites: true,
         brandings: true,
         widgetConfigs: true,
         outreachLogs: {
@@ -18,7 +19,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     if (!clinic) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
     return NextResponse.json({ success: true, data: clinic });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed" }, { status: 500 });
   }
 }
@@ -29,7 +30,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     const { name, industry, location, notes, primaryColor } = body;
 
-    const updateData: any = { name, industry, location, notes };
+    const updateData: Record<string, string | undefined> = { name, industry, location, notes };
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
     if (primaryColor) {
@@ -47,7 +48,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     });
 
     return NextResponse.json({ success: true, data: clinic });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to update" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    await prisma.clinic.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ success: false, error: "Failed to delete" }, { status: 500 });
+  }
+}
+

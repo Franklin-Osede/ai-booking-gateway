@@ -27,8 +27,15 @@ export async function POST(req: Request) {
       const n = data.name.toLowerCase().trim();
       const u = data.url ? data.url.toLowerCase().trim() : null;
 
-      // Smart intelligence: skip if exactly same name OR same URL exists
-      if (existingNames.has(n) || (u && existingUrls.has(u))) {
+      // Smart intelligence: skip if exactly same URL exists, or (if no URL) same name exists
+      let isDuplicate = false;
+      if (u) {
+        if (existingUrls.has(u)) isDuplicate = true;
+      } else {
+        if (existingNames.has(n)) isDuplicate = true;
+      }
+
+      if (isDuplicate) {
         skipped++;
         continue;
       }

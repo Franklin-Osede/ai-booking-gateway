@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TopPillNavigation } from "./TopPillNavigation";
 import { VideoPitchModal } from "./VideoPitchModal";
 import { AIAssistantVoice } from "../AIAssistantVoice";
@@ -19,10 +19,20 @@ interface DemoOverlayProps {
 }
 
 export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = false, videoPitchUrl, niche }: DemoOverlayProps) {
+  console.log("=== DEBUG [DemoOverlay.tsx] ===");
+  console.log("niche string received:", niche);
+  console.log("===============================");
+  
   const [activeMode, setActiveMode] = useState<"hub" | "triage" | "text" | "voice" | "voice-free" | "phone">("hub");
   const [isPitchOpen, setIsPitchOpen] = useState(false);
   const [useIframeFallback, setUseIframeFallback] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleModeChange = (mode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone") => {
     setActiveMode(mode);
@@ -86,14 +96,16 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
       <div className="absolute z-50 pointer-events-none w-full h-full">
         
         {/* Real Conditional Rendering to prevent memory leaks and unnecessary API calls */}
-        <div className="pointer-events-auto h-full w-full opacity-100 transition-opacity duration-300">
-          {activeMode === "hub" && <DemoSelectorHub color={themeColor} onSelect={handleModeChange} />}
-          {activeMode === "triage" && <AIAssistantWidgetProxy color={themeColor} niche={niche || "Clínica Capilar"} isOpen={true} setIsOpen={(b: boolean) => { if (!b) setActiveMode("hub"); }} />}
-          {activeMode === "text" && <AIAssistantChat color={themeColor} pos="right" niche="hair_transplant" />}
-          {activeMode === "voice" && <AIAssistantVoice color={themeColor} pos="right" niche="hair_transplant" />}
-          {activeMode === "voice-free" && <AIAssistantVoiceFree color={themeColor} pos="right" niche="hair_transplant" />}
-          {activeMode === "phone" && <AIAssistantPhone color={themeColor} pos="right" niche="hair_transplant" />}
-        </div>
+        {mounted && (
+          <div className="pointer-events-auto h-full w-full opacity-100 transition-opacity duration-300">
+            {activeMode === "hub" && <DemoSelectorHub color={themeColor} niche={niche || "Clínica Capilar"} onSelect={handleModeChange} />}
+            {activeMode === "triage" && <AIAssistantWidgetProxy color={themeColor} niche={niche || "Clínica Capilar"} isOpen={true} setIsOpen={(b: boolean) => { if (!b) setActiveMode("hub"); }} />}
+            {activeMode === "text" && <AIAssistantChat color={themeColor} pos="right" niche="hair_transplant" />}
+            {activeMode === "voice" && <AIAssistantVoice color={themeColor} pos="right" niche="hair_transplant" />}
+            {activeMode === "voice-free" && <AIAssistantVoiceFree color={themeColor} pos="right" niche="hair_transplant" />}
+            {activeMode === "phone" && <AIAssistantPhone color={themeColor} pos="right" niche="hair_transplant" />}
+          </div>
+        )}
       </div>
     </div>
   );

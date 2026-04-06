@@ -61,10 +61,11 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
       customIndustry = clinic.industry || customIndustry;
     } else {
-      const mockDatabase: Record<string, { url: string, color: string }> = {
-        "instituto-capilar": { url: "https://institutocapilar.es", color: "#1a4b8c" },
-        "clinica-arbelaez": { url: "https://www.clinicaarbelaez.com/", color: "#ededed" },
-        "info-mncapilar": { url: "https://info.mncapilar.com/", color: "#1a4b8c" },
+      const mockDatabase: Record<string, { url: string, color: string, industry?: string }> = {
+        "instituto-capilar": { url: "https://institutocapilar.es", color: "#1a4b8c", industry: "Clínica Capilar" },
+        "clinica-arbelaez": { url: "https://www.clinicaarbelaez.com/", color: "#ededed", industry: "Clínica Capilar" },
+        "info-mncapilar": { url: "https://info.mncapilar.com/", color: "#1a4b8c", industry: "Clínica Capilar" },
+        "clinicaciro": { url: "https://www.clinicaciro.es/", color: "#1a4b8c", industry: "Clínica Dental" }
       };
       
       let clinicsDb: Record<string, { url: string, color: string }> = {};
@@ -79,6 +80,8 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       if (dbConfig) {
         customSiteUrl = dbConfig.url;
         customColor = dbConfig.color;
+        // @ts-ignore - Handle mock database industry
+        if (dbConfig.industry) customIndustry = dbConfig.industry;
       }
     }
   } catch (error) {
@@ -93,6 +96,11 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   const finalUrl = useProxy ? `/api/v1/proxy?url=${encodeURIComponent(customSiteUrl)}` : customSiteUrl;
 
   const forceImageMode = resolvedSearchParams.image === 'true';
+
+  console.log("=== DEBUG [page.tsx] ===");
+  console.log("clinicSlug:", clinicSlug);
+  console.log("customIndustry FINALLY:", customIndustry);
+  console.log("=====================");
 
   return (
     <DemoOverlay 

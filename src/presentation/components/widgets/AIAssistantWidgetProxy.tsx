@@ -11,17 +11,19 @@ interface AIAssistantWidgetProxyProps {
 }
 
 export function AIAssistantWidgetProxy({ color, niche, isOpen, setIsOpen }: AIAssistantWidgetProxyProps) {
+  console.log("=== DEBUG [Proxy.tsx] ===");
+  console.log("niche string received:", niche);
+  console.log("===========================");
+
   if (!isOpen) return null;
 
-  // Route to the correct module based on the CRM / DB Niche
-  switch (niche) {
-    case "Clínica Dental":
-      return <AIAssistantWidgetDental color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
-    case "Clínica Capilar":
-    case "Triaje Capilar":
-      return <AIAssistantWidgetCapilar color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
-    default:
-      // Default fallback (we can build a Generic Widget later)
-      return <AIAssistantWidgetCapilar color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
+  // Normalize the niche string for flexible matching
+  const normalizedNiche = (niche || "").toLowerCase();
+
+  if (normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont")) {
+    return <AIAssistantWidgetDental color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
   }
+  
+  // Default to Capilar for hair transplant or unknown niches
+  return <AIAssistantWidgetCapilar color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
 }

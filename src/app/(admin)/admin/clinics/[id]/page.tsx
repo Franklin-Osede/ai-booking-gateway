@@ -144,7 +144,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                     type="date"
                     value={contactDate}
                     onChange={e => setContactDate(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-yellow-500/50 [color-scheme:dark]"
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-yellow-500/50 scheme-dark"
                   />
                 </div>
                 <div>
@@ -186,13 +186,39 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
       {tab === "config" && (
         <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 space-y-8">
            <div>
-             <h3 className="text-xl font-bold mb-3">Enlace Mágico Universitario</h3>
-             <div className="flex items-center gap-4 bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
+             <h3 className="text-xl font-bold mb-3">Enlaces de la Clínica y Demo</h3>
+             
+             {/* Original URL Display */}
+             {clinic.websites?.[0] && (
+               <div className="mb-4 bg-neutral-950 border border-neutral-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                 <div>
+                   <p className="text-xs text-neutral-400 font-bold uppercase tracking-wider mb-1">🔗 URL Original de la Clínica</p>
+                   <a 
+                     href={clinic.websites[0].url}
+                     target="_blank"
+                     rel="noreferrer"
+                     className="block text-white font-mono text-sm opacity-90 truncate hover:text-yellow-500 hover:underline mt-1"
+                   >
+                     {clinic.websites[0].url}
+                   </a>
+                 </div>
+                 <a 
+                   href={clinic.websites[0].url} 
+                   target="_blank" 
+                   className="bg-neutral-800 text-white hover:bg-neutral-700 font-bold px-4 py-2 rounded-xl transition-colors text-sm flex items-center gap-2 shrink-0"
+                 >
+                   Visitar Sitio <ExternalLink size={14}/>
+                 </a>
+               </div>
+             )}
+
+             <div className="flex items-center gap-4 bg-black border border-yellow-500/30 rounded-2xl p-4">
                 <div className="flex-1 overflow-hidden">
+                   <p className="text-xs text-yellow-500/70 font-bold uppercase tracking-wider mb-1">🪄 Enlace Mágico de Demo (Local)</p>
                    <p className="text-yellow-500 font-mono text-sm truncate">{`${typeof window !== 'undefined' ? window.location.origin : ''}/demo/${clinic.slug || clinic.id}`}</p>
                 </div>
                 <a href={`/demo/${clinic.slug || clinic.id}`} target="_blank" className="bg-white text-black px-4 py-2 text-sm font-bold rounded-xl hover:bg-neutral-200 transition-colors shrink-0 flex items-center gap-2">
-                  <ExternalLink size={16}/> Probar Hub Completo
+                  <ExternalLink size={16}/> Probar Hub
                 </a>
              </div>
 

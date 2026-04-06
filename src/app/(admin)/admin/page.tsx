@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin, FileSpreadsheet } from "lucide-react";
+import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin, FileSpreadsheet, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseExcelBuffer, ParsedClinic } from "@/lib/excel-parser";
 
@@ -47,12 +47,27 @@ export default function AdminDashboard() {
   const handleBulkSubmit = async () => {
     if (!bulkUrls.trim()) return;
     setProcessState("processing");
-    const urls = bulkUrls.split('\n').map(u => u.trim()).filter(Boolean);
+    const lines = bulkUrls.split('\n').map(u => u.trim()).filter(Boolean);
     const newResults: {name: string, id: string, url: string}[] = [];
 
-    for (const url of urls) {
-      const name = extractNameFromUrl(url);
-      const siteUrl = url.startsWith('http') ? url : `https://${url}`;
+    for (const line of lines) {
+      // Split by tab (Excel copy-paste) or comma
+      const parts = line.split(/[\t,]/).map(p => p.trim()).filter(Boolean);
+      const urlRaw = parts[0] || "";
+      
+      let nameRaw = "";
+      let locationRaw = "";
+
+      if (parts.length === 2) {
+        locationRaw = parts[1]; // User pasted [URL, City]
+      } else if (parts.length >= 3) {
+        nameRaw = parts[1];
+        locationRaw = parts[2];
+      }
+
+      const name = nameRaw || extractNameFromUrl(urlRaw);
+      const siteUrl = urlRaw.startsWith('http') ? urlRaw : `https://${urlRaw}`;
+
       try {
         const res = await fetch("/api/clinics", {
           method: "POST",
@@ -60,6 +75,7 @@ export default function AdminDashboard() {
           body: JSON.stringify({
              name: name || "Clínica Desconocida",
              industry: bulkNiche,
+             location: locationRaw || undefined,
              siteUrl: siteUrl,
              brandColor: "#FFD700"
           })
@@ -69,7 +85,7 @@ export default function AdminDashboard() {
            newResults.push({ name, id: data.data.id, url: siteUrl });
         }
       } catch (e) {
-        console.error("Error inserting", url, e);
+        console.error("Error inserting", urlRaw, e);
       }
     }
     
@@ -248,6 +264,21 @@ export default function AdminDashboard() {
                        </td>
                        <td className="py-4 px-4 text-sm text-neutral-400 font-mono tracking-tight text-right flex items-center justify-end gap-4">
                          {new Date(clinic.createdAt).toLocaleDateString()}
+                         <button 
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             if (confirm(`¿Estás seguro de que deseas eliminar la clínica "${clinic.name}"?`)) {
+                               fetch(`/api/clinics/${clinic.id}`, { method: 'DELETE' })
+                                 .then((res) => {
+                                    if (res.ok) setClinics((prev) => prev.filter(c => c.id !== clinic.id));
+                                    else alert("Error al eliminar la clínica");
+                                 });
+                             }
+                           }}
+                           className="p-2 hover:bg-red-500/10 text-neutral-600 hover:text-red-500 rounded-lg transition-colors"
+                         >
+                           <Trash2 size={18} />
+                         </button>
                          <ChevronRight size={18} className="text-neutral-600 group-hover:text-white transition-colors" />
                        </td>
                      </tr>
@@ -261,7 +292,7 @@ export default function AdminDashboard() {
 
       {/* MODAL CREADOR MASIVO */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-neutral-900 border border-neutral-800 p-8 rounded-3xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col">
             <button 
               onClick={() => setIsModalOpen(false)} 
@@ -276,11 +307,11 @@ export default function AdminDashboard() {
             {processState === "idle" && (
               <div className="space-y-6 overflow-y-auto pr-2">
                 <div>
-                  <label className="block text-sm font-bold text-neutral-300 mb-2">URLs de las Clínicas (Una por línea)</label>
+                  <label className="block text-sm font-bold text-neutral-300 mb-2">Pega desde Excel (URL, Nombre, Ciudad) o 1 URL por línea</label>
                   <textarea 
                     value={bulkUrls}
                     onChange={(e) => setBulkUrls(e.target.value)}
-                    placeholder="ej. https://clinicadental.com&#10;ej. https://imassalud.es"
+                    placeholder={`ej. https://clinicadental.com\tMi Clínica\tMadrid\nej. https://imassalud.es`}
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-4 min-h-[200px] outline-none focus:border-neutral-500/50 text-white font-mono text-sm leading-relaxed"
                   />
                 </div>
@@ -473,7 +504,7 @@ export default function AdminDashboard() {
                           } else {
                             alert(`Error al guardar: ${data.error}`);
                           }
-                        } catch (err: unknown) {
+                        } catch {
                           alert("Error de conexión");
                         } finally {
                           setIsExcelUploading(false);

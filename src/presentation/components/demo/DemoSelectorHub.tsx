@@ -5,6 +5,7 @@ import { Mic, PhoneCall, MessageCircle, Stethoscope, Sparkles, ChevronRight } fr
 
 interface DemoSelectorHubProps {
   color: string;
+  niche?: string;
   onSelect: (mode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone") => void;
 }
 
@@ -20,15 +21,19 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff';
 }
 
-export function DemoSelectorHub({ color, onSelect }: DemoSelectorHubProps) {
+export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps) {
   const contrast = getContrastColor(color);
+  const normalizedNiche = (niche || "").toLowerCase();
+  const isDental = normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont");
 
   const modules = [
     {
       id: "triage" as const,
-      title: "Escáner Triage",
+      title: isDental ? "Escáner Dental" : "Escáner Triage",
       tag: "Interactivo",
-      desc: "Formulario gamificado con subida de fotos y un simulador folicular visual.",
+      desc: isDental 
+        ? "Formulario interactivo para captar urgencias y evaluar restauraciones dentales."
+        : "Formulario gamificado con subida de fotos y un simulador folicular visual.",
       icon: <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />,
       highlight: true
     },
