@@ -110,7 +110,7 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-9999 pointer-events-auto">
+      <div className="fixed inset-0 pointer-events-auto" style={{ zIndex: 9999 }}>
         
         {/* Subtle backdrop highlight */}
         {targetRect && (
