@@ -15,9 +15,9 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
 
   const steps = [
     { targetId: 'center', title: '¡Bienvenido a tu demo!', text: 'Te enseño cómo probar esta infraestructura de Inteligencia Artificial en 30 segundos.' },
-    { targetId: 'tour-asistentes-hub', title: 'Sistemas de IA', text: 'Aquí tienes los diferentes agentes. Haz click en "Voz Guiada" para interactuar con la consultora clínica, avanzando paso a paso.' },
-    { targetId: 'tour-video-intro', title: 'Vídeo Intro', text: 'Aquí encontrarás una breve explicación en vídeo sobre cómo funciona la arquitectura.' },
-    { targetId: 'tour-agendar', title: 'Agendar Llamada', text: 'Si esta operativa os ahorra tiempo de filtrado, agenda una reunión corta para verlo a fondo.' }
+    { targetId: 'tour-asistentes-nav', title: 'Panel de Asistentes', text: 'Usando este botón abres el panel principal para probar los distintos algoritmos.' },
+    { targetId: 'tour-video-intro', title: 'Vídeo Explicativo', text: 'Aquí te he dejado un vídeo de un minuto explicando cómo lo he integrado sobre tu web.' },
+    { targetId: 'tour-asistentes-hub', title: 'Sistema de Voz Guiada', text: 'Haz clic aquí para interactuar con la asesora clínica, simulando el viaje avanzado de un paciente.' }
   ];
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
   let arrowClass = "hidden";
 
   if (targetRect) {
-    let topPos = targetRect.top + targetRect.height + 15;
+    const topPos = targetRect.top + targetRect.height + 15;
     let leftPos = targetRect.left + (targetRect.width / 2);
     
     // Safety check for mobile (prevent overflow right)
@@ -105,7 +105,7 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
       transform: 'translateX(-50%)',
       zIndex: 9999
     };
-    arrowClass = "absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100";
+    arrowClass = "absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 rotate-45 border-l border-t border-gray-700/50";
   }
 
   return (
@@ -138,29 +138,29 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300, mass: 0.8 }}
-            className="relative pointer-events-auto bg-white/95 backdrop-blur-xl border border-gray-100 rounded-3xl p-5 shadow-2xl w-[320px]"
+            className="relative pointer-events-auto bg-gray-900 border border-gray-700/50 rounded-3xl p-5 shadow-2xl w-[320px]"
           >
           <div className={arrowClass} />
           
           <div className="flex justify-between items-start mb-3">
-             <h4 className="font-bold text-gray-900 text-base">{currentStepInfo.title}</h4>
-             <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors">
+             <h4 className="font-bold text-white text-base">{currentStepInfo.title}</h4>
+             <button onClick={handleClose} className="p-1 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
                <X className="w-4 h-4" />
              </button>
           </div>
           
-          <p className="text-gray-600 text-sm leading-relaxed mb-5">
+          <p className="text-gray-300 text-sm leading-relaxed mb-5">
              {currentStepInfo.text}
           </p>
           
-          <div className="flex items-center justify-between">
-             <span className="text-xs font-semibold text-gray-400">
+          <div className="flex items-center justify-between mt-2 pt-4 border-t border-gray-800/50">
+             <span className="text-xs font-semibold text-gray-500">
                Paso {step + 1} de {steps.length}
              </span>
              <div className="flex gap-2">
                 <button 
                   onClick={handleClose} 
-                  className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors"
                 >
                   Saltar
                 </button>
