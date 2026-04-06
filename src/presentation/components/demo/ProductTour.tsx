@@ -14,10 +14,10 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
   const [targetRect, setTargetRect] = useState<{ top: number; left: number; width: number; height: number; } | null>(null);
 
   const steps = [
-    { targetId: 'center', title: '¡Bienvenido a tu demo!', text: 'Te enseño cómo probar esta infraestructura de Inteligencia Artificial en 30 segundos.' },
-    { targetId: 'tour-asistentes-nav', title: 'Panel de Asistentes', text: 'Usando este botón abres el panel principal para probar los distintos algoritmos.' },
-    { targetId: 'tour-video-intro', title: 'Vídeo Explicativo', text: 'Aquí te he dejado un vídeo de un minuto explicando cómo lo he integrado sobre tu web.' },
-    { targetId: 'tour-asistentes-hub', title: 'Sistema de Voz Guiada', text: 'Haz clic aquí para interactuar con la asesora clínica, simulando el viaje avanzado de un paciente.' }
+    { targetId: 'center', title: '¡Bienvenido a tu HUB!', text: 'Explora el potencial de nuestra Inteligencia Artificial actuando sobre tu web en tiempo real.' },
+    { targetId: 'tour-asistentes-hub', title: 'Voz Guiada', text: 'Haz clic en este modo de agente para simular de forma interactiva el filtrado de un paciente.' },
+    { targetId: 'tour-video-intro', title: 'El Motor (Vídeo)', text: 'Descubre en 1 minuto cómo conectamos esta arquitectura a tu CRM sin alterar tu código.' },
+    { targetId: 'tour-agendar', title: 'Viabilidad Técnica', text: 'Agenda aquí una consulta rápida de 15 min para analizar la integración en tu propia clínica.' }
   ];
 
   useEffect(() => {
