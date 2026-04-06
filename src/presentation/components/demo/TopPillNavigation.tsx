@@ -38,7 +38,7 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
         onClick={onOpenPitch}
         className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 px-3 py-2 sm:py-2.5 rounded-full text-xs font-medium transition-colors hover:bg-gray-100"
       >
-        <PlayCircle size={16} /> <span className="hidden sm:inline">Vídeo Pitch</span>
+        <PlayCircle size={16} /> <span className="hidden sm:inline">Vídeo Intro</span>
       </button>
 
       <button 
