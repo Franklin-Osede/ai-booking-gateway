@@ -43,6 +43,51 @@ type Msg = {
   photoUrls?: string[];
 };
 
+const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: boolean, duration?: number, color: string, audioRef: React.RefObject<HTMLAudioElement | null> }) => {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (audioRef.current && !audioRef.current.paused) {
+      setElapsed(audioRef.current.currentTime);
+    }
+    
+    let timer: ReturnType<typeof setInterval>;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        if (audioRef.current && !audioRef.current.paused) {
+           setElapsed(audioRef.current.currentTime);
+        }
+      }, 50);
+    }
+    return () => clearInterval(timer);
+  }, [isPlaying, audioRef]);
+
+  const display = Math.min(elapsed, duration || 10);
+  const m = Math.floor(display / 60);
+  const s = Math.floor(display % 60);
+  const percentage = duration ? Math.min((display / duration) * 100, 100) : 0;
+
+  return (
+    <>
+      <div className="h-1.5 bg-gray-200 rounded-full w-full relative mb-2 flex items-center">
+         <div 
+           className={`absolute top-0 left-0 h-full rounded-full transition-all duration-100 linear ${!isPlaying ? 'opacity-50' : ''}`}
+           style={{ width: `${percentage}%`, backgroundColor: color }}
+         />
+         <div
+           className="absolute w-3 h-3 rounded-full bg-white shadow-sm border border-gray-300 z-10 transition-all duration-100 linear"
+           style={{ left: `calc(${percentage}% - 6px)` }}
+         />
+      </div>
+      <div className="flex justify-between items-center mt-1">
+         <span className="text-[11px] sm:text-[12px] font-medium text-gray-400 tracking-wide">
+           {m}:{s.toString().padStart(2, '0')}
+         </span>
+      </div>
+    </>
+  );
+};
+
 export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "left" }: { color: string, niche?: string, pos?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
@@ -189,29 +234,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const AudioTimer = ({ isPlaying, duration }: { isPlaying?: boolean, duration?: number }) => {
-    const [elapsed, setElapsed] = useState(0);
 
-    useEffect(() => {
-      let timer: ReturnType<typeof setInterval>;
-      if (isPlaying) {
-        setElapsed(0);
-        timer = setInterval(() => {
-          if (audioRef.current && !audioRef.current.paused) {
-             setElapsed(audioRef.current.currentTime);
-          }
-        }, 250);
-      } else {
-        setElapsed(0);
-      }
-      return () => clearInterval(timer);
-    }, [isPlaying]);
-
-    const display = isPlaying ? elapsed : (duration || 0);
-    const m = Math.floor(display / 60);
-    const s = Math.floor(display % 60);
-    return <>{m}:{s.toString().padStart(2, '0')}</>;
-  };
   
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
@@ -417,6 +440,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   };
 
   const isBotPlaying = messages.some(m => m.playing);
+  const disableVoiceChange = isProcessing || isBotPlaying;
 
   const handleMicClick = async () => {
     if (isProcessing || isBotPlaying) return;
@@ -559,23 +583,28 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                     <h3 className="font-bold text-[13px] sm:text-[14px] leading-tight text-gray-900 whitespace-nowrap">{activeVoice.fullName}</h3>
                     <div className="flex flex-col mt-1.5">
                         <div 
-                         onClick={() => setShowVoiceSelector(!showVoiceSelector)}
-                         className="cursor-pointer group flex items-center w-fit"
-                        >
-                          <span className={`px-2 py-[2px] rounded-md text-[10px] sm:text-[11px] font-semibold transition-colors flex items-center gap-1.5 ${isProcessing ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-gray-100 hover:bg-gray-200 border border-transparent text-gray-600'}`}>
-                            {isProcessing ? (
-                               <>
-                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                 Escribiendo...
-                               </>
-                            ) : (
-                               <>
-                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                 Cambiar Asistente <ChevronDown size={10} className="text-gray-400 group-hover:text-gray-600" />
-                               </>
-                            )}
-                          </span>
-                        </div>
+                          onClick={() => { if (!disableVoiceChange) setShowVoiceSelector(!showVoiceSelector); }}
+                          className={`group flex items-center w-fit ${disableVoiceChange ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'}`}
+                         >
+                           <span className={`px-2 py-[2px] rounded-md text-[10px] sm:text-[11px] font-semibold transition-colors flex items-center gap-1.5 ${disableVoiceChange ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-gray-100 hover:bg-gray-200 border border-transparent text-gray-600'}`}>
+                             {isProcessing ? (
+                                <>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                  Escribiendo...
+                                </>
+                             ) : isBotPlaying ? (
+                                <>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                  Hablando...
+                                </>
+                             ) : (
+                                <>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                  Cambiar Asistente <ChevronDown size={10} className="text-gray-400 group-hover:text-gray-600" />
+                                </>
+                             )}
+                           </span>
+                         </div>
                     </div>
                   </div>
                 </div>
@@ -663,26 +692,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                            </div>
                            
                            <div className="flex-1 flex flex-col justify-center min-w-0 pr-2">
-                              <div className="h-1.5 bg-gray-200 rounded-full w-full relative mb-2 flex items-center">
-                                 <motion.div 
-                                   initial={{ width: "0%" }}
-                                   animate={{ width: msg.playing ? "100%" : "100%" }}
-                                   transition={msg.playing ? { duration: msg.duration || 10, ease: "linear" } : { duration: 0 }}
-                                   className={`absolute top-0 left-0 h-full rounded-full ${!msg.playing ? 'opacity-50' : ''}`}
-                                   style={{ backgroundColor: color }}
-                                 />
-                                 <motion.div
-                                   initial={{ left: "0%" }}
-                                   animate={{ left: msg.playing ? "100%" : "100%" }}
-                                   transition={msg.playing ? { duration: msg.duration || 10, ease: "linear" } : { duration: 0 }}
-                                   className="absolute w-3 h-3 rounded-full bg-white shadow-sm border border-gray-300 md:border-gray-200 -ml-1.5 z-10"
-                                 />
-                              </div>
-                              <div className="flex justify-between items-center mt-1">
-                                 <span className="text-[11px] sm:text-[12px] font-medium text-gray-400 tracking-wide">
-                                   <AudioTimer isPlaying={msg.playing} duration={msg.duration} />
-                                 </span>
-                              </div>
+                              <AudioProgress isPlaying={msg.playing} duration={msg.duration} color={color} audioRef={audioRef} />
                            </div>
                         </div>
                         

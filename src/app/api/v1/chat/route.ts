@@ -39,7 +39,7 @@ ESTRATEGIA CONVERSACIONAL ESTRICTA ("Conversacional por defecto + reconducción 
 3. Reglas Técnicas: ${specifics}
 4. Prevención de Alucinación: Si el usuario dice algo que no entiendes bien, NUNCA inventes. Pregunta amablemente: "Disculpa, ¿te refieres a los precios, al cuidado preventivo o te gustaría saber la disponibilidad médica?".
 5. Cierre Natural (CTA): ÚNICAMENTE cuando detectes intención real de avance (ej: "me gusta", "¿qué pasos seguimos?", "quiero hacerlo"), lánzale suavemente tu CTA: "¿Quieres que echemos un vistazo a las fechas libres del doctor?".
-6. RESTRICCIÓN DE LONGITUD: TUS RESPUESTAS DEBEN SER MUY CORTAS (Máximo 2 oraciones). Eres un bot de voz y si hablas más de 5 segundos el usuario cortará. Usa PUNTOS y COMAS, no uses listas.
+6. RESTRICCIÓN DE LONGITUD: TUS RESPUESTAS DEBEN SER MUY CORTAS (Máximo 2 oraciones). Eres un bot de voz. Usa PUNTOS, COMAS y PUNTOS SUSPENSIVOS (...) abundantemente para forzar pausas naturales y respiratorias en la voz de IA. Nunca unas frases largas sin comillas o comas. Evita las listas.
 
 Regla de Interfaz Mágica: Si el usuario acepta formalmente ver el calendario o agendar (ej: "sí, miremos agenda", "¿qué huecos tienes?"), incluye exactamente la palabra "[SHOW_CALENDAR]" para que la pantalla local haga el pop-up mágico.`;
 
@@ -79,8 +79,34 @@ Regla de Interfaz Mágica: Si el usuario acepta formalmente ver el calendario o 
       textToSpeak = textToSpeak.replace("[SHOW_CALENDAR]", "").trim();
     }
 
-    // Default cleanup for TTS readability
-    textToSpeak = textToSpeak.replace(/[\*\#\-\_]/g, "");
+    // Default cleanup for TTS readability: remove markdown, treat dashes as pauses
+    textToSpeak = textToSpeak.replace(/[\*\#\_]/g, "");
+    textToSpeak = textToSpeak.replace(/\-/g, ", ");
+
+    // Phonetic Dictionary for TTS Engine
+    // Corrects acronyms and medical terms that AI spells correctly but TTS mispronounces
+    const phoneticDict: Record<string, string> = {
+      "\\bFUE\\b": "F. U. E.",
+      "\\bDHI\\b": "D. H. I.",
+      "\\bPRP\\b": "P. R. P.",
+      "\\bFinasteride\\b": "finastéride",
+      "\\bDutasteride\\b": "dutastéride",
+      "\\bMinoxidil\\b": "minoxídil",
+      "\\bInvisalign\\b": "Invisálain",
+      "\\bBotox\\b": "Bótox",
+      "\\bLifting\\b": "Lífting",
+      "\\bPeeling\\b": "Píling",
+      "\\bAnti-aging\\b": "anti éiying",
+      "\\bIA\\b": "I. A."
+    };
+
+    for (const [pattern, replacement] of Object.entries(phoneticDict)) {
+      textToSpeak = textToSpeak.replace(new RegExp(pattern, "gi"), replacement);
+    }
+    
+    // Explicit title replacements (since \b doesn't play well with dots)
+    textToSpeak = textToSpeak.replace(/\bDr\./gi, "Doctor");
+    textToSpeak = textToSpeak.replace(/\bDra\./gi, "Doctora");
 
     return NextResponse.json({
       success: true,

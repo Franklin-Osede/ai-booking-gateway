@@ -25,6 +25,28 @@ async function applyTTSDictionary(text: string, clinicId?: string, niche: string
       const nRules = (nicheRules?.rules as TermRule[]) || [];
       const cRules = (clinicRules?.rules as TermRule[]) || [];
 
+      // Base rules
+      const baseRules: TermRule[] = [
+        { match: "\\bFUE\\b", replace: "F. U. E.", priority: -1 },
+        { match: "\\bDHI\\b", replace: "D. H. I.", priority: -1 },
+        { match: "\\bPRP\\b", replace: "P. R. P.", priority: -1 },
+        { match: "\\bFinasteride\\b", replace: "finastéride", priority: -1 },
+        { match: "\\bDutasteride\\b", replace: "dutastéride", priority: -1 },
+        { match: "\\bMinoxidil\\b", replace: "minoxídil", priority: -1 },
+        { match: "\\bInvisalign\\b", replace: "Invisálain", priority: -1 },
+        { match: "\\bBotox\\b", replace: "Bótox", priority: -1 },
+        { match: "\\bLifting\\b", replace: "Lífting", priority: -1 },
+        { match: "\\bPeeling\\b", replace: "Píling", priority: -1 },
+        { match: "\\bAnti-aging\\b", replace: "anti éiying", priority: -1 },
+        { match: "\\bIA\\b", replace: "I. A.", priority: -1 },
+        { match: "\\bDr\\.", replace: "Doctor", priority: -1 },
+        { match: "\\bDra\\.", replace: "Doctora", priority: -1 }
+      ];
+
+      for (const rule of baseRules) {
+        merged.set(rule.match, rule);
+      }
+
       // Merge niche rules first
       for (const rule of nRules) {
         merged.set(rule.match, { ...rule, priority: rule.priority || 0 });
