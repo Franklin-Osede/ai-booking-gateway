@@ -186,7 +186,7 @@ export default function CalendarPage() {
            <div className="bg-neutral-900 border border-neutral-800 p-5 rounded-xl">
               <h4 className="font-bold text-sm mb-4 border-b border-neutral-800 pb-2">Registrar Nuevo Seguimiento</h4>
               <form onSubmit={handleAddEvent} className="space-y-3 flex flex-col">
-                <div className="relative">
+                <div className="relative z-50">
                   <input
                     type="text"
                     value={searchClinic}
@@ -200,7 +200,7 @@ export default function CalendarPage() {
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none focus:border-yellow-500 transition-colors"
                   />
                   {isClinicDropdownOpen && searchClinic.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl">
+                    <div className="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto bg-neutral-900 border border-neutral-700 rounded-lg shadow-2xl">
                       {clinics.filter(c => c.name.toLowerCase().includes(searchClinic.toLowerCase())).length === 0 ? (
                         <div className="p-3 text-sm text-neutral-500 text-center">No hay coincidencias</div>
                       ) : (
