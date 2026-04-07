@@ -8,8 +8,8 @@ import { CalendarIcon, ChevronLeft, ChevronRight, MessageSquare, Trash2 } from "
 export default function CalendarPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [clinics, setClinics] = useState<any[]>([]);
-  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 0, 1));
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 0, 1));
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [events, setEvents] = useState<any[]>([]);
   
@@ -17,6 +17,10 @@ export default function CalendarPage() {
   const [newEventFeedback, setNewEventFeedback] = useState("");
   const [newEventAction, setNewEventAction] = useState("");
   const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
+  
+  // Para el buscador de clínicas
+  const [searchClinic, setSearchClinic] = useState("");
+  const [isClinicDropdownOpen, setIsClinicDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/clinics").then(r => r.json()).then(d => setClinics(d?.data || []));
@@ -60,6 +64,7 @@ export default function CalendarPage() {
         setNewEventFeedback("");
         setNewEventAction("");
         setNewEventClinicId("");
+        setSearchClinic("");
         fetchEvents();
       }
     } catch(e) {
@@ -84,7 +89,7 @@ export default function CalendarPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <CalendarIcon className="text-yellow-500" size={32} />
-          Calendario de Contactos (2026)
+          Calendario de Contactos ({format(currentMonth, 'yyyy')})
         </h1>
       </div>
       
@@ -181,34 +186,63 @@ export default function CalendarPage() {
            <div className="bg-neutral-900 border border-neutral-800 p-5 rounded-xl">
               <h4 className="font-bold text-sm mb-4 border-b border-neutral-800 pb-2">Registrar Nuevo Seguimiento</h4>
               <form onSubmit={handleAddEvent} className="space-y-3 flex flex-col">
-                <select 
-                  value={newEventClinicId}
-                  onChange={e => setNewEventClinicId(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none"
-                  required
-                >
-                  <option value="" disabled>Selecciona clínica destino...</option>
-                  {clinics.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchClinic}
+                    onChange={(e) => {
+                      setSearchClinic(e.target.value);
+                      setIsClinicDropdownOpen(true);
+                      if (newEventClinicId) setNewEventClinicId(""); // Reset selected if typing
+                    }}
+                    onFocus={() => setIsClinicDropdownOpen(true)}
+                    placeholder="Buscar clínica por nombre..."
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none focus:border-yellow-500 transition-colors"
+                  />
+                  {isClinicDropdownOpen && searchClinic.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl">
+                      {clinics.filter(c => c.name.toLowerCase().includes(searchClinic.toLowerCase())).length === 0 ? (
+                        <div className="p-3 text-sm text-neutral-500 text-center">No hay coincidencias</div>
+                      ) : (
+                        clinics.filter(c => c.name.toLowerCase().includes(searchClinic.toLowerCase())).map(c => (
+                          <div 
+                            key={c.id} 
+                            onClick={() => {
+                              setNewEventClinicId(c.id);
+                              setSearchClinic(c.name);
+                              setIsClinicDropdownOpen(false);
+                            }}
+                            className={`p-3 text-sm cursor-pointer hover:bg-neutral-800 transition-colors ${newEventClinicId === c.id ? 'bg-neutral-800 text-yellow-500 font-bold' : 'text-neutral-300'}`}
+                          >
+                            {c.name}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                  {/* Close hack */}
+                  {isClinicDropdownOpen && (
+                    <div className="fixed inset-0 z-0" onClick={() => setIsClinicDropdownOpen(false)} />
+                  )}
+                </div>
+
                 <textarea 
                   value={newEventFeedback}
                   onChange={e => setNewEventFeedback(e.target.value)}
                   placeholder="Feedback de la reunión o llamada..."
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none min-h-[80px]"
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none resize-none min-h-[80px] relative z-10"
                 />
                 <input 
                   type="text"
                   value={newEventAction}
                   onChange={e => setNewEventAction(e.target.value)}
-                  placeholder="Siguiente paso (ej. Llamarle mañana)"
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none"
+                  placeholder="Siguiente paso (ej. Llamar el martes)"
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none relative z-10"
                 />
                 <button 
                   type="submit" 
-                  disabled={isSubmittingEvent}
-                  className="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 mt-2"
+                  disabled={isSubmittingEvent || !newEventClinicId}
+                  className="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 mt-2 relative z-10"
                 >
                   {isSubmittingEvent ? "Guardando..." : "Programar Evento"}
                 </button>
@@ -216,6 +250,41 @@ export default function CalendarPage() {
            </div>
         </div>
       </div>
+
+      {/* HISTORIAL GLOBAL DE EVENTOS MENSUAL */}
+      <div className="mt-8 bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-xl">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 border-b border-neutral-800 pb-4">
+          <MessageSquare className="text-yellow-500" />
+          Historial de Eventos ({format(currentMonth, 'MMMM yyyy', { locale: es })})
+        </h2>
+        
+        {events.length === 0 ? (
+          <div className="text-center py-8 text-neutral-500">
+            No hay ningún evento registrado en este mes.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {events.sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()).map(e => (
+              <div key={`hist-${e.id}`} className="bg-neutral-950 border border-neutral-800 p-5 rounded-xl flex flex-col group relative">
+                <button onClick={() => handleDeleteEvent(e.id)} className="absolute top-4 right-4 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                  <Trash2 size={16} />
+                </button>
+                <div className="text-xs text-neutral-500 mb-2 font-medium bg-neutral-900 px-2 py-1 rounded inline-block w-fit">
+                  {format(new Date(e.eventDate), "d 'de' MMM, yyyy", { locale: es })}
+                </div>
+                <p className="font-bold text-yellow-500 mb-2">{e.clinic?.name || "Clínica borrada"}</p>
+                {e.feedback && <p className="text-sm text-neutral-300 mb-3 flex-1">{e.feedback}</p>}
+                {e.nextAction && (
+                  <div className="bg-blue-500/10 text-blue-400 text-xs px-3 py-2 rounded-lg border border-blue-500/20 font-medium mt-auto">
+                    Próximo paso: {e.nextAction}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
