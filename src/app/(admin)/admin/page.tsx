@@ -36,6 +36,7 @@ export default function AdminDashboard() {
   const [isExcelPreviewOpen, setIsExcelPreviewOpen] = useState(false);
   const [excelResult, setExcelResult] = useState<{added: number, skipped: number} | null>(null);
 
+
   const extractNameFromUrl = (url: string) => {
     try {
       const u = new URL(url.startsWith('http') ? url : `https://${url}`);
@@ -292,6 +293,7 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
 
       {/* MODAL CREADOR MASIVO */}
       {isModalOpen && (

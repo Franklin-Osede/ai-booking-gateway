@@ -20,6 +20,7 @@ model Clinic {
   brandings      Branding[]
   widgetConfigs  WidgetConfig[]
   outreachLogs   OutreachLog[]
+  events         ClinicEvent[]
 
   @@index([name])
   @@index([slug])
@@ -97,4 +98,20 @@ model PronunciationProfile {
 
   @@unique([scopeType, scopeId, locale])
   @@index([scopeId, locale])
+}
+
+model ClinicEvent {
+  id           String    @id @default(uuid())
+  clinicId     String
+  eventDate    DateTime
+  reminderDate DateTime?
+  feedback     String?
+  nextAction   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  clinic       Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
+  @@index([eventDate])
 }

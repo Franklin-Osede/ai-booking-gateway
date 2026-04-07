@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, LayoutDashboard, Database, ArrowLeft } from "lucide-react";
+import { Sparkles, LayoutDashboard, Database, ArrowLeft, Calendar } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +15,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-neutral-800 text-neutral-300 hover:text-white transition-colors">
             <Database size={18} />
             <span>Clínicas</span>
+          </Link>
+          <Link href="/admin/calendar" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-neutral-800 text-neutral-300 hover:text-white transition-colors">
+            <Calendar size={18} />
+            <span>Calendario</span>
           </Link>
           <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-neutral-800 text-neutral-300 hover:text-white transition-colors mt-auto absolute bottom-6">
             <ArrowLeft size={18} />
