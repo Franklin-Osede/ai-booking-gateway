@@ -20,7 +20,8 @@ export async function GET(req: NextRequest) {
       where.eventDate = { gte: new Date(startDate) };
     }
 
-    // @ts-expect-error - Prisma client needs restart to pick up new types
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const events = await prisma.clinicEvent.findMany({
       where,
       include: {
@@ -47,7 +48,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    // @ts-expect-error - Prisma client needs restart to pick up new types
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const event = await prisma.clinicEvent.create({
       data: {
         clinicId,

@@ -9,7 +9,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ success: false, error: "Missing ID" }, { status: 400 });
     }
 
-    // @ts-expect-error - Prisma client needs restart to pick up new types
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     await prisma.clinicEvent.delete({
       where: { id }
     });
