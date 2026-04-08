@@ -52,7 +52,7 @@ export class ElevenLabsStrategy implements IVoiceStrategy {
       }
       
       case VoiceIntent.DOCTOR_PITCH:
-        return `${params.pitchText}... ¿Quieres ver al equipo médico... o prefieres que agendemos tu valoración ahora?`;
+        return `${params.pitchText} ¿Quieres ver al equipo médico... o prefieres que agendemos tu valoración ahora?`;
       
       case VoiceIntent.OTHERS:
         return "Claro, aquí tienes al resto del equipo titular. Dime con quién prefieres agendar.";

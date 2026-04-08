@@ -320,9 +320,12 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraParams?: { isSuccess?: boolean; isFinalCard?: boolean; image?: string; isDoctorList?: boolean; doctorListData?: DoctorData[], overrideVoice?: VoiceProfile }) => {
     try {
       setIsProcessing(true);
+      if (audioRef.current && !audioRef.current.paused) {
+         audioRef.current.pause();
+      }
       // Remove SSML tags for the visual chat bubble
       const displayText = text.replace(/<[^>]*>/g, '');
-      setMessages(prev => [...prev, { id: msgId, text: displayText, sender: "bot", playing: true, ...extraParams }]);
+      setMessages(prev => [...prev.map(m => ({...m, playing: false})), { id: msgId, text: displayText, sender: "bot", playing: true, ...extraParams }]);
       
       let voiceProvider = "elevenlabs";
       try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
@@ -373,7 +376,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
          setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: false } : m));
       } else {
          audioRef.current.play();
-         setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: true } : m));
+         setMessages(prev => prev.map(m => ({ ...m, playing: m.id === msgId })));
       }
     }
   };

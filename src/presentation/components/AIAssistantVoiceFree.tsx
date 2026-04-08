@@ -324,8 +324,11 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraProps?: Partial<Msg> & { overrideVoice?: VoiceProfile }) => {
     try {
       setIsProcessing(true);
+      if (audioRef.current && !audioRef.current.paused) {
+         audioRef.current.pause();
+      }
       const displayText = text.replace(/<[^>]*>/g, '');
-      setMessages(prev => [...prev, { id: msgId, text: displayText, sender: "bot", playing: true, ...extraProps }]);
+      setMessages(prev => [...prev.map(m => ({...m, playing: false})), { id: msgId, text: displayText, sender: "bot", playing: true, ...extraProps }]);
       
       let audioUrl = "";
       if (msgId === "bot-0" && preloadedGreetingRef.current) {
@@ -380,7 +383,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
          setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: false } : m));
       } else {
          audioRef.current.play();
-         setMessages(prev => prev.map(m => m.id === msgId ? { ...m, playing: true } : m));
+         setMessages(prev => prev.map(m => ({ ...m, playing: m.id === msgId })));
       }
     }
   };
