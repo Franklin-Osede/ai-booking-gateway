@@ -585,6 +585,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     if (currentStep === 1) triggerFlowStep(1, text);
     else if (currentStep === 2) triggerFlowStep(2, text);
     else if (currentStep === 25) triggerFlowStep(25, text);
+    else if (currentStep === 15) triggerFlowStep(15, text);
     else if (currentStep === 3) triggerFlowStep(3, text);
   };
 
