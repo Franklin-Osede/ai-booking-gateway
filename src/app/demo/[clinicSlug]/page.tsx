@@ -41,6 +41,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   let customSiteUrl = "https://institutocapilar.es";
   let customColor = "#1a4b8c";
   let customIndustry = "Clínica Capilar";
+  let detectedLang = "es";
 
   try {
     const clinic = await prisma.clinic.findFirst({
@@ -57,6 +58,17 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       customSiteUrl = clinic.websites?.[0]?.url || customSiteUrl;
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
       customIndustry = clinic.industry || customIndustry;
+      
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((clinic as any).countryCode === 'EN') {
+         detectedLang = 'en';
+      } else if (clinic.location) {
+         const loc = clinic.location.toLowerCase();
+         if (loc.includes('london') || loc.includes('uk') || loc.includes('england') || loc.includes('manchester') || loc.includes('reino unido') || loc.includes('brit')) {
+            detectedLang = 'en';
+         }
+      }
     } else {
       const mockDatabase: Record<string, { url: string, color: string, industry?: string }> = {
         "instituto-capilar": { url: "https://institutocapilar.es", color: "#1a4b8c", industry: "Clínica Capilar" },
@@ -77,7 +89,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       if (dbConfig) {
         customSiteUrl = dbConfig.url;
         customColor = dbConfig.color;
-        // @ts-ignore - Handle mock database industry
+        // @ts-expect-error - Handle mock database industry
         if (dbConfig.industry) customIndustry = dbConfig.industry;
       }
     }
@@ -93,10 +105,13 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   const finalUrl = useProxy ? `/api/v1/proxy?url=${encodeURIComponent(customSiteUrl)}` : customSiteUrl;
 
   const forceImageMode = resolvedSearchParams.image === 'true';
+  const forceLang = resolvedSearchParams.lang as string;
+  if (forceLang) detectedLang = forceLang;
 
   console.log("=== DEBUG [page.tsx] ===");
   console.log("clinicSlug:", clinicSlug);
   console.log("customIndustry FINALLY:", customIndustry);
+  console.log("detectedLang:", detectedLang);
   console.log("=====================");
 
   return (
@@ -106,6 +121,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       useImageMode={forceImageMode}
       videoPitchUrl={customVideo}
       niche={customIndustry}
+      lang={detectedLang}
     />
   );
 }

@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Play, Menu, ChevronDown, Check } from "lucide-react";
-import { NICHE_CONFIGS } from "../config/nicheConfig";
-import { CLINIC_VOICES, VoiceProfile } from "../config/voiceConfig";
+import { getDictionary } from "../i18n";
+import { getVoices, VoiceProfile } from "../config/voiceConfig";
 import { VoiceIntent } from "../../domain/voice/VoiceIntent";
 import { VoicePromptService } from "../../domain/voice/VoicePromptService";
 
@@ -96,7 +96,7 @@ const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: b
   );
 };
 
-export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "right" }: { color: string, niche?: string, pos?: string }) {
+export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "right", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -109,7 +109,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
   const [activeVoiceId, setActiveVoiceId] = useState("f_laura");
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
-  const activeVoice: VoiceProfile = CLINIC_VOICES.find(v => v.id === activeVoiceId) || CLINIC_VOICES[0];
+  const availableVoicesForInit = getVoices(lang);
+  const activeVoice: VoiceProfile = availableVoicesForInit.find(v => v.id === activeVoiceId) || availableVoicesForInit[0];
 
   // Clean up all localized blobs on unmount
   useEffect(() => {
@@ -208,7 +209,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         
     let voiceProvider = "elevenlabs";
     try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-    const selectedVoice = CLINIC_VOICES.find(v => v.id === id) || CLINIC_VOICES[0];
+    const currentAvailVoices = getVoices(lang);
+    const selectedVoice = currentAvailVoices.find(v => v.id === id) || currentAvailVoices[0];
 
     const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand }, voiceProvider);
     let greeting = rawGreeting.replace(/Soy [a-zA-ZáéíóúÁÉÍÓÚñÑ]+/, `Soy ${name}`);
@@ -225,7 +227,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-  const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
+  const config = getDictionary(lang)[activeNiche] || getDictionary(lang).medical;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
   const contrastText = getContrastColor(color);
   const darkerBorder = getDarkerColor(color);
@@ -424,7 +426,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const serviceQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_SERVICE, { isHT, userSelection, niche: activeNiche }, voiceProvider);
         
         fetchAudio(serviceQuestion, "bot-1", () => {
-          const nicheConf = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS['default'];
+          const nicheConf = getDictionary(lang)[activeNiche] || getDictionary(lang)['default'] || getDictionary(lang).medical;
           if (userSelection && nicheConf?.voice_scripts?.deep_dive_chips && nicheConf.voice_scripts.deep_dive_chips[userSelection]) {
              setStepInfo({ options: nicheConf.voice_scripts.deep_dive_chips[userSelection], stepId: 15 });
           } else {
@@ -725,7 +727,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                     >
                        <div className="p-2">
                           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 pt-1">Mujeres</p>
-                          {CLINIC_VOICES.slice(0, 3).map(v => (
+                          {getVoices(lang).slice(0, 3).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
                                onClick={() => handleVoiceSelection(v.id, v.name)}
@@ -741,7 +743,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                           ))}
                           
                           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-4 mb-2 px-2">Hombres</p>
-                          {CLINIC_VOICES.slice(6, 9).map(v => (
+                          {getVoices(lang).slice(6, 9).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
                                onClick={() => handleVoiceSelection(v.id, v.name)}

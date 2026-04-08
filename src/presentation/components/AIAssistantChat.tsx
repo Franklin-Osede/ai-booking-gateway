@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, X, Send, Sparkles, ChevronRight } from "lucide-react";
 
-import { NICHE_CONFIGS } from "../config/nicheConfig";
+import { getDictionary } from "../i18n";
 
-export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right" }: { color: string, niche?: string, pos?: string }) {
+export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ id: string; text: string; sender: "bot" | "user"; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean; isDoctorList?: boolean; doctorListData?: { name: string; image?: string; specialty?: string; bio?: string }[] }[]>([]);
@@ -44,7 +44,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-  const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
+  const config = getDictionary(lang)[activeNiche] || getDictionary(lang).medical;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
 
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string, docs: ({name: string, image?: string} | string)[] }[] } | null>(null);

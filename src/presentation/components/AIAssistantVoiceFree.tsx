@@ -4,8 +4,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, Play, Menu, Camera, ChevronLeft, ChevronRight, CheckCircle2, ChevronDown, Check } from "lucide-react";
-import { CLINIC_VOICES, VoiceProfile } from "../config/voiceConfig";
-import { NICHE_CONFIGS } from "../config/nicheConfig";
+import { getVoices, VoiceProfile } from "../config/voiceConfig";
+import { getDictionary } from "../i18n";
 
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
@@ -105,7 +105,7 @@ const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: b
   );
 };
 
-export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "left" }: { color: string, niche?: string, pos?: string }) {
+export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "left", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -129,7 +129,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
   
-  const activeVoice: VoiceProfile = CLINIC_VOICES.find(v => v.id === activeVoiceId) || CLINIC_VOICES[3];
+  const availableVoicesForInit = getVoices(lang);
+  const activeVoice: VoiceProfile = availableVoicesForInit.find(v => v.id === activeVoiceId) || availableVoicesForInit[3];
 
   useEffect(() => {
     try {
@@ -177,7 +178,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     setChatHistory([]);
     setStepInfo({ options: [], stepId: 0 });
 
-    const selectedVoice = CLINIC_VOICES.find(v => v.id === id) || CLINIC_VOICES[3];
+    const currentAvailVoices = getVoices(lang);
+    const selectedVoice = currentAvailVoices.find(v => v.id === id) || currentAvailVoices[3];
     const newGreeting = `¡Hola! Bienvenido a ${brandName}. Soy ${name}. Cuéntame con tus palabras, ¿en qué te puedo ayudar o qué es lo que más te preocupa de tu cabello?`;
     setChatHistory([{ role: "assistant", content: newGreeting }]);
 
@@ -256,7 +258,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-  const config = NICHE_CONFIGS[activeNiche] || NICHE_CONFIGS.medical;
+  const config = getDictionary(lang)[activeNiche] || getDictionary(lang).medical;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _config = config; 
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
@@ -658,7 +660,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                     >
                        <div className="p-2">
                           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 pt-1">Mujeres</p>
-                          {CLINIC_VOICES.slice(3, 6).map(v => (
+                          {getVoices(lang).slice(3, 6).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
                                onClick={() => handleVoiceSelection(v.id, v.name)}
@@ -674,7 +676,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                           ))}
                           
                           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-4 mb-2 px-2">Hombres</p>
-                          {CLINIC_VOICES.slice(9, 12).map(v => (
+                          {getVoices(lang).slice(9, 12).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
                                onClick={() => handleVoiceSelection(v.id, v.name)}

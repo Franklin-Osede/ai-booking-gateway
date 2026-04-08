@@ -10,6 +10,7 @@ type Clinic = {
   name: string;
   industry: string;
   location: string | null;
+  countryCode?: string | null;
   createdAt: string;
   websites?: { url: string }[];
 };
@@ -21,12 +22,14 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState<string>("All");
   const [selectedLocation, setSelectedLocation] = useState<string>("All");
+  const [selectedCountry, setSelectedCountry] = useState<string>("All");
 
   // Bulk Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [processState, setProcessState] = useState<"idle" | "processing" | "results">("idle");
   const [bulkUrls, setBulkUrls] = useState("");
   const [bulkNiche, setBulkNiche] = useState("Clínica Capilar");
+  const [bulkCountry, setBulkCountry] = useState("ES");
   const [results, setResults] = useState<{name: string; id: string; url:string}[]>([]);
 
   // Excel Bulk State
@@ -78,6 +81,7 @@ export default function AdminDashboard() {
              name: name || "Clínica Desconocida",
              industry: bulkNiche,
              location: locationRaw || undefined,
+             countryCode: bulkCountry,
              siteUrl: siteUrl,
              brandColor: "#FFD700"
           })
@@ -122,7 +126,8 @@ export default function AdminDashboard() {
                           urlMatch;
     const matchesIndustry = selectedIndustry === "All" || clinic.industry === selectedIndustry;
     const matchesLocation = selectedLocation === "All" || (selectedLocation === "SinEspecificar" && !clinic.location) || clinic.location === selectedLocation;
-    return matchesSearch && matchesIndustry && matchesLocation;
+    const matchesCountry = selectedCountry === "All" || (clinic.countryCode || 'ES') === selectedCountry;
+    return matchesSearch && matchesIndustry && matchesLocation && matchesCountry;
   });
 
   return (
@@ -217,6 +222,18 @@ export default function AdminDashboard() {
                   {uniqueLocations.map(loc => (
                     <option key={loc} value={loc}>{loc}</option>
                   ))}
+               </select>
+            </div>
+
+            <div className="flex-1 min-w-[200px] max-w-[300px]">
+               <select 
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-white text-sm font-bold cursor-pointer"
+               >
+                  <option value="All">🌍 Todos los Países</option>
+                  <option value="ES">🇪🇸 España</option>
+                  <option value="EN">🇬🇧 Reino Unido</option>
                </select>
             </div>
           </div>
@@ -337,6 +354,18 @@ export default function AdminDashboard() {
                     <option value="Automotriz">Concesionario Automotriz</option>
                     <option value="SaaS B2B">Agencia B2B / Software SaaS</option>
                     <option value="Sector General">Otro sector (General)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-neutral-300 mb-2">País Destino / Mercado</label>
+                  <select 
+                    value={bulkCountry}
+                    onChange={(e) => setBulkCountry(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-4 outline-none focus:border-neutral-500/50 text-white cursor-pointer appearance-none"
+                  >
+                    <option value="ES">🇪🇸 España (ES)</option>
+                    <option value="EN">🇬🇧 Reino Unido (EN)</option>
                   </select>
                 </div>
 

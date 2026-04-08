@@ -12,7 +12,7 @@ export type VoiceProfile = {
   isRecommended: boolean;
 };
 
-export const CLINIC_VOICES: VoiceProfile[] = [
+export const CLINIC_VOICES_ES: VoiceProfile[] = [
   // MUJERES (6)
   {
     id: "f_laura",
@@ -173,3 +173,174 @@ export const CLINIC_VOICES: VoiceProfile[] = [
     isRecommended: false
   }
 ];
+
+export const CLINIC_VOICES_EN: VoiceProfile[] = [
+   // FEMALES (6) - UK
+   {
+     id: "f_emma",
+     name: "Emma",
+     fullName: "Emma · Clinical Advisor",
+     role: "Clinical Advisor",
+     gender: "F",
+     avatarUrl: "/avatars/woman_1.webp",
+     elevenLabsId: "ZF6FPAbjXT4488VcRRnw", 
+     tone: "Warm and empathetic",
+     rhythm: "Medium",
+     useCase: "Lead Capture & Booking",
+     isRecommended: true
+   },
+   {
+     id: "f_victoria",
+     name: "Victoria",
+     fullName: "Victoria · Medical Coordinator",
+     role: "Medical Coordinator",
+     gender: "F",
+     avatarUrl: "/avatars/woman_2.webp",
+     elevenLabsId: "dAlhI9qAHVIjXuVppzhW", 
+     tone: "Professional and confident",
+     rhythm: "Slow",
+     useCase: "Medical Doubts",
+     isRecommended: true
+   },
+   {
+     id: "f_sophie",
+     name: "Sophie",
+     fullName: "Sophie · Preventive Care",
+     role: "Preventive Care",
+     gender: "F",
+     avatarUrl: "/avatars/woman_3.webp",
+     elevenLabsId: "CpGtoGY8SdJ5zkY4HAjX", 
+     tone: "Approachable",
+     rhythm: "Medium",
+     useCase: "First Contact",
+     isRecommended: false
+   },
+   {
+     id: "f_charlotte",
+     name: "Charlotte",
+     fullName: "Charlotte · Receptionist",
+     role: "Receptionist",
+     gender: "F",
+     avatarUrl: "/avatars/woman_4.webp",
+     elevenLabsId: "sIak7pFapfSLCfctxdOu", 
+     tone: "Youthful and cheerful",
+     rhythm: "Fast",
+     useCase: "Agile Support",
+     isRecommended: false
+   },
+   {
+     id: "f_eleanor",
+     name: "Eleanor",
+     fullName: "Eleanor · Medical Director",
+     role: "Medical Director",
+     gender: "F",
+     avatarUrl: "/avatars/woman_5.webp",
+     elevenLabsId: "rfkTsdZrVWEVhDycUYn9", 
+     tone: "Mature and expert",
+     rhythm: "Slow",
+     useCase: "Authority Building",
+     isRecommended: false
+   },
+   {
+     id: "f_olivia",
+     name: "Olivia",
+     fullName: "Olivia · Post-op Support",
+     role: "Post-operative Support",
+     gender: "F",
+     avatarUrl: "/avatars/woman_6.webp",
+     elevenLabsId: "19STyYD15bswVz51nqLf", 
+     tone: "Sweet and patient",
+     rhythm: "Medium",
+     useCase: "Follow-up",
+     isRecommended: false
+   },
+ 
+   // MALES (6) - UK
+   {
+     id: "m_james",
+     name: "James",
+     fullName: "James · Coordinator",
+     role: "Medical Coordinator",
+     gender: "M",
+     avatarUrl: "/avatars/man_1.webp",
+     elevenLabsId: "Fahco4VZzobUeiPqni1S", 
+     tone: "Deep and professional",
+     rhythm: "Slow",
+     useCase: "Technical Doubts",
+     isRecommended: true
+   },
+   {
+     id: "m_william",
+     name: "William",
+     fullName: "William · Specialist",
+     role: "Clinical Specialist",
+     gender: "M",
+     avatarUrl: "/avatars/man_2.webp",
+     elevenLabsId: "bDTlr4ICxntY9qVWyL0o", 
+     tone: "Clear and confident",
+     rhythm: "Medium",
+     useCase: "B2B Capture",
+     isRecommended: false
+   },
+   {
+     id: "m_thomas",
+     name: "Thomas",
+     fullName: "Thomas · Support",
+     role: "Clinical Support",
+     gender: "M",
+     avatarUrl: "/avatars/man_3.webp",
+     elevenLabsId: "pYDLV125o4CgqP8i49Lg", 
+     tone: "Warm and human",
+     rhythm: "Medium",
+     useCase: "Undecided Patients",
+     isRecommended: false
+   },
+   {
+     id: "m_arthur",
+     name: "Arthur",
+     fullName: "Arthur · Head Surgeon",
+     role: "Head Surgeon",
+     gender: "M",
+     avatarUrl: "/avatars/man_4.webp",
+     elevenLabsId: "lUTamkMw7gOzZbFIwmq4", 
+     tone: "Mature and definitive",
+     rhythm: "Slow",
+     useCase: "Complex Cases",
+     isRecommended: false
+   },
+   {
+     id: "m_harry",
+     name: "Harry",
+     fullName: "Harry · Triage Advisor",
+     role: "Triage Advisor",
+     gender: "M",
+     avatarUrl: "/avatars/man_5.webp",
+     elevenLabsId: "UaYTS0wayjmO9KD1LR4R", 
+     tone: "Dynamic",
+     rhythm: "Fast",
+     useCase: "Agile Filtering",
+     isRecommended: false
+   },
+   {
+     id: "m_george",
+     name: "George",
+     fullName: "George · Direct Care",
+     role: "Immediate Care",
+     gender: "M",
+     avatarUrl: "/avatars/man_6.webp",
+     elevenLabsId: "ZCtBm65V5P2WRgHF7fKI", 
+     tone: "Direct and energetic",
+     rhythm: "Fast",
+     useCase: "Quick Responses",
+     isRecommended: false
+   }
+ ];
+
+ export function getVoices(lang: string = 'es'): VoiceProfile[] {
+    if (lang.toLowerCase().startsWith('en')) {
+       return CLINIC_VOICES_EN;
+    }
+    return CLINIC_VOICES_ES;
+ }
+
+ export const CLINIC_VOICES = CLINIC_VOICES_ES; // Legacy support

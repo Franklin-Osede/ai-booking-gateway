@@ -16,7 +16,7 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff';
 }
 
-export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void }) {
+export function AIAssistantWidgetDental({ color, isOpen, setIsOpen, lang = "es" }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
   const [step, setStep] = useState(1);
   const [urgency, setUrgency] = useState("");
   const [quadrant, setQuadrant] = useState("");

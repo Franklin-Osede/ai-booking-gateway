@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, industry, location, siteUrl, brandColor, oldDemoLink } = body;
+    const { name, industry, location, countryCode, siteUrl, brandColor, oldDemoLink } = body;
     
     if (!name) return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 });
 
@@ -26,6 +26,8 @@ export async function POST(req: Request) {
         slug,
         industry: industry || 'Sector General',
         location: location || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...({ countryCode: countryCode || 'ES' } as any),
         websites: siteUrl ? { create: { url: siteUrl } } : undefined,
         brandings: brandColor ? { create: { primaryColor: brandColor } } : undefined,
         widgetConfigs: oldDemoLink ? { create: { demoLink: oldDemoLink } } : undefined

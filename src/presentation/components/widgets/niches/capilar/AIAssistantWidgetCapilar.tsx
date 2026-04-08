@@ -18,7 +18,7 @@ function getContrastColor(hexcolor: string) {
 import { WidgetShell } from "../../base/WidgetShell";
 import { BookingCheckoutStep, SuccessStep } from "../../base/shared-steps";
 
-export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void }) {
+export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen, lang = "es" }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
 
   const [step, setStep] = useState(1);
   

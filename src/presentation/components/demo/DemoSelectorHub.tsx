@@ -6,6 +6,7 @@ import { Mic, PhoneCall, MessageCircle, Stethoscope, Sparkles, ChevronRight } fr
 interface DemoSelectorHubProps {
   color: string;
   niche?: string;
+  lang?: string;
   onSelect: (mode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone") => void;
 }
 
@@ -21,7 +22,7 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff';
 }
 
-export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps) {
+export function DemoSelectorHub({ color, niche, lang = "es", onSelect }: DemoSelectorHubProps) {
   const contrast = getContrastColor(color);
   const normalizedNiche = (niche || "").toLowerCase();
   const isDental = normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont");
