@@ -2,6 +2,7 @@
 
 import { AIAssistantWidgetCapilar } from './niches/capilar/AIAssistantWidgetCapilar';
 import { AIAssistantWidgetDental } from './niches/dental/AIAssistantWidgetDental';
+import { AIAssistantWidgetAesthetic } from './niches/aesthetic/AIAssistantWidgetAesthetic';
 
 interface AIAssistantWidgetProxyProps {
   color: string;
@@ -22,6 +23,10 @@ export function AIAssistantWidgetProxy({ color, niche, isOpen, setIsOpen }: AIAs
 
   if (normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont")) {
     return <AIAssistantWidgetDental color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
+  }
+
+  if (normalizedNiche.includes("aesthetic") || normalizedNiche.includes("estetica") || normalizedNiche.includes("estética")) {
+    return <AIAssistantWidgetAesthetic color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
   }
   
   // Default to Capilar for hair transplant or unknown niches

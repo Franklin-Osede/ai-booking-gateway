@@ -116,7 +116,8 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
             {(() => {
                 const normalized = (niche || "capilar").toLowerCase();
                 const isDental = normalized.includes("dental") || normalized.includes("dentist") || normalized.includes("odont");
-                const mappedNiche = isDental ? "dental" : "hair_transplant";
+                const isAesthetic = normalized.includes("aesthetic") || normalized.includes("estetica") || normalized.includes("estética");
+                const mappedNiche = isDental ? "dental" : isAesthetic ? "aesthetic" : "hair_transplant";
                 return (
                  <>
                    {activeMode === "text" && <AIAssistantChat color={themeColor} pos="right" niche={mappedNiche} />}

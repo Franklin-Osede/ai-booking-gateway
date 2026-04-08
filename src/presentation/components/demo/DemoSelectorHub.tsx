@@ -25,14 +25,17 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
   const contrast = getContrastColor(color);
   const normalizedNiche = (niche || "").toLowerCase();
   const isDental = normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont");
+  const isAesthetic = normalizedNiche.includes("aesthetic") || normalizedNiche.includes("estetica") || normalizedNiche.includes("estética");
 
   const modules = [
     {
       id: "triage" as const,
-      title: isDental ? "Escáner Dental" : "Escáner Triage",
+      title: isDental ? "Escáner Dental" : isAesthetic ? "Estudio Facial Quirúrgico" : "Escáner Triage",
       tag: "Interactivo",
       desc: isDental 
         ? "Formulario interactivo para captar urgencias y evaluar restauraciones dentales."
+        : isAesthetic
+        ? "Diagnóstico interactivo para pre-evaluar inyectables, bótox y calidad de la piel."
         : "Formulario gamificado con subida de fotos y un simulador folicular visual.",
       icon: <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />,
       highlight: true
