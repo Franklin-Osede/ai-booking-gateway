@@ -397,6 +397,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       setTimeout(() => {
         let topic = "qué es lo que más te preocupa de tu cabello";
         if (activeNiche === 'dental') topic = "qué tratamiento buscas... o qué te preocupa de tus dientes";
+        else if (activeNiche === 'aesthetic') topic = "qué aspecto de tu rostro o cuerpo te gustaría mejorar hoy";
         else if (activeNiche === 'beauty') topic = "qué tratamiento o cambio de imagen te apetece hoy";
         else if (activeNiche === 'legal') topic = "de qué trata el caso legal que necesitas consultar";
         else if (activeNiche === 'auto') topic = "qué modelo buscas... o en qué te puedo asesorar";
