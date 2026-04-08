@@ -69,16 +69,16 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
          "Odontopediatría": ["Revisión General", "Dolor Específico", "Ver Especialistas"]
       },
       deep_dive_scripts: {
-         "Estética Invisible": "Excelente. Contamos con alineadores invisibles de primer nivel que nadie notará que llevas puestos.",
-         "Máxima Rapidez": "Entendido. Nuestros brackets Damon reducen los tiempos de tratamiento estandarizados casi a la mitad.",
-         "Tengo Manchas": "Comprendo. Nuestro blanqueamiento clínico desincrusta hasta las manchas más profundas de café o tabaco desde la primera sesión.",
-         "Pérdida de Color": "Perfecto. Revitalizaremos el esmalte devolviéndole su brillo natural con una técnica nada invasiva.",
-         "Un solo diente": "Estupendo. Realizaremos un TAC tridimensional gratuito para medir milimétricamente el hueso e insertar el implante el mismo día.",
-         "Arcada Completa": "Comprendo. Con la técnica All-on-4 podemos recuperar toda tu dentadura en apenas 24 horas y con sedación consciente.",
-         "Revisión General": "Genial. Les enseñaremos técnicas de cepillado preventivo mientras revisamos que no haya caries invisibles.",
-         "Dolor Específico": "Uy, no te preocupes. Haremos una radiografía de baja intensidad para detectar exactamente el foco del dolor sin hacerles daño."
+         "Estética Invisible": "Excelente. Contamos con alineadores invisibles de primer nivel... Nadie notará que los llevas puestos.",
+         "Máxima Rapidez": "Entendido. Con nuestro sistema de brackets Damon, reducimos el tiempo de tratamiento a la mitad... consiguiendo resultados mucho más rápidos.",
+         "Tengo Manchas": "Comprendo. Nuestro blanqueamiento clínico avanzado, elimina hasta las manchas más profundas desde la primera sesión.",
+         "Pérdida de Color": "Perfecto. Revitalizaremos tu esmalte, devolviéndole su brillo y blanco natural... de manera indolora.",
+         "Un solo diente": "Estupendo. Realizaremos un TAC gratuito en 3D para medir tu hueso... y así podremos insertar el implante en el mismo día.",
+         "Arcada Completa": "Comprendo. Con la técnica All-on-four, recuperarás toda tu sonrisa en apenas 24 horas... y con sedación consciente.",
+         "Revisión General": "Genial. Haremos una limpieza profunda, y te enseñaremos técnicas de prevención para evitar cualquier caries invisible.",
+         "Dolor Específico": "No te preocupes. Haremos una radiografía focalizada, para detectar exactamente el foco del dolor... y poder aliviarte al momento."
       },
-      ask_service_fallback: "TEXT_INTRO ¿Te gustaría agendar una cita de valoración... o prefieres más información de nuestros tratamientos?",
+      ask_service_fallback: "TEXT_INTRO ¿Te gustaría que agendemos una cita de valoración... o prefieres que te dé más información de los tratamientos?",
       confirm_booking: "¡Estupendo! Tu reserva con DR_NAME para el día SELECTED_DATE a las SPOKEN_TIME ha quedado confirmada."
     }
   },
