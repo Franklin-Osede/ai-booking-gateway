@@ -75,8 +75,23 @@ const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: b
            style={{ width: `${percentage}%`, backgroundColor: color }}
          />
          <div
-           className="absolute w-3 h-3 rounded-full bg-white shadow-sm border border-gray-300 z-10 transition-all duration-100 linear"
+           className="absolute w-3 h-3 rounded-full bg-white shadow-sm border border-gray-300 z-10 transition-all duration-100 linear pointer-events-none"
            style={{ left: `calc(${percentage}% - 6px)` }}
+         />
+         <input
+            type="range"
+            min="0"
+            max={duration || 100}
+            step="0.01"
+            value={elapsed}
+            onChange={(e) => {
+              const newTime = parseFloat(e.target.value);
+              setElapsed(newTime);
+              if (audioRef.current) {
+                audioRef.current.currentTime = newTime;
+              }
+            }}
+            className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
          />
       </div>
       <div className="flex justify-between items-center mt-1">
