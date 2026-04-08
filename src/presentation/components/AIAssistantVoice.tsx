@@ -458,7 +458,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         if (srv.includes("fue") || srv.includes("dhi") || srv.includes("implante") || srv.includes("injerto") || srv.includes("trasplante") || srv.includes("técnica capilar")) {
            match = {
              img: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2000&auto=format&fit=crop",
-             text: "Nuestra intervención capilar es el tratamiento estrella. Extraemos los folículos de forma individual sin dejar cicatrices, asegurando un diseño natural y densidad máxima gracias a la mejor tecnología."
+             text: "Nuestra intervención capilar, es verdaderamente el tratamiento estrella. Extraemos los folículos uno a uno, sin dejar cicatrices... asegurando un diseño natural y la máxima densidad posible, gracias a tecnología de punta."
            };
         } else if (srv.includes("preventivo") || srv.includes("prp") || srv.includes("mesoterapia") || srv.includes("plasma")) {
            match = {

@@ -206,7 +206,7 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
          "Seguimiento Postoperatorio": ["Revisión Mensual", "Tengo molestias", "Hablar con Asesor"]
       },
       deep_dive_scripts: {
-         "En las Entradas": "Comprendo. Reconstruir la primera línea frontal requiere de mucho arte y precisión matemática para que sea indetectable.",
+         "En las Entradas": "Comprendo. Reconstruir la zona de las entradas requiere de un diseño muy detallado y gran precisión para que el resultado sea completamente indetectable.",
          "En la Coronilla": "Entendido. La coronilla requiere mayor número de unidades foliculares y paciencia porque el riego sanguíneo allí es diferente.",
          "Ambas zonas": "Perfecto. Necesitaremos realizar un diseño integral que redensifique ambas áreas conservando una zona donante sana.",
          "Pelo fino y débil": "Para ese adelgazamiento miniaturizado, la mesoterapia con vitaminas da un chute de energía directo al folículo logrando engrosarlo rápidamente.",
