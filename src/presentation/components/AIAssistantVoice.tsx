@@ -654,7 +654,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[14px] sm:text-[15px]"
                style={{ backgroundColor: color, color: contrastText }}
              >
-               <Mic fill={contrastText} size={16} /> Tu Asistente Capilar
+               <Mic fill={contrastText} size={16} /> Tu Asistente {activeNiche === 'dental' ? 'Dental' : activeNiche === 'aesthetic' ? 'Médico' : 'Capilar'}
              </button>
            </motion.div>
         )}
