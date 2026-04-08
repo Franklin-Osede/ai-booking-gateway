@@ -219,19 +219,55 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen }: { color
                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 3 de {TOTAL_STEPS}
               </div>
 
-              <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Historial Médico Estético</h2>
-              <p className="text-gray-500 font-medium text-sm mb-6">Para garantizar tu seguridad y evitar contraindicaciones, ¿te has realizado infiltraciones en los últimos meses?</p>
-              <div className="flex flex-col gap-3 mb-6">
-                {['Es mi primera vez, nunca me he hecho nada', 'Sí, llevo rellenos de hace menos de 1 año', 'Tengo procedimientos de hace varios años'].map((q) => (
-                  <button 
-                    key={q} onClick={() => setTailored2(q)}
-                    className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
-                    style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
+              {urgency === "Armonización Facial" || urgency === "Inyectables" ? (
+                <>
+                  <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Historial Médico Estético</h2>
+                  <p className="text-gray-500 font-medium text-sm mb-6">Para garantizar tu seguridad y evitar interacciones, ¿te has realizado infiltraciones faciales en los últimos meses?</p>
+                  <div className="flex flex-col gap-3 mb-6">
+                    {['Es mi primera vez, nunca me he inyectado', 'Sí, llevo rellenos o toxina de hace menos de 1 año', 'Tengo procedimientos de hace más de 2 años'].map((q) => (
+                      <button 
+                        key={q} onClick={() => setTailored2(q)}
+                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : urgency === "Láser y Calidad" ? (
+                <>
+                  <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Estado Base de tu Piel</h2>
+                  <p className="text-gray-500 font-medium text-sm mb-6">El láser interactúa con los pigmentos. ¿Tienes actualmente un bronceado muy reciente o has tomado isotretinoína (Roacután)?</p>
+                  <div className="flex flex-col gap-3 mb-6">
+                    {['No, mi piel no está bronceada ni tomo medicación', 'Sí, he tomado sol o rayos UVA hace menos de 1 mes', 'He tomado medicación fuerte contra el acné este año'].map((q) => (
+                      <button 
+                        key={q} onClick={() => setTailored2(q)}
+                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Evolución del Problema</h2>
+                  <p className="text-gray-500 font-medium text-sm mb-6">¿Acompañas esta situación con algún plan de ejercicio o dieta actualmente?</p>
+                  <div className="flex flex-col gap-3 mb-6">
+                    {['Hago dieta y ejercicio, pero esa zona no mejora', 'No tengo un plan específico de dieta/ejercicio', 'Acabo de ser mamá o tuve una gran pérdida de peso'].map((q) => (
+                      <button 
+                        key={q} onClick={() => setTailored2(q)}
+                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <button 
                  disabled={!tailored2}
@@ -255,20 +291,58 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen }: { color
                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 4 de {TOTAL_STEPS}
               </div>
 
-              <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Diagnóstico Avanzado</h2>
-              <p className="text-gray-500 font-medium text-sm mb-6">Nuestros médicos emplean Ecografía Facial para infiltrar de forma 100% segura. Evita riesgos y bloquea tu cita médica hoy.</p>
-              <div className="flex flex-col gap-3 mb-6">
-                {['Abonar 50€ por Consulta Médica (Reembolsable en Tto)', 'Agendar solo valoración visual general (Gratuita)'].map((q) => (
-                  <button 
-                    key={q} onClick={() => setPriority(q)}
-                    className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
-                    style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
-                  >
-                    {q.includes("Abonar") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black uppercase rounded-full shadow-sm">Seguridad Médica</span>}
-                    <span className="block pr-4">{q}</span>
-                  </button>
-                ))}
-              </div>
+              {urgency === "Armonización Facial" || urgency === "Inyectables" ? (
+                <>
+                  <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Diagnóstico Avanzado</h2>
+                  <p className="text-gray-500 font-medium text-sm mb-6">Nuestros médicos emplean Ecografía Facial para infiltrar de forma 100% segura. Evita riesgos y reserva tu consulta médica hoy.</p>
+                  <div className="flex flex-col gap-3 mb-6">
+                    {['Abonar 50€ por Consulta Médica (Reembolsable en Tto)', 'Agendar solo valoración visual general (Gratuita)'].map((q) => (
+                      <button 
+                        key={q} onClick={() => setPriority(q)}
+                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
+                      >
+                        {q.includes("Abonar") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black uppercase rounded-full shadow-sm">Seguridad Médica</span>}
+                        <span className="block pr-4">{q}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : urgency === "Láser y Calidad" ? (
+                <>
+                  <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Estudio Dermo-Epidérmico 3D</h2>
+                  <p className="text-gray-500 font-medium text-sm mb-6">El éxito del láser depende de ver lo que el ojo no capta. Realizamos un escáner facial VISIA para analizar pigmentos internos y rojeces ocultas.</p>
+                  <div className="flex flex-col gap-3 mb-6">
+                    {['Reservar Escáner Facial VISIA 3D (30€ a descontar)', 'Agendar valoración clínica estándar gratuita'].map((q) => (
+                      <button 
+                        key={q} onClick={() => setPriority(q)}
+                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
+                      >
+                        {q.includes("Escáner") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-amber-400 text-amber-900 text-[9px] font-black uppercase rounded-full shadow-sm">Más Precisión</span>}
+                        <span className="block pr-4">{q}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Análisis Tisular Corporal</h2>
+                  <p className="text-gray-500 font-medium text-sm mb-6">Para definir el protocolo (onda de choque, criolipólisis, maderoterapia) medimos tu grasa visceral y retención líquida con Bioimpedancia InBody.</p>
+                  <div className="flex flex-col gap-3 mb-6">
+                    {['Bloquear Diagnóstico InBody Medical (Prepago 20€)', 'Solo acudir a primera consulta para presupuesto'].map((q) => (
+                      <button 
+                        key={q} onClick={() => setPriority(q)}
+                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
+                      >
+                        {q.includes("InBody") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-emerald-400 text-emerald-900 text-[9px] font-black uppercase rounded-full shadow-sm">Clínico</span>}
+                        <span className="block pr-4">{q}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <button 
                  disabled={!priority}
