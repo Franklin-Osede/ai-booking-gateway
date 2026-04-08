@@ -77,9 +77,11 @@ const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: b
             value={elapsed}
             onChange={(e) => {
               const newTime = parseFloat(e.target.value);
-              setElapsed(newTime);
+              const maxTime = duration || 100;
+              const safeTime = newTime >= maxTime - 0.1 ? Math.max(0, maxTime - 0.1) : newTime;
+              setElapsed(safeTime);
               if (audioRef.current) {
-                audioRef.current.currentTime = newTime;
+                audioRef.current.currentTime = safeTime;
               }
             }}
             className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
