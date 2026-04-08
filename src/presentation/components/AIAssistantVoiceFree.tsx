@@ -395,7 +395,15 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
     if (nextStepId === 0) {
       setTimeout(() => {
-        const greeting = `¡Hola! Bienvenido a ${brandName}. Soy ${activeVoice.name}. Cuéntame con tus palabras, ¿en qué te puedo ayudar o qué es lo que más te preocupa de tu cabello?`;
+        let topic = "qué es lo que más te preocupa de tu cabello";
+        if (activeNiche === 'dental') topic = "qué tratamiento buscas... o qué te preocupa de tus dientes";
+        else if (activeNiche === 'beauty') topic = "qué tratamiento o cambio de imagen te apetece hoy";
+        else if (activeNiche === 'legal') topic = "de qué trata el caso legal que necesitas consultar";
+        else if (activeNiche === 'auto') topic = "qué modelo buscas... o en qué te puedo asesorar";
+        else if (activeNiche === 'regenerative') topic = "qué dolencia te gustaría tratar con nosotros";
+        else if (activeNiche === 'hair_salon') topic = "qué cambio de look o estilo tienes en mente";
+        
+        const greeting = `¡Hola! Bienvenido a ${brandName}. Soy ${activeVoice.name}... Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
         setChatHistory([{ role: "assistant", content: greeting }]);
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: [], stepId: 1 });
