@@ -73,16 +73,16 @@ export function AIAssistantWidgetCapilar({ color }: { color: string, pos?: strin
     setStep(7);
     let prog = 0;
     const interval = setInterval(() => {
-      prog += Math.floor(Math.random() * 8) + 2;
+      prog += Math.floor(Math.random() * 20) + 10;
       if (prog > 100) prog = 100;
       setAnalysisProgress(prog);
       if (prog >= 100) {
         clearInterval(interval);
         setTimeout(() => {
            setStep(8);
-        }, 800);
+        }, 300);
       }
-    }, 500);
+    }, 150);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
