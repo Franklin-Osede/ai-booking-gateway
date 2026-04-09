@@ -295,7 +295,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       }
       const silentAudio = new Audio("data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
       silentAudio.play().catch(() => {});
-    } catch (_) {}
+    } catch {
+      // ignore
+    }
 
     if (isOpen) {
       stopAudio();
@@ -733,7 +735,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                onClick={() => handleVoiceSelection(v.id, v.name)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
-                                <img src={v.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                                <img src={v.avatarUrl} alt={v.name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                                 <div className="flex-1 min-w-0">
                                    <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
                                    <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>
@@ -749,7 +751,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                onClick={() => handleVoiceSelection(v.id, v.name)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
-                                <img src={v.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-gray-200 opacity-90" />
+                                <img src={v.avatarUrl} alt={v.name} className="w-10 h-10 rounded-full object-cover border border-gray-200 opacity-90" />
                                 <div className="flex-1 min-w-0">
                                    <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
                                    <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>

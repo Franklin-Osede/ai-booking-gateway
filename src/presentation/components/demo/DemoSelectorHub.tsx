@@ -22,7 +22,7 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff';
 }
 
-export function DemoSelectorHub({ color, niche, lang = "es", onSelect }: DemoSelectorHubProps) {
+export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps) {
   const contrast = getContrastColor(color);
   const normalizedNiche = (niche || "").toLowerCase();
   const isDental = normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont");
@@ -51,9 +51,9 @@ export function DemoSelectorHub({ color, niche, lang = "es", onSelect }: DemoSel
     },
     {
       id: "voice-free" as const,
-      title: "Asistente de Voz IA",
+      title: "Asistente de Recepción IA",
       tag: "Conversacional",
-      desc: "Voz ultra-realista que resuelve dudas y negocia sin un guion estricto.",
+      desc: "El apoyo perfecto para tu equipo. Atiende llamadas perdidas o fuera de horario, resuelve dudas y agenda citas 24/7.",
       icon: <PhoneCall className="w-5 h-5 sm:w-6 sm:h-6" />,
       highlight: false
     },

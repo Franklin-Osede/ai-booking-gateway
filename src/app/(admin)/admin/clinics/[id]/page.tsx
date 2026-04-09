@@ -263,8 +263,13 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                <div className="flex items-center justify-between gap-4 bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
                   <div className="flex items-center gap-4">
                     <div 
-                      className="w-12 h-12 rounded-xl shadow-inner border border-neutral-700" 
+                      className="w-12 h-12 rounded-xl shadow-inner border border-neutral-700 cursor-pointer hover:scale-105 hover:ring-2 hover:ring-yellow-500/50 transition-all" 
                       style={{ backgroundColor: clinic.brandings?.[0]?.primaryColor || "#333" }}
+                      onClick={() => {
+                        setTempColor(clinic.brandings?.[0]?.primaryColor || "#000000");
+                        setEditingColor(true);
+                      }}
+                      title="Editar Color"
                     />
                     <div>
                        <p className="text-neutral-400 text-sm">Color Principal</p>

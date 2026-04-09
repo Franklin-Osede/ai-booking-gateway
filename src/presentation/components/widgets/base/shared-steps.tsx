@@ -15,13 +15,12 @@ interface SharedProps {
 // --------------------------------------------------------
 // Booking & Checkout Step
 // --------------------------------------------------------
-export function BookingCheckoutStep({ color, contrastText, nextStep, stepName, totalSteps }: SharedProps) {
+export function BookingCheckoutStep({ color, contrastText, nextStep }: SharedProps) {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const doctor = "Dr. Especialista";
   const times = ["10:00 AM", "11:30 AM", "13:00 PM", "16:00 PM", "17:30 PM", "18:45 PM"];
 
   return (

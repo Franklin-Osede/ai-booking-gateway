@@ -21,7 +21,7 @@ export default async function Home({
 }) {
   const params = await searchParams;
   let siteUrl = params.site;
-  let widgetType = params.widget || "form";
+  const widgetType = params.widget || "form";
   let niche = params.niche || "default";
   let brandColor = params.color ? `#${params.color}` : "#FFD700";
   const pos = "left";
