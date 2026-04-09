@@ -51,7 +51,7 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
     },
     {
       id: "voice-free" as const,
-      title: "Sistema de Automatización Telefónica",
+      title: "Asistente de Recepción IA",
       tag: "Conversacional",
       desc: "El apoyo perfecto para tu equipo. Atiende llamadas perdidas o fuera de horario, resuelve dudas y agenda citas 24/7.",
       icon: <PhoneCall className="w-5 h-5 sm:w-6 sm:h-6" />,
@@ -91,7 +91,7 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
           </div>
           
           <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2 sm:mb-3 mt-2 sm:mt-0">
-             Sistemas de Automatización IA
+             Sistemas de Automatización
           </h2>
           <p className="text-gray-500 font-medium text-sm sm:text-base max-w-xl mb-6 sm:mb-10 leading-relaxed">
              Simulación segura y en tiempo real. Explora cómo interactuarían estos agentes predictivos sobre tu web actual sin alterar tu código original.
