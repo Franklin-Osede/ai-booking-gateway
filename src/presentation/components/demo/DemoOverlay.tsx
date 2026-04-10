@@ -110,8 +110,8 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
         {/* Real Conditional Rendering to prevent memory leaks and unnecessary API calls */}
         {mounted && (
           <div className="pointer-events-auto h-full w-full opacity-100 transition-opacity duration-300">
-            {activeMode === "hub" && <DemoSelectorHub color={themeColor} niche={niche || "Clínica Capilar"} lang={lang} onSelect={handleModeChange} />}
-            {activeMode === "triage" && <AIAssistantWidgetProxy color={themeColor} niche={niche || "Clínica Capilar"} lang={lang} isOpen={true} setIsOpen={(b: boolean) => { if (!b) setActiveMode("hub"); }} />}
+            {activeMode === "hub" && <DemoSelectorHub color={themeColor} niche={niche || "Clínica Capilar"} onSelect={handleModeChange} />}
+            {activeMode === "triage" && <AIAssistantWidgetProxy color={themeColor} niche={niche || "Clínica Capilar"} isOpen={true} setIsOpen={(b: boolean) => { if (!b) setActiveMode("hub"); }} />}
             
             {/* Dynamic niche resolver logic for text & voice components */}
             {(() => {
