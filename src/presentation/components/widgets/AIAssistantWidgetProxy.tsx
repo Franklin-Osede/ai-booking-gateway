@@ -7,12 +7,11 @@ import { AIAssistantWidgetAesthetic } from './niches/aesthetic/AIAssistantWidget
 interface AIAssistantWidgetProxyProps {
   color: string;
   niche: string;
-  lang?: string;
   isOpen: boolean;
   setIsOpen: (b: boolean) => void;
 }
 
-export function AIAssistantWidgetProxy({ color, niche, lang = "es", isOpen, setIsOpen }: AIAssistantWidgetProxyProps) {
+export function AIAssistantWidgetProxy({ color, niche, isOpen, setIsOpen }: AIAssistantWidgetProxyProps) {
   console.log("=== DEBUG [Proxy.tsx] ===");
   console.log("niche string received:", niche);
   console.log("===========================");
@@ -23,13 +22,13 @@ export function AIAssistantWidgetProxy({ color, niche, lang = "es", isOpen, setI
   const normalizedNiche = (niche || "").toLowerCase();
 
   if (normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont")) {
-    return <AIAssistantWidgetDental color={color} isOpen={isOpen} setIsOpen={setIsOpen} lang={lang} />;
+    return <AIAssistantWidgetDental color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
   }
 
   if (normalizedNiche.includes("aesthetic") || normalizedNiche.includes("estetica") || normalizedNiche.includes("estética")) {
-    return <AIAssistantWidgetAesthetic color={color} isOpen={isOpen} setIsOpen={setIsOpen} lang={lang} />;
+    return <AIAssistantWidgetAesthetic color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
   }
   
   // Default to Capilar for hair transplant or unknown niches
-  return <AIAssistantWidgetCapilar color={color} isOpen={isOpen} setIsOpen={setIsOpen} lang={lang} />;
+  return <AIAssistantWidgetCapilar color={color} isOpen={isOpen} setIsOpen={setIsOpen} />;
 }
