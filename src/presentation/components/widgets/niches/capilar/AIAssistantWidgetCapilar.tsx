@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, Upload, UserCircle2, ShieldCheck, Calendar as CalendarIcon, Check, Shield, MessageCircle } from "lucide-react";
+import { ChevronRight, Upload, UserCircle2, ShieldCheck, Check } from "lucide-react";
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
   if (hexcolor.length === 4) {
@@ -18,7 +18,7 @@ function getContrastColor(hexcolor: string) {
 import { WidgetShell } from "../../base/WidgetShell";
 import { BookingCheckoutStep, SuccessStep } from "../../base/shared-steps";
 
-export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen, lang = "es" }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
+export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
 
   const [step, setStep] = useState(1);
   

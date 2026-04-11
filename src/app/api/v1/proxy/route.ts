@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: newHeaders,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Proxy Proxy Error:", error);
-    return new NextResponse(error.message || "Internal server error", { status: 500 });
+    return new NextResponse(error instanceof Error ? error.message : "Internal server error", { status: 500 });
   }
 }
