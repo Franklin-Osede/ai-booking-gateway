@@ -184,7 +184,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: Rankean por 'precio injerto', pero pierden leads ahí."
                 value={seoMetrics.topPages}
                 onChange={e => setSeoMetrics({ ...seoMetrics, topPages: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[160px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[300px]"
               />
             </div>
             <div>
@@ -193,7 +193,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: Insparya y Capilclinic."
                 value={seoMetrics.competitors}
                 onChange={e => setSeoMetrics({ ...seoMetrics, competitors: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[160px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[300px]"
               />
             </div>
             <div className="md:col-span-2">
@@ -202,7 +202,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: Mencionar que el widget IA solucionará sus rebotes nocturnos."
                 value={seoMetrics.insights}
                 onChange={e => setSeoMetrics({ ...seoMetrics, insights: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[220px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[350px]"
               />
             </div>
           </div>
