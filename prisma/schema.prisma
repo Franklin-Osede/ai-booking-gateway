@@ -14,6 +14,7 @@ model Clinic {
   location  String?
   countryCode String?
   videoUrl  String?
+  seoMetrics Json?
 
   notes     String?
   createdAt DateTime @default(now())

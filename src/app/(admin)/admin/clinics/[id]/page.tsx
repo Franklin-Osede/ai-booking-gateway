@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2 } from "lucide-react";
+import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2, BarChart3, Save } from "lucide-react";
 
 export default function ClinicDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [clinic, setClinic] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"config" | "outreach">("config");
+  const [tab, setTab] = useState<"config" | "metrics" | "outreach">("config");
   
   // Forms
   const [status, setStatus] = useState("contactado");
@@ -18,6 +18,8 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [tempColor, setTempColor] = useState("#ffffff");
   const [videoUrl, setVideoUrl] = useState("");
   const [editingVideo, setEditingVideo] = useState(false);
+  const [seoMetrics, setSeoMetrics] = useState({ traffic: "", cost: "", topPages: "", competitors: "", insights: "" });
+  const [savingMetrics, setSavingMetrics] = useState(false);
 
   const fetchClinic = () => {
     fetch(`/api/clinics/${unwrappedParams.id}`)
@@ -26,6 +28,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
         if (data.success) {
           setClinic(data.data);
           if (data.data.videoUrl) setVideoUrl(data.data.videoUrl);
+          if (data.data.seoMetrics) setSeoMetrics(data.data.seoMetrics);
         }
         setLoading(false);
       });
@@ -64,6 +67,17 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
       body: JSON.stringify({ videoUrl }),
     });
     setEditingVideo(false);
+    fetchClinic();
+  };
+
+  const handleSaveMetrics = async () => {
+    setSavingMetrics(true);
+    await fetch(`/api/clinics/${unwrappedParams.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seoMetrics }),
+    });
+    setSavingMetrics(false);
     fetchClinic();
   };
 
@@ -108,6 +122,12 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
             Configuración de IA
           </button>
           <button 
+            onClick={() => setTab("metrics")}
+            className={`pb-4 px-2 font-bold transition-all border-b-2 ${tab === "metrics" ? "border-green-500 text-green-500" : "border-transparent text-neutral-500 hover:text-neutral-300"}`}
+          >
+            Métricas (Research)
+          </button>
+          <button 
             onClick={() => setTab("outreach")}
             className={`pb-4 px-2 font-bold transition-all border-b-2 ${tab === "outreach" ? "border-yellow-500 text-yellow-500" : "border-transparent text-neutral-500 hover:text-neutral-300"}`}
           >
@@ -117,6 +137,78 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
       </div>
 
       {/* Content */}
+      {tab === "metrics" && (
+        <div className="bg-neutral-900 border border-green-500/30 rounded-3xl p-8 space-y-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-green-500/20 p-3 rounded-xl text-green-500"><BarChart3 size={24} /></div>
+            <div>
+              <h3 className="text-xl font-bold">Investigación & Métricas (Ahrefs/SEMrush)</h3>
+              <p className="text-neutral-400 text-sm">Recoge datos clave aquí para deslumbrar en la llamada de ventas.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico Orgánico Mensual</label>
+              <input 
+                type="text" 
+                placeholder="Ej: 5.000 visitas/mes"
+                value={seoMetrics.traffic}
+                onChange={e => setSeoMetrics({ ...seoMetrics, traffic: e.target.value })}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50"
+              />
+            </div>
+            <div>
+              <label className="text-neutral-400 text-sm mb-1 block font-bold">Valor Mensual del Tráfico (VMT / Cost)</label>
+              <input 
+                type="text" 
+                placeholder="Ej: $3,500 en Ads"
+                value={seoMetrics.cost}
+                onChange={e => setSeoMetrics({ ...seoMetrics, cost: e.target.value })}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50"
+              />
+            </div>
+            <div>
+              <label className="text-neutral-400 text-sm mb-1 block font-bold">Páginas o Keywords Top de Fuga</label>
+              <textarea 
+                placeholder="Ej: Rankean por 'precio injerto', pero pierden leads ahí."
+                value={seoMetrics.topPages}
+                onChange={e => setSeoMetrics({ ...seoMetrics, topPages: e.target.value })}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 h-24 resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-neutral-400 text-sm mb-1 block font-bold">Competidores Directos</label>
+              <textarea 
+                placeholder="Ej: Insparya y Capilclinic."
+                value={seoMetrics.competitors}
+                onChange={e => setSeoMetrics({ ...seoMetrics, competitors: e.target.value })}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 h-24 resize-none"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-neutral-400 text-sm mb-1 block font-bold">Insights Estratégicos para la Llamada</label>
+              <textarea 
+                placeholder="Ej: Mencionar que el widget IA solucionará sus rebotes nocturnos."
+                value={seoMetrics.insights}
+                onChange={e => setSeoMetrics({ ...seoMetrics, insights: e.target.value })}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 h-32 resize-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4 border-t border-neutral-800 mt-6">
+            <button 
+              onClick={handleSaveMetrics}
+              disabled={savingMetrics}
+              className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg flex items-center gap-2"
+            >
+              <Save size={18} /> {savingMetrics ? "Guardando..." : "Guardar Métricas"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {tab === "outreach" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
