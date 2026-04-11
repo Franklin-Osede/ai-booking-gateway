@@ -154,7 +154,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: 5.000 visitas/mes"
                 value={seoMetrics.traffic}
                 onChange={e => setSeoMetrics({ ...seoMetrics, traffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[80px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[140px]"
               />
             </div>
             <div>
@@ -163,7 +163,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: $3,500 en Ads"
                 value={seoMetrics.cost}
                 onChange={e => setSeoMetrics({ ...seoMetrics, cost: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[80px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[140px]"
               />
             </div>
             <div className="md:col-span-2">
@@ -172,7 +172,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: 30% del tráfico viene de Meta. Atención ultra corta."
                 value={seoMetrics.socialTraffic}
                 onChange={e => setSeoMetrics({ ...seoMetrics, socialTraffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-blue-500/50 min-h-[80px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-blue-500/50 min-h-[140px]"
               />
             </div>
             <div>
