@@ -20,6 +20,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [editingVideo, setEditingVideo] = useState(false);
   const [seoMetrics, setSeoMetrics] = useState({ traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
   const [savingMetrics, setSavingMetrics] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
 
   const fetchClinic = () => {
     fetch(`/api/clinics/${unwrappedParams.id}`)
@@ -78,6 +79,8 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
       body: JSON.stringify({ seoMetrics }),
     });
     setSavingMetrics(false);
+    setHasSaved(true);
+    setTimeout(() => setHasSaved(false), 3000);
     fetchClinic();
   };
 
@@ -207,10 +210,15 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
           <div className="flex justify-end pt-4 border-t border-neutral-800 mt-6">
             <button 
               onClick={handleSaveMetrics}
-              disabled={savingMetrics}
-              className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg flex items-center gap-2"
+              disabled={savingMetrics || hasSaved}
+              className={`font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center gap-2 ${
+                hasSaved 
+                  ? "bg-emerald-600 text-white" 
+                  : "bg-green-600 hover:bg-green-500 text-white"
+              }`}
             >
-              <Save size={18} /> {savingMetrics ? "Guardando..." : "Guardar Métricas"}
+              {hasSaved ? <Check size={18} /> : <Save size={18} />} 
+              {savingMetrics ? "Guardando..." : hasSaved ? "¡Guardado!" : "Guardar Métricas"}
             </button>
           </div>
         </div>
