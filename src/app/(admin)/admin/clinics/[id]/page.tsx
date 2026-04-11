@@ -18,7 +18,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [tempColor, setTempColor] = useState("#ffffff");
   const [videoUrl, setVideoUrl] = useState("");
   const [editingVideo, setEditingVideo] = useState(false);
-  const [seoMetrics, setSeoMetrics] = useState({ traffic: "", cost: "", topPages: "", competitors: "", insights: "" });
+  const [seoMetrics, setSeoMetrics] = useState({ traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
   const [savingMetrics, setSavingMetrics] = useState(false);
 
   const fetchClinic = () => {
@@ -166,6 +166,16 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 value={seoMetrics.cost}
                 onChange={e => setSeoMetrics({ ...seoMetrics, cost: e.target.value })}
                 className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico de Redes Sociales (Instagram/TikTok)</label>
+              <input 
+                type="text" 
+                placeholder="Ej: 30% del tráfico viene de Meta. Atención ultra corta."
+                value={seoMetrics.socialTraffic}
+                onChange={e => setSeoMetrics({ ...seoMetrics, socialTraffic: e.target.value })}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-blue-500/50"
               />
             </div>
             <div>
