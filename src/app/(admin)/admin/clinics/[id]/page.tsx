@@ -266,7 +266,9 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                       className="w-12 h-12 rounded-xl shadow-inner border border-neutral-700 cursor-pointer hover:scale-105 hover:ring-2 hover:ring-yellow-500/50 transition-all" 
                       style={{ backgroundColor: clinic.brandings?.[0]?.primaryColor || "#333" }}
                       onClick={() => {
-                        setTempColor(clinic.brandings?.[0]?.primaryColor || "#000000");
+                        const dbColor = clinic.brandings?.[0]?.primaryColor || "#000000";
+                        const match = dbColor.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
+                        setTempColor(match ? match[0] : dbColor);
                         setEditingColor(true);
                       }}
                       title="Editar Color"
@@ -278,7 +280,9 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                   </div>
                   <button 
                     onClick={() => {
-                      setTempColor(clinic.brandings?.[0]?.primaryColor || "#000000");
+                      const dbColor = clinic.brandings?.[0]?.primaryColor || "#000000";
+                      const match = dbColor.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
+                      setTempColor(match ? match[0] : dbColor);
                       setEditingColor(true);
                     }}
                     className="text-neutral-400 hover:text-white px-4 py-2 border border-neutral-800 rounded-xl transition-colors text-sm font-medium"
@@ -319,8 +323,11 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                             <input 
                               type="text" 
                               value={tempColor} 
-                              onChange={(e) => setTempColor(e.target.value)} 
-                              className="bg-transparent text-white font-mono outline-none w-24 pl-1" 
+                              onChange={(e) => {
+                                const match = e.target.value.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
+                                setTempColor(match ? match[0] : e.target.value);
+                              }} 
+                              className="bg-transparent text-white font-mono outline-none w-32 sm:w-64 pl-1 truncate" 
                             />
                           </div>
                         </div>
