@@ -150,32 +150,29 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico Orgánico Mensual</label>
-              <input 
-                type="text" 
+              <textarea 
                 placeholder="Ej: 5.000 visitas/mes"
                 value={seoMetrics.traffic}
                 onChange={e => setSeoMetrics({ ...seoMetrics, traffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[80px]"
               />
             </div>
             <div>
               <label className="text-neutral-400 text-sm mb-1 block font-bold">Valor Mensual del Tráfico (VMT / Cost)</label>
-              <input 
-                type="text" 
+              <textarea 
                 placeholder="Ej: $3,500 en Ads"
                 value={seoMetrics.cost}
                 onChange={e => setSeoMetrics({ ...seoMetrics, cost: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[80px]"
               />
             </div>
             <div className="md:col-span-2">
               <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico de Redes Sociales (Instagram/TikTok)</label>
-              <input 
-                type="text" 
+              <textarea 
                 placeholder="Ej: 30% del tráfico viene de Meta. Atención ultra corta."
                 value={seoMetrics.socialTraffic}
                 onChange={e => setSeoMetrics({ ...seoMetrics, socialTraffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-blue-500/50"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-blue-500/50 min-h-[80px]"
               />
             </div>
             <div>
