@@ -16,12 +16,17 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [contactDate, setContactDate] = useState(new Date().toISOString().split('T')[0]);
   const [editingColor, setEditingColor] = useState(false);
   const [tempColor, setTempColor] = useState("#ffffff");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [editingVideo, setEditingVideo] = useState(false);
 
   const fetchClinic = () => {
     fetch(`/api/clinics/${unwrappedParams.id}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success) setClinic(data.data);
+        if (data.success) {
+          setClinic(data.data);
+          if (data.data.videoUrl) setVideoUrl(data.data.videoUrl);
+        }
         setLoading(false);
       });
   };
@@ -49,6 +54,16 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
       body: JSON.stringify({ primaryColor: tempColor }),
     });
     setEditingColor(false);
+    fetchClinic();
+  };
+
+  const handleSaveVideo = async () => {
+    await fetch(`/api/clinics/${unwrappedParams.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ videoUrl }),
+    });
+    setEditingVideo(false);
     fetchClinic();
   };
 
@@ -348,6 +363,54 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                         Guardar Color
                       </button>
                     </div>
+                  </div>
+               </div>
+             )}
+           </div>
+
+           <div>
+             <h3 className="text-xl font-bold mb-3 pt-6 border-t border-neutral-800">Video Demo (Opcional)</h3>
+             {!editingVideo ? (
+               <div className="flex items-center justify-between gap-4 bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
+                  <div className="flex flex-col gap-1 overflow-hidden">
+                     <p className="text-neutral-400 text-sm">URL Unlisted (YouTube/Loom/etc)</p>
+                     <a href={clinic.videoUrl || "#"} target="_blank" className="text-white font-mono text-xs truncate hover:text-yellow-500">{clinic.videoUrl || "Sin video configurado"}</a>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setVideoUrl(clinic.videoUrl || "");
+                      setEditingVideo(true);
+                    }}
+                    className="text-neutral-400 hover:text-white px-4 py-2 border border-neutral-800 rounded-xl transition-colors text-sm font-medium shrink-0"
+                  >
+                    Editar
+                  </button>
+               </div>
+             ) : (
+               <div className="bg-neutral-950 border border-yellow-500/50 rounded-2xl p-6 space-y-6">
+                  <div>
+                    <p className="text-neutral-400 text-sm mb-2">Pega la URL del vídeo a pantalla completa que quieres mostrar en The Pitch Modal:</p>
+                    <input 
+                      type="url" 
+                      value={videoUrl} 
+                      onChange={(e) => setVideoUrl(e.target.value)} 
+                      placeholder="https://www.youtube.com/embed/..."
+                      className="bg-neutral-900 border border-neutral-800 text-white p-3 rounded-xl outline-none focus:border-yellow-500/50 w-full" 
+                    />
+                  </div>
+                  <div className="flex gap-3 justify-end border-t border-neutral-800 pt-6">
+                    <button 
+                      onClick={() => setEditingVideo(false)} 
+                      className="text-neutral-400 hover:text-white px-5 py-2.5 text-sm font-medium transition-colors border border-neutral-800 hover:bg-neutral-800 rounded-xl"
+                    >
+                      Cancelar
+                    </button>
+                    <button 
+                      onClick={handleSaveVideo} 
+                      className="bg-yellow-500 text-black px-6 py-2.5 text-sm font-bold rounded-xl hover:bg-yellow-400 transition-colors shadow-lg"
+                    >
+                      Guardar Video
+                    </button>
                   </div>
                </div>
              )}

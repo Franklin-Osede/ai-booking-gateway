@@ -42,6 +42,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   let customColor = "#1a4b8c";
   let customIndustry = "Clínica Capilar";
   let detectedLang = "es";
+  let customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
 
   try {
     const clinic = await prisma.clinic.findFirst({
@@ -58,6 +59,8 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       customSiteUrl = clinic.websites?.[0]?.url || customSiteUrl;
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
       customIndustry = clinic.industry || customIndustry;
+      // @ts-expect-error - Prisma client may not be fully synced yet
+      if (clinic.videoUrl) customVideo = clinic.videoUrl;
       
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,8 +102,6 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
 
   const customColorMatch = customColor?.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
   if (customColorMatch) customColor = customColorMatch[0];
-
-  const customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
 
   // Por defecto usamos proxy para saltar las protecciones X-Frame-Options.
   // Solo desactivamos proxy si pasamos ?proxy=false
