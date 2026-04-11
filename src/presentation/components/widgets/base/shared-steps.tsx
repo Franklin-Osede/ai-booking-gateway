@@ -152,13 +152,11 @@ export function BookingCheckoutStep({ color, contrastText, nextStep }: SharedPro
               <button 
                 disabled={isProcessing}
                 onClick={() => {
-                  if (email) {
-                    setIsProcessing(true);
-                    setTimeout(() => {
-                      setIsProcessing(false);
-                      nextStep();
-                    }, 1500);
-                  } else alert("Valid email required");
+                  setIsProcessing(true);
+                  setTimeout(() => {
+                    setIsProcessing(false);
+                    nextStep();
+                  }, 1500);
                 }}
                 className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-extrabold text-white transition-all shadow-lg text-base ${isProcessing ? 'opacity-80' : 'hover:shadow-xl active:scale-95'}`}
                 style={{ backgroundColor: color, color: contrastText }}

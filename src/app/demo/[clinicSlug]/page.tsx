@@ -97,6 +97,9 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
      console.error("Failed to load clinic in demo hub", error);
   }
 
+  const customColorMatch = customColor?.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b/);
+  if (customColorMatch) customColor = customColorMatch[0];
+
   const customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
 
   // Por defecto usamos proxy para saltar las protecciones X-Frame-Options.

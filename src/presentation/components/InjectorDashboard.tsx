@@ -163,7 +163,10 @@ export function InjectorDashboard() {
                <input 
                  type="text"
                  value={brandColor}
-                 onChange={(e) => setBrandColor(e.target.value)}
+                 onChange={(e) => {
+                    const match = e.target.value.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b/);
+                    setBrandColor(match ? match[0] : e.target.value);
+                 }}
                  className="flex-1 bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white font-mono text-lg uppercase"
                />
              </div>

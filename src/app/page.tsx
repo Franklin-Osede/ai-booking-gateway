@@ -44,6 +44,9 @@ export default async function Home({
     }
   }
 
+  const brandColorMatch = brandColor?.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b/);
+  if (brandColorMatch) brandColor = brandColorMatch[0];
+
   if (!siteUrl) {
     return <InjectorDashboard />;
   }

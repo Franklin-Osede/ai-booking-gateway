@@ -59,9 +59,15 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen, lang = "es"
 
   useEffect(() => {
     try {
-      const url = new URLSearchParams(window.location.search).get('site');
-      if (url) {
-        setTimeout(() => setBrandName(new URL(url).hostname.replace('www.', '').split('.')[0]), 0);
+      const urlParam = new URLSearchParams(window.location.search).get('site');
+      if (urlParam) {
+        let actualSite = urlParam;
+        if (actualSite.includes('url=')) {
+           try { actualSite = decodeURIComponent(actualSite.split('url=')[1].split('&')[0]); } catch {}
+        }
+        let host = actualSite;
+        try { host = new URL(actualSite).hostname; } catch { host = actualSite.replace(/^https?:\/\//, '').split('/')[0]; }
+        setTimeout(() => setBrandName(host.replace('www.', '').split('.')[0]), 0);
       }
     } catch { /* ignored */ }
   }, []);
@@ -94,6 +100,42 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen, lang = "es"
       });
       setUploadedPhotos(prev => [...prev, ...newUrls].slice(0, 3));
     }
+  };
+
+  const handleAdvancedUploadClick = async (e: React.MouseEvent) => {
+    if (typeof window !== 'undefined' && 'showOpenFilePicker' in window) {
+      // Prevent standard file dialog if File System Access API is supported
+      e.preventDefault();
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fileHandles = await (window as any).showOpenFilePicker({
+          startIn: 'desktop',
+          multiple: true,
+          types: [{
+            description: 'Imágenes',
+            accept: {
+              'image/*': ['.png', '.jpeg', '.jpg', '.webp']
+            }
+          }]
+        });
+        const files: File[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        for (const handle of fileHandles as any[]) {
+          files.push(await handle.getFile());
+        }
+        if (files.length > 0) {
+          const newUrls = files.map(f => {
+            const url = URL.createObjectURL(f);
+            blobTrackerRef.current.push(url);
+            return url;
+          });
+          setUploadedPhotos(prev => [...prev, ...newUrls].slice(0, 3));
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'AbortError') console.error('Upload Error:', err);
+      }
+    }
+    // If showOpenFilePicker is not supported, it falls back to default browser behavior
   };
 
   return (
@@ -443,7 +485,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen, lang = "es"
                       
                       {uploadedPhotos.length === 0 ? (
                         <div className="border-2 border-dashed border-gray-200 rounded-3xl p-8 sm:p-10 mb-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition-colors relative group">
-                          <input type="file" multiple accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleFileUpload} />
+                          <input type="file" multiple accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleFileUpload} onClick={handleAdvancedUploadClick} />
                           
                           <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                             <Upload size={28} style={{ color }} />
@@ -461,7 +503,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen, lang = "es"
                           ))}
                           {uploadedPhotos.length < 3 && (
                             <label className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors shrink-0">
-                              <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileUpload} />
+                              <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileUpload} onClick={handleAdvancedUploadClick} />
                               <Upload size={24} className="text-gray-400 mb-1" />
                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Añadir</span>
                             </label>

@@ -129,7 +129,13 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
          if (brandParam) {
             currentBrand = brandParam;
          } else if (storedSite) {
-            let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
+            let actualSite = storedSite;
+            if (storedSite.includes('url=')) {
+               try { actualSite = decodeURIComponent(storedSite.split('url=')[1].split('&')[0]); } catch {}
+            }
+            let host = actualSite;
+            try { host = new URL(actualSite).hostname; } catch { host = actualSite.replace(/^https?:\/\//, '').split('/')[0]; }
+            let parsedName = host.replace('www.', '').split('.')[0];
             parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
             if (!parsedName) parsedName = "especializada";
             currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
@@ -203,8 +209,17 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     try {
       const brandParam = new URLSearchParams(window.location.search).get('brand');
       const storedSite = localStorage.getItem('onboarding_site_url');
-      if (brandParam) currentBrand = brandParam;
-      else if (storedSite) currentBrand = "la clínica " + new URL(storedSite).hostname.replace('www.', '').split('.')[0];
+      if (brandParam) {
+        currentBrand = brandParam;
+      } else if (storedSite) {
+        let actualSite = storedSite;
+        if (storedSite.includes('url=')) {
+           try { actualSite = decodeURIComponent(storedSite.split('url=')[1].split('&')[0]); } catch {}
+        }
+        let host = actualSite;
+        try { host = new URL(actualSite).hostname; } catch { host = actualSite.replace(/^https?:\/\//, '').split('/')[0]; }
+        currentBrand = "la clínica " + host.replace('www.', '').split('.')[0];
+      }
     } catch {}
         
     let voiceProvider = "elevenlabs";
@@ -240,13 +255,22 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     try {
       const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
       const brandParam = new URLSearchParams(window.location.search).get('brand');
+      
+      let actualSite = storedSite || '';
+      if (actualSite.includes('url=')) {
+         try { actualSite = decodeURIComponent(actualSite.split('url=')[1].split('&')[0]); } catch {}
+      }
+
       if (brandParam) {
         setTimeout(() => setBrandName(brandParam), 0);
-      } else if (storedSite) {
-        setTimeout(() => setBrandName(new URL(storedSite).hostname.replace('www.', '').split('.')[0]), 0);
+      } else if (actualSite) {
+        let host = actualSite;
+        try { host = new URL(actualSite).hostname; } catch { host = actualSite.replace(/^https?:\/\//, '').split('/')[0]; }
+        setTimeout(() => setBrandName(host.replace('www.', '').split('.')[0]), 0);
       }
-      if (storedSite) {
-        fetch('/api/v1/scrape-team?url=' + encodeURIComponent(storedSite) + '&t=' + Date.now())
+      
+      if (actualSite) {
+        fetch('/api/v1/scrape-team?url=' + encodeURIComponent(actualSite) + '&t=' + Date.now())
           .then(res => res.json())
           .then(data => {
             if (data && data.success) {
