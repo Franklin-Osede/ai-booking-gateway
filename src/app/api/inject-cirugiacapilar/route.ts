@@ -22,7 +22,7 @@ export async function GET() {
       await prisma.clinic.update({
         where: { id: clinic.id },
         data: { 
-          seoMetrics: seoMetrics as any,
+          seoMetrics,
           websites: {
             create: { url: "http://www.cirugiacapilar.es/" }
           }
@@ -35,7 +35,7 @@ export async function GET() {
           slug: "cirugiacapilar",
           industry: "Clínica Capilar",
           location: "Madrid",
-          seoMetrics: seoMetrics as any,
+          seoMetrics,
           websites: { create: { url: "http://www.cirugiacapilar.es/" } }
         }
       });
