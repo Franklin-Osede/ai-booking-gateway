@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2, BarChart3, Save } from "lucide-react";
+import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2, BarChart3, Save, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ClinicDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -9,6 +10,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [clinic, setClinic] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"config" | "metrics" | "outreach">("config");
+  const router = useRouter();
   
   // Forms
   const [status, setStatus] = useState("contactado");
@@ -18,7 +20,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [tempColor, setTempColor] = useState("#ffffff");
   const [videoUrl, setVideoUrl] = useState("");
   const [editingVideo, setEditingVideo] = useState(false);
-  const [seoMetrics, setSeoMetrics] = useState({ traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
+  const [seoMetrics, setSeoMetrics] = useState({ summary: "", traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
   const [savingMetrics, setSavingMetrics] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
 
@@ -94,6 +96,16 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
 
   return (
     <div className="space-y-8">
+      {/* Botón Volver */}
+      <div>
+        <button 
+          onClick={() => router.push('/admin')}
+          className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors font-medium text-sm bg-neutral-900 border border-neutral-800 px-4 py-2 rounded-xl"
+        >
+          <ArrowLeft size={16} /> Volver a Clínicas
+        </button>
+      </div>
+
       {/* Header */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 sticky top-0 z-10 shadow-2xl">
         <div className="flex justify-between items-start">
@@ -151,13 +163,22 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="text-neutral-400 text-sm mb-1 block font-bold">Resumen / Arquetipo (Summary)</label>
+              <textarea 
+                placeholder="Ej: El Fantasma Digital. Sin tracción orgánica..."
+                value={seoMetrics.summary}
+                onChange={e => setSeoMetrics({ ...seoMetrics, summary: e.target.value })}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
+              />
+            </div>
             <div>
               <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico Orgánico Mensual</label>
               <textarea 
                 placeholder="Ej: 5.000 visitas/mes"
                 value={seoMetrics.traffic}
                 onChange={e => setSeoMetrics({ ...seoMetrics, traffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[140px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
               />
             </div>
             <div>
@@ -166,7 +187,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: $3,500 en Ads"
                 value={seoMetrics.cost}
                 onChange={e => setSeoMetrics({ ...seoMetrics, cost: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-green-500/50 min-h-[140px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
               />
             </div>
             <div className="md:col-span-2">
@@ -175,7 +196,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: 30% del tráfico viene de Meta. Atención ultra corta."
                 value={seoMetrics.socialTraffic}
                 onChange={e => setSeoMetrics({ ...seoMetrics, socialTraffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-white outline-none focus:border-blue-500/50 min-h-[140px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-blue-500/50 min-h-[250px]"
               />
             </div>
             <div>
@@ -184,7 +205,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: Rankean por 'precio injerto', pero pierden leads ahí."
                 value={seoMetrics.topPages}
                 onChange={e => setSeoMetrics({ ...seoMetrics, topPages: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[300px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[400px]"
               />
             </div>
             <div>
@@ -193,7 +214,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: Insparya y Capilclinic."
                 value={seoMetrics.competitors}
                 onChange={e => setSeoMetrics({ ...seoMetrics, competitors: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[300px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[400px]"
               />
             </div>
             <div className="md:col-span-2">
@@ -202,7 +223,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 placeholder="Ej: Mencionar que el widget IA solucionará sus rebotes nocturnos."
                 value={seoMetrics.insights}
                 onChange={e => setSeoMetrics({ ...seoMetrics, insights: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[350px]"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[600px]"
               />
             </div>
           </div>
