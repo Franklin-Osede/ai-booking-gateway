@@ -59,7 +59,6 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       customSiteUrl = clinic.websites?.[0]?.url || customSiteUrl;
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
       customIndustry = clinic.industry || customIndustry;
-      // @ts-expect-error - Prisma client may not be fully synced yet
       if (clinic.videoUrl) customVideo = clinic.videoUrl;
       
 
