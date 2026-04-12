@@ -210,8 +210,8 @@ export default function AdminDashboard() {
             />
           </div>
           
-          <div className="flex flex-wrap gap-4 flex-1">
-            <div className="flex-1 min-w-[200px] max-w-[300px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-1 w-full">
+            <div className="w-full">
                <select 
                   value={selectedIndustry}
                   onChange={(e) => setSelectedIndustry(e.target.value)}
@@ -224,7 +224,7 @@ export default function AdminDashboard() {
                </select>
             </div>
 
-            <div className="flex-1 min-w-[200px] max-w-[300px]">
+            <div className="w-full">
                <select 
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
                </select>
             </div>
 
-            <div className="flex-1 min-w-[200px] max-w-[300px]">
+            <div className="w-full">
                <select 
                   value={selectedCountry}
                   onChange={(e) => setSelectedCountry(e.target.value)}
@@ -250,13 +250,13 @@ export default function AdminDashboard() {
                </select>
             </div>
 
-            <div className="flex-1 min-w-[200px] max-w-[300px]">
+            <div className="w-full">
                <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 outline-none focus:border-yellow-500/50 text-yellow-500 text-sm font-bold cursor-pointer"
                >
-                  <option value="updated">⏱️ Recién Editadas (Vistas)</option>
+                  <option value="updated">⏱️ Recién Editadas</option>
                   <option value="created">🆕 Añadidas Recientemente</option>
                   <option value="name">🔤 Alfabético (A-Z)</option>
                </select>
