@@ -12,6 +12,7 @@ type Clinic = {
   location: string | null;
   countryCode?: string | null;
   createdAt: string;
+  updatedAt?: string;
   websites?: { url: string }[];
 };
 
@@ -23,6 +24,7 @@ export default function AdminDashboard() {
   const [selectedIndustry, setSelectedIndustry] = useState<string>("All");
   const [selectedLocation, setSelectedLocation] = useState<string>("All");
   const [selectedCountry, setSelectedCountry] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<string>("updated");
 
   // Bulk Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -128,6 +130,17 @@ export default function AdminDashboard() {
     const matchesLocation = selectedLocation === "All" || (selectedLocation === "SinEspecificar" && !clinic.location) || clinic.location === selectedLocation;
     const matchesCountry = selectedCountry === "All" || (clinic.countryCode || 'ES') === selectedCountry;
     return matchesSearch && matchesIndustry && matchesLocation && matchesCountry;
+  });
+
+  const sortedClinics = [...filteredClinics].sort((a, b) => {
+    if (sortBy === "updated") {
+      return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+    } else if (sortBy === "created") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else if (sortBy === "name") {
+      return a.name.localeCompare(b.name);
+    }
+    return 0;
   });
 
   return (
@@ -236,12 +249,24 @@ export default function AdminDashboard() {
                   <option value="EN">🇬🇧 Reino Unido</option>
                </select>
             </div>
+
+            <div className="flex-1 min-w-[200px] max-w-[300px]">
+               <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 outline-none focus:border-yellow-500/50 text-yellow-500 text-sm font-bold cursor-pointer"
+               >
+                  <option value="updated">⏱️ Recién Editadas (Vistas)</option>
+                  <option value="created">🆕 Añadidas Recientemente</option>
+                  <option value="name">🔤 Alfabético (A-Z)</option>
+               </select>
+            </div>
           </div>
         </div>
 
         {loading ? (
           <div className="text-center py-10 text-neutral-500">Cargando clínicas...</div>
-        ) : filteredClinics.length === 0 ? (
+        ) : sortedClinics.length === 0 ? (
           <div className="text-center py-10 text-neutral-500">
             <Search size={48} className="mx-auto mb-4 opacity-50" />
             <p className="font-medium text-lg text-white mb-1">Sin resultados</p>
@@ -258,7 +283,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filteredClinics.map((clinic) => {
+                {sortedClinics.map((clinic) => {
                    return (
                      <tr 
                        key={clinic.id} 
