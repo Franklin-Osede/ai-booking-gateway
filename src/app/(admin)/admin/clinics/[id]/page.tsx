@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2, BarChart3, Save, ArrowLeft } from "lucide-react";
+import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2, BarChart3, Save, ArrowLeft, Target, Activity, TrendingDown, Quote, Copy, Edit2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ClinicDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -23,6 +23,8 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [seoMetrics, setSeoMetrics] = useState({ summary: "", traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
   const [savingMetrics, setSavingMetrics] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
+  const [isEditingMetrics, setIsEditingMetrics] = useState(false);
+  const [copiedPitch, setCopiedPitch] = useState(false);
 
   const fetchClinic = () => {
     fetch(`/api/clinics/${unwrappedParams.id}`)
@@ -154,94 +156,169 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
       {/* Content */}
       {tab === "metrics" && (
         <div className="bg-neutral-900 border border-green-500/30 rounded-3xl p-8 space-y-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-green-500/20 p-3 rounded-xl text-green-500"><BarChart3 size={24} /></div>
-            <div>
-              <h3 className="text-xl font-bold">Investigación & Métricas (Ahrefs/SEMrush)</h3>
-              <p className="text-neutral-400 text-sm">Recoge datos clave aquí para deslumbrar en la llamada de ventas.</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-500/20 p-3 rounded-xl text-green-500"><BarChart3 size={24} /></div>
+              <div>
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  Dossier Táctico 
+                  <span className="bg-neutral-800 text-neutral-400 text-xs px-2 py-1 rounded-md uppercase tracking-wider">Sales Intelligence</span>
+                </h3>
+                <p className="text-neutral-400 text-sm">Inteligencia en tiempo real para tu llamada consultiva.</p>
+              </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="text-neutral-400 text-sm mb-1 block font-bold">Resumen / Arquetipo (Summary)</label>
-              <textarea 
-                placeholder="Ej: El Fantasma Digital. Sin tracción orgánica..."
-                value={seoMetrics.summary}
-                onChange={e => setSeoMetrics({ ...seoMetrics, summary: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
-              />
-            </div>
-            <div>
-              <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico Orgánico Mensual</label>
-              <textarea 
-                placeholder="Ej: 5.000 visitas/mes"
-                value={seoMetrics.traffic}
-                onChange={e => setSeoMetrics({ ...seoMetrics, traffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
-              />
-            </div>
-            <div>
-              <label className="text-neutral-400 text-sm mb-1 block font-bold">Valor Mensual del Tráfico (VMT / Cost)</label>
-              <textarea 
-                placeholder="Ej: $3,500 en Ads"
-                value={seoMetrics.cost}
-                onChange={e => setSeoMetrics({ ...seoMetrics, cost: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico de Redes Sociales (Instagram/TikTok)</label>
-              <textarea 
-                placeholder="Ej: 30% del tráfico viene de Meta. Atención ultra corta."
-                value={seoMetrics.socialTraffic}
-                onChange={e => setSeoMetrics({ ...seoMetrics, socialTraffic: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-blue-500/50 min-h-[250px]"
-              />
-            </div>
-            <div>
-              <label className="text-neutral-400 text-sm mb-1 block font-bold">Páginas o Keywords Top de Fuga</label>
-              <textarea 
-                placeholder="Ej: Rankean por 'precio injerto', pero pierden leads ahí."
-                value={seoMetrics.topPages}
-                onChange={e => setSeoMetrics({ ...seoMetrics, topPages: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[400px]"
-              />
-            </div>
-            <div>
-              <label className="text-neutral-400 text-sm mb-1 block font-bold">Competidores Directos</label>
-              <textarea 
-                placeholder="Ej: Insparya y Capilclinic."
-                value={seoMetrics.competitors}
-                onChange={e => setSeoMetrics({ ...seoMetrics, competitors: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[400px]"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-neutral-400 text-sm mb-1 block font-bold">Insights Estratégicos para la Llamada</label>
-              <textarea 
-                placeholder="Ej: Mencionar que el widget IA solucionará sus rebotes nocturnos."
-                value={seoMetrics.insights}
-                onChange={e => setSeoMetrics({ ...seoMetrics, insights: e.target.value })}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[600px]"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-4 border-t border-neutral-800 mt-6">
             <button 
-              onClick={handleSaveMetrics}
-              disabled={savingMetrics || hasSaved}
-              className={`font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center gap-2 ${
-                hasSaved 
-                  ? "bg-emerald-600 text-white" 
-                  : "bg-green-600 hover:bg-green-500 text-white"
-              }`}
+              onClick={() => setIsEditingMetrics(!isEditingMetrics)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border ${isEditingMetrics ? 'bg-neutral-800 border-neutral-700 text-white' : 'bg-transparent border-neutral-700 text-neutral-400 hover:text-white hover:bg-neutral-800'}`}
             >
-              {hasSaved ? <Check size={18} /> : <Save size={18} />} 
-              {savingMetrics ? "Guardando..." : hasSaved ? "¡Guardado!" : "Guardar Métricas"}
+              {isEditingMetrics ? <><Check size={16}/> Ver Dossier</> : <><Edit2 size={16}/> Editar Datos</>}
             </button>
           </div>
+
+          {!isEditingMetrics ? (
+            <div className="space-y-6">
+              {/* Arquetipo Header */}
+              <div className="bg-neutral-950 border border-green-500/30 relative overflow-hidden rounded-2xl p-6 shadow-2xl group">
+                <div className="absolute top-0 right-0 p-8 opacity-5 text-green-500 rotate-12 group-hover:scale-110 transition-transform duration-700 pointer-events-none"><Target size={120}/></div>
+                <h4 className="text-green-500 font-bold uppercase tracking-widest text-xs flex items-center gap-2 mb-3">
+                   <Target size={14}/> Diagnóstico & Arquetipo
+                </h4>
+                <p className="text-white text-lg md:text-xl leading-relaxed font-medium relative z-10">
+                  {seoMetrics.summary || "Sin análisis de arquetipo disponible. Edita los datos para añadirlo."}
+                </p>
+              </div>
+
+              {/* Grid 2x2 Bento */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5 hover:border-yellow-500/30 transition-colors">
+                  <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2 flex items-center gap-2"><Activity size={14} className="text-yellow-500"/> Tráfico Orgánico Mensual</h4>
+                  <p className="text-neutral-200">{seoMetrics.traffic || "N/A"}</p>
+                </div>
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5 hover:border-red-500/30 transition-colors">
+                   <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2 flex items-center gap-2"><TrendingDown size={14} className="text-red-500"/> Coste de Oportunidad / Fuga</h4>
+                   <p className="text-neutral-200">{seoMetrics.cost || "N/A"}</p>
+                </div>
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5">
+                   <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2">Top Pages / Fugas Secundarias</h4>
+                   <p className="text-neutral-300 text-sm whitespace-pre-wrap">{seoMetrics.topPages || "N/A"}</p>
+                </div>
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5">
+                   <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2">Competencia</h4>
+                   <p className="text-neutral-300 text-sm whitespace-pre-wrap">{seoMetrics.competitors || "N/A"}</p>
+                </div>
+              </div>
+
+              {seoMetrics.socialTraffic && (
+                <div className="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-4">
+                  <h4 className="text-blue-400 font-bold text-xs uppercase mb-1">Contexto Social (Meta/TikTok)</h4>
+                  <p className="text-blue-100/80 text-sm">{seoMetrics.socialTraffic}</p>
+                </div>
+              )}
+
+              {/* Teleprompter / Sales Pitch */}
+              <div className="bg-linear-to-br from-yellow-500/10 to-transparent border border-yellow-500/50 rounded-2xl p-6 md:p-8 mt-8 shadow-inner relative">
+                 <div className="absolute -top-3 left-6 bg-neutral-900 border border-yellow-500/50 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                    <Quote size={12}/> The Pitch Injector
+                 </div>
+                 <div className="flex justify-end mb-4">
+                   <button 
+                     onClick={() => {
+                       navigator.clipboard.writeText(seoMetrics.insights);
+                       setCopiedPitch(true);
+                       setTimeout(() => setCopiedPitch(false), 2000);
+                     }}
+                     className="text-neutral-400 hover:text-yellow-500 flex items-center gap-1 text-xs font-bold bg-neutral-950 p-2 rounded-lg border border-neutral-800 transition-colors"
+                   >
+                     {copiedPitch ? <Check size={14}/> : <Copy size={14}/>}
+                     {copiedPitch ? "Copiado" : "Copiar Texto"}
+                   </button>
+                 </div>
+                 <p className="text-yellow-500/90 font-medium text-lg md:text-xl leading-relaxed whitespace-pre-wrap">
+                   {seoMetrics.insights || "No hay pitch disponible. Edita las métricas para redactar el guion de venta consultiva."}
+                 </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
+              <div className="md:col-span-2">
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Resumen / Arquetipo (Summary)</label>
+                <textarea 
+                  placeholder="Ej: El Fantasma Digital. Sin tracción orgánica..."
+                  value={seoMetrics.summary}
+                  onChange={e => setSeoMetrics({ ...seoMetrics, summary: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
+                />
+              </div>
+              <div>
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico Orgánico Mensual</label>
+                <textarea 
+                  placeholder="Ej: 5.000 visitas/mes"
+                  value={seoMetrics.traffic}
+                  onChange={e => setSeoMetrics({ ...seoMetrics, traffic: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
+                />
+              </div>
+              <div>
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Valor Mensual del Tráfico (VMT / Cost)</label>
+                <textarea 
+                  placeholder="Ej: $3,500 en Ads"
+                  value={seoMetrics.cost}
+                  onChange={e => setSeoMetrics({ ...seoMetrics, cost: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-green-500/50 min-h-[300px]"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Tráfico de Redes Sociales (Instagram/TikTok)</label>
+                <textarea 
+                  placeholder="Ej: 30% del tráfico viene de Meta. Atención ultra corta."
+                  value={seoMetrics.socialTraffic}
+                  onChange={e => setSeoMetrics({ ...seoMetrics, socialTraffic: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-blue-500/50 min-h-[250px]"
+                />
+              </div>
+              <div>
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Páginas o Keywords Top de Fuga</label>
+                <textarea 
+                  placeholder="Ej: Rankean por 'precio injerto', pero pierden leads ahí."
+                  value={seoMetrics.topPages}
+                  onChange={e => setSeoMetrics({ ...seoMetrics, topPages: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[400px]"
+                />
+              </div>
+              <div>
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Competidores Directos</label>
+                <textarea 
+                  placeholder="Ej: Insparya y Capilclinic."
+                  value={seoMetrics.competitors}
+                  onChange={e => setSeoMetrics({ ...seoMetrics, competitors: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[400px]"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Insights Estratégicos para la Llamada</label>
+                <textarea 
+                  placeholder="Ej: Mencionar que el widget IA solucionará sus rebotes nocturnos."
+                  value={seoMetrics.insights}
+                  onChange={e => setSeoMetrics({ ...seoMetrics, insights: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white outline-none focus:border-green-500/50 min-h-[600px]"
+                />
+              </div>
+              <div className="md:col-span-2 flex justify-end pt-4 border-t border-neutral-800 mt-6">
+                <button 
+                  onClick={handleSaveMetrics}
+                  disabled={savingMetrics || hasSaved}
+                  className={`font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center gap-2 ${
+                    hasSaved 
+                      ? "bg-emerald-600 text-white" 
+                      : "bg-green-600 hover:bg-green-500 text-white"
+                  }`}
+                >
+                  {hasSaved ? <Check size={18} /> : <Save size={18} />} 
+                  {savingMetrics ? "Guardando..." : hasSaved ? "¡Guardado!" : "Guardar Cambios"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

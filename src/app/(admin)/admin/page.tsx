@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin, FileSpreadsheet, Trash2 } from "lucide-react";
+import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin, FileSpreadsheet, Trash2, Brain } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseExcelBuffer, ParsedClinic } from "@/lib/excel-parser";
 
@@ -14,6 +14,7 @@ type Clinic = {
   createdAt: string;
   updatedAt?: string;
   websites?: { url: string }[];
+  seoMetrics?: Record<string, unknown>;
 };
 
 export default function AdminDashboard() {
@@ -295,7 +296,14 @@ export default function AdminDashboard() {
                            <Building2 size={18} />
                          </div>
                          <div>
-                            <span className="text-white capitalize text-base block font-bold tracking-tight">{clinic.name}</span>
+                            <span className="text-white capitalize text-base flex flex-wrap items-center gap-2 font-bold tracking-tight">
+                                {clinic.name}
+                                {clinic.seoMetrics && (
+                                  <span className="flex items-center gap-1 bg-green-500/10 text-green-400 border border-green-500/20 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                                    <Brain size={12} /> Datos Inyectados
+                                  </span>
+                                )}
+                            </span>
                             <span className="text-xs text-neutral-500 font-medium">{clinic.industry}</span>
                          </div>
                        </td>
