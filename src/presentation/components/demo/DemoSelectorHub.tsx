@@ -39,7 +39,7 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
         ? "Diagnóstico interactivo para pre-evaluar inyectables, bótox y calidad de la piel."
         : "Formulario gamificado con subida de fotos y un simulador folicular visual.",
       icon: <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />,
-      highlight: true
+      highlight: false
     },
     {
       id: "voice" as const,
