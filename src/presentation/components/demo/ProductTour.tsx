@@ -15,9 +15,9 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
 
   const steps = [
     { targetId: 'center', title: 'Automatización Integral', text: 'Filtra contactos 24/7, extrae datos críticos y los organiza en tu agenda antes de que saturen recepción.' },
-    { targetId: 'tour-mod-voice-free', title: 'Triaje Predictivo', text: 'Clasifica urgencias y patologías de forma autónoma. Descarta curiosos para que el equipo atienda solo casos rentables.' },
+    { targetId: 'tour-mod-triage', title: 'Triaje Predictivo', text: 'Clasifica urgencias y patologías de forma autónoma. Descarta curiosos para que el equipo atienda solo casos rentables.' },
     { targetId: 'tour-mod-text', title: 'Asistente Textual', text: 'Un perfilado digital dinámico. El motor dialoga con la visita para estructurar y validar su perfil antes de derivarlo al equipo.' },
-    { targetId: 'tour-mod-voice', title: 'Agente Telefónico Digital', text: 'Como tener un agente respondiendo llamadas 24/7. Escucha, comprende y responde con total coherencia para agilizar la gestión.' },
+    { targetId: 'tour-mod-voice-free', title: 'Agente Telefónico Digital', text: 'Como tener un agente respondiendo llamadas 24/7. Escucha, comprende y responde con total coherencia para agilizar la gestión.' },
     { targetId: 'tour-video-intro', title: 'Videodemostración', text: 'Te explico personalmente cómo funciona cada asistente y te enseño su vinculación invisible con tu agenda habitual.' },
     { targetId: 'tour-agendar', title: 'Auditoría Técnica', text: 'Descubre en 15 min cómo integrar y adaptar este ecosistema a las especialidades concretas de tu propio centro.' }
   ];
@@ -100,14 +100,29 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
        }
     }
 
-    wrapperStyle = {
-      position: 'absolute',
-      top: topPos + 'px',
-      left: leftPos + 'px',
-      transform: 'translateX(-50%)',
-      zIndex: 9999
-    };
-    arrowClass = "absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 rotate-45 border-l border-t border-gray-700/50";
+    // Safety check for bottom overflow
+    const estimatedTooltipHeight = 220; // safe assumption for mobile
+    const isOverflowBottom = typeof window !== 'undefined' && (topPos + estimatedTooltipHeight > window.innerHeight);
+
+    if (isOverflowBottom) {
+      wrapperStyle = {
+        position: 'absolute',
+        bottom: (window.innerHeight - targetRect.top + 15) + 'px',
+        left: leftPos + 'px',
+        transform: 'translateX(-50%)',
+        zIndex: 9999
+      };
+      arrowClass = "absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 rotate-45 border-r border-b border-gray-700/50";
+    } else {
+      wrapperStyle = {
+        position: 'absolute',
+        top: topPos + 'px',
+        left: leftPos + 'px',
+        transform: 'translateX(-50%)',
+        zIndex: 9999
+      };
+      arrowClass = "absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 rotate-45 border-l border-t border-gray-700/50";
+    }
   }
 
   return (
