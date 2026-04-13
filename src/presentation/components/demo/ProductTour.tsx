@@ -14,12 +14,12 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
   const [targetRect, setTargetRect] = useState<{ top: number; left: number; width: number; height: number; } | null>(null);
 
   const steps = [
-    { targetId: 'center', title: 'Automatización Integral para Tu Clínica', text: 'Descubre un sistema predictivo diseñado para apoyar a tu equipo: filtra contactos 24/7, capta los datos críticos del paciente y los organiza automáticamente antes de que saturen la recepción.' },
-    { targetId: 'tour-mod-voice-free', title: 'Triaje Predictivo de Sintomatología', text: 'Tu equipo necesita centrarse en casos reales. Este escudo digital clasifica urgencias, patologías y descarta contactos sin impacto comercial de forma autónoma.' },
-    { targetId: 'tour-mod-text', title: 'Apoyo Textual de Cualificación', text: 'Un perfilado mucho más profundo que un formulario tradicional. El motor charla con la visita para estructurar y validar su perfil antes de volcarlo en tu sistema.' },
-    { targetId: 'tour-mod-voice', title: 'Entrevista Guiada por Voz (Recomendado)', text: 'Experimenta un filtrado verbal de alta fidelidad. El paciente habla libremente por el micrófono mientras el sistema empatiza, audita sus necesidades y adelanta trabajo médico.' },
-    { targetId: 'tour-video-intro', title: 'El Motor (Vídeo Demostración)', text: 'En este vídeo te explico de primera mano qué hace cada asistente, cómo funciona el ecosistema detrás y su vinculación directa a tu agenda médica.' },
-    { targetId: 'tour-agendar', title: 'Adaptación a Tu Clínica', text: 'Reserva 15 minutos en nuestro calendario para una pequeña auditoría técnica. Evaluaremos las integraciones de vuestro centro y cómo estructurar este sistema juntas.' }
+    { targetId: 'center', title: 'Automatización Integral', text: 'Filtra contactos 24/7, extrae datos críticos y los organiza en tu agenda antes de que saturen recepción.' },
+    { targetId: 'tour-mod-voice-free', title: 'Triaje Predictivo', text: 'Clasifica urgencias y patologías de forma autónoma. Descarta curiosos para que el equipo atienda solo casos rentables.' },
+    { targetId: 'tour-mod-text', title: 'Asistente Textual', text: 'Un perfilado digital dinámico. El motor dialoga con la visita para estructurar y validar su perfil antes de derivarlo al equipo.' },
+    { targetId: 'tour-mod-voice', title: 'Agente Telefónico Digital', text: 'Como tener un agente respondiendo llamadas 24/7. Escucha, comprende y responde con total coherencia para agilizar la gestión.' },
+    { targetId: 'tour-video-intro', title: 'Videodemostración', text: 'Te explico personalmente cómo funciona cada asistente y te enseño su vinculación invisible con tu agenda habitual.' },
+    { targetId: 'tour-agendar', title: 'Auditoría Técnica', text: 'Descubre en 15 min cómo integrar y adaptar este ecosistema a las especialidades concretas de tu propio centro.' }
   ];
 
   useEffect(() => {
