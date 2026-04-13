@@ -83,14 +83,19 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
       >
         <div className="px-4 py-8 sm:px-12 sm:py-12 flex flex-col items-center text-center overflow-y-auto flex-1">
           <div 
-             className="hidden sm:flex w-16 h-16 rounded-2xl mb-6 items-center justify-center shadow-inner relative"
+             className="hidden sm:flex w-20 h-20 rounded-[1.5rem] mb-6 items-center justify-center shadow-inner relative shrink-0"
              style={{ backgroundColor: `${color}15`, color }}
           >
-             <div className="absolute top-0 left-0 w-full h-full rounded-2xl border-2 opacity-20" style={{ borderColor: color }} />
-             <Sparkles className="w-8 h-8" />
+             <div className="absolute top-0 left-0 w-full h-full rounded-[1.5rem] border-2 opacity-20" style={{ borderColor: color }} />
+             <Sparkles className="w-10 h-10" />
           </div>
           
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2 sm:mb-3 mt-2 sm:mt-0">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}20`, color }}>
+             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: color }} />
+             Entorno de Pruebas (Sandbox)
+          </div>
+          
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2 sm:mb-3 mt-0">
              Sistemas de Automatización
           </h2>
           <p className="text-gray-500 font-medium text-sm sm:text-base max-w-xl mb-6 sm:mb-10 leading-relaxed">
