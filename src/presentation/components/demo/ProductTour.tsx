@@ -14,10 +14,12 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
   const [targetRect, setTargetRect] = useState<{ top: number; left: number; width: number; height: number; } | null>(null);
 
   const steps = [
-    { targetId: 'center', title: '¡Bienvenido a tu HUB!', text: 'Explora el potencial de nuestra Inteligencia Artificial actuando sobre tu web en tiempo real.' },
-    { targetId: 'tour-asistentes-hub', title: 'Voz Guiada', text: 'Haz clic en este modo de agente para simular de forma interactiva el filtrado de un paciente.' },
-    { targetId: 'tour-video-intro', title: 'El Motor (Vídeo)', text: 'Descubre en 1 minuto cómo conectamos esta arquitectura a tu CRM sin alterar tu código.' },
-    { targetId: 'tour-agendar', title: 'Viabilidad Técnica', text: 'Agenda aquí una consulta rápida de 15 min para analizar la integración en tu propia clínica.' }
+    { targetId: 'center', title: 'Automatización Integral para Tu Clínica', text: 'Descubre un sistema predictivo diseñado para apoyar a tu equipo: filtra contactos 24/7, capta los datos críticos del paciente y los organiza automáticamente antes de que saturen la recepción.' },
+    { targetId: 'tour-mod-voice-free', title: 'Triaje Predictivo de Sintomatología', text: 'Tu equipo necesita centrarse en casos reales. Este escudo digital clasifica urgencias, patologías y descarta contactos sin impacto comercial de forma autónoma.' },
+    { targetId: 'tour-mod-text', title: 'Apoyo Textual de Cualificación', text: 'Un perfilado mucho más profundo que un formulario tradicional. El motor charla con la visita para estructurar y validar su perfil antes de volcarlo en tu sistema.' },
+    { targetId: 'tour-mod-voice', title: 'Entrevista Guiada por Voz (Recomendado)', text: 'Experimenta un filtrado verbal de alta fidelidad. El paciente habla libremente por el micrófono mientras el sistema empatiza, audita sus necesidades y adelanta trabajo médico.' },
+    { targetId: 'tour-video-intro', title: 'El Motor (Vídeo Demostración)', text: 'En este vídeo te explico de primera mano qué hace cada asistente, cómo funciona el ecosistema detrás y su vinculación directa a tu agenda médica.' },
+    { targetId: 'tour-agendar', title: 'Adaptación a Tu Clínica', text: 'Reserva 15 minutos en nuestro calendario para una pequeña auditoría técnica. Evaluaremos las integraciones de vuestro centro y cómo estructurar este sistema juntas.' }
   ];
 
   useEffect(() => {
