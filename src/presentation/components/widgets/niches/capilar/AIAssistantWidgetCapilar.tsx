@@ -233,9 +233,9 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       
                       <div className="space-y-3">
                         {[
-                          { id: 'light', title: 'Ligera', desc: 'Pérdida muy leve o indetectable.', img: '/images/triage/ligera.webp' },
-                          { id: 'mod', title: 'Moderada', desc: 'Despoblación visible en entradas o coronilla.', img: '/images/triage/moderada.webp' },
-                          { id: 'severe', title: 'Calvicie Severa', desc: 'Pérdida de densidad notable en la mayor parte del cráneo.', img: '/images/triage/severa.webp' }
+                          { id: 'light', title: 'Ligera', desc: 'Pérdida muy leve o indetectable.', img: gender === 'Mujer' ? '/images/triage/female/ligera.webp' : '/images/triage/ligera.webp' },
+                          { id: 'mod', title: 'Moderada', desc: 'Despoblación visible en entradas o coronilla.', img: gender === 'Mujer' ? '/images/triage/female/moderada.webp' : '/images/triage/moderada.webp' },
+                          { id: 'severe', title: 'Calvicie Severa', desc: 'Pérdida de densidad notable en la mayor parte del cráneo.', img: gender === 'Mujer' ? '/images/triage/female/severa.webp' : '/images/triage/severa.webp' }
                         ].map(g => (
                           <button
                             key={g.id} onClick={() => setGenetics(g.id)}
@@ -287,10 +287,10 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       
                       <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         {[
-                          { id: 'entradas', title: 'Entradas', desc: 'Retraso línea frontal', img: '/images/triage/step3_entradas.webp' },
-                          { id: 'coronilla', title: 'Coronilla', desc: 'Despoblación superior', img: '/images/triage/step3_coronilla.webp' },
-                          { id: 'difusa', title: 'Pérdida Difusa', desc: 'Falta general de densidad', img: '/images/triage/step3_difusa.webp' },
-                          { id: 'avanzada', title: 'Avanzada', desc: 'Norwood V-VII', img: '/images/triage/step3_avanzada.webp' }
+                          { id: 'entradas', title: 'Entradas', desc: 'Retraso línea frontal', img: gender === 'Mujer' ? '/images/triage/female/step3_entradas.webp' : '/images/triage/step3_entradas.webp' },
+                          { id: 'coronilla', title: 'Coronilla', desc: 'Despoblación superior', img: gender === 'Mujer' ? '/images/triage/female/step3_coronilla.webp' : '/images/triage/step3_coronilla.webp' },
+                          { id: 'difusa', title: 'Pérdida Difusa', desc: 'Falta general de densidad', img: gender === 'Mujer' ? '/images/triage/female/step3_difusa.webp' : '/images/triage/step3_difusa.webp' },
+                          { id: 'avanzada', title: 'Avanzada', desc: 'Norwood V-VII', img: gender === 'Mujer' ? '/images/triage/female/step3_avanzada.webp' : '/images/triage/step3_avanzada.webp' }
                         ].map(p => (
                           <button
                             key={p.id} onClick={() => setNorwoodPattern(p.title)}
@@ -421,7 +421,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                          {/* Togles */}
                          {[
                            { title: '¿Trasplantes Capilares Previos?', desc: 'Has tenido procedimientos en el pasado', val: medFlagHT, setter: setMedFlagHT },
-                           { title: '¿Fumador (>10 al día)?', desc: 'Afecta salvajemente a la cicatrización', val: medFlagSmoke, setter: setMedFlagSmoke },
+                           { title: gender === 'Mujer' ? '¿Fumadora (>10 al día)?' : '¿Fumador (>10 al día)?', desc: 'Afecta salvajemente a la cicatrización', val: medFlagSmoke, setter: setMedFlagSmoke },
                            { title: '¿Enfermedades Sistémicas?', desc: 'Diabetes, Hipertensión o corazón', val: medFlagDisease, setter: setMedFlagDisease },
                          ].map(flag => (
                            <div key={flag.title} className="flex items-center justify-between p-4 sm:p-5 rounded-2xl border border-gray-100 bg-gray-50/50">
@@ -530,7 +530,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                           <button disabled className="w-full py-4 rounded-xl font-bold bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 border-dashed">
                             Esperando fotos...
                           </button>
-                          <button onClick={() => setUploadedPhotos(['/images/triage/step3_difusa.webp'])} className="w-full py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors">
+                          <button onClick={() => setUploadedPhotos([gender === 'Mujer' ? '/images/triage/female/step3_difusa.webp' : '/images/triage/step3_difusa.webp'])} className="w-full py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors">
                             Cargar fotos demo
                           </button>
                         </div>
