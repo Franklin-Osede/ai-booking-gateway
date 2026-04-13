@@ -43,6 +43,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   let customIndustry = "Clínica Capilar";
   let detectedLang = "es";
   let customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
+  let customWidgetPosition = "right";
 
   try {
     const clinic = await prisma.clinic.findFirst({
@@ -60,6 +61,8 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
       customIndustry = clinic.industry || customIndustry;
       if (clinic.videoUrl) customVideo = clinic.videoUrl;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((clinic as any).widgetPosition) customWidgetPosition = (clinic as any).widgetPosition;
       
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,6 +128,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       videoPitchUrl={customVideo}
       niche={customIndustry}
       lang={detectedLang}
+      widgetPosition={customWidgetPosition}
     />
   );
 }

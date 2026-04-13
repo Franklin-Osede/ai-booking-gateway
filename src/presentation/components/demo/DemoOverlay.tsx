@@ -18,9 +18,10 @@ interface DemoOverlayProps {
   videoPitchUrl?: string;
   niche?: string;
   lang?: string;
+  widgetPosition?: string;
 }
 
-export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = false, videoPitchUrl, niche, lang = "es" }: DemoOverlayProps) {
+export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = false, videoPitchUrl, niche, lang = "es", widgetPosition = "right" }: DemoOverlayProps) {
   console.log("=== DEBUG [DemoOverlay.tsx] ===");
   console.log("niche string received:", niche);
   console.log("===============================");
@@ -121,10 +122,10 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
                 const mappedNiche = isDental ? "dental" : isAesthetic ? "aesthetic" : "hair_transplant";
                 return (
                  <>
-                   {activeMode === "text" && <AIAssistantChat color={themeColor} pos="right" niche={mappedNiche} lang={lang} />}
-                   {activeMode === "voice" && <AIAssistantVoice color={themeColor} pos="right" niche={mappedNiche} lang={lang} />}
-                   {activeMode === "voice-free" && <AIAssistantVoiceFree color={themeColor} pos="right" niche={mappedNiche} lang={lang} />}
-                   {activeMode === "phone" && <AIAssistantPhone color={themeColor} pos="right" niche={mappedNiche} lang={lang} />}
+                   {activeMode === "text" && <AIAssistantChat color={themeColor} pos={widgetPosition} niche={mappedNiche} lang={lang} />}
+                   {activeMode === "voice" && <AIAssistantVoice color={themeColor} pos={widgetPosition} niche={mappedNiche} lang={lang} />}
+                   {activeMode === "voice-free" && <AIAssistantVoiceFree color={themeColor} pos={widgetPosition} niche={mappedNiche} lang={lang} />}
+                   {activeMode === "phone" && <AIAssistantPhone color={themeColor} pos={widgetPosition} niche={mappedNiche} lang={lang} />}
                  </>
                );
             })()}

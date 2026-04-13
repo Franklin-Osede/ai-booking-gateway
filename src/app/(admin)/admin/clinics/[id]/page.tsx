@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2, BarChart3, Save, ArrowLeft, Target, Activity, TrendingDown, Quote, Copy, Edit2 } from "lucide-react";
+import { Check, MessageSquare, Briefcase, MapPin, Building2, ExternalLink, Trash2, BarChart3, Save, ArrowLeft, Target, Activity, TrendingDown, Quote, Copy, Edit2, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ClinicDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -19,7 +19,11 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [editingColor, setEditingColor] = useState(false);
   const [tempColor, setTempColor] = useState("#ffffff");
   const [videoUrl, setVideoUrl] = useState("");
-  const [editingVideo, setEditingVideo] = useState(false);
+  const [savingVideo, setSavingVideo] = useState(false);
+  const [hasSavedVideo, setHasSavedVideo] = useState(false);
+  const [widgetPosition, setWidgetPosition] = useState("right");
+  const [savingPosition, setSavingPosition] = useState(false);
+  const [hasSavedPosition, setHasSavedPosition] = useState(false);
   const [seoMetrics, setSeoMetrics] = useState({ summary: "", traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
   const [savingMetrics, setSavingMetrics] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
@@ -34,6 +38,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
           setClinic(data.data);
           if (data.data.videoUrl) setVideoUrl(data.data.videoUrl);
           if (data.data.seoMetrics) setSeoMetrics(data.data.seoMetrics);
+          if (data.data.widgetPosition) setWidgetPosition(data.data.widgetPosition);
         }
         setLoading(false);
       });
@@ -66,12 +71,28 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   };
 
   const handleSaveVideo = async () => {
+    setSavingVideo(true);
     await fetch(`/api/clinics/${unwrappedParams.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ videoUrl }),
     });
-    setEditingVideo(false);
+    setSavingVideo(false);
+    setHasSavedVideo(true);
+    setTimeout(() => setHasSavedVideo(false), 3000);
+    fetchClinic();
+  };
+
+  const handleSavePosition = async () => {
+    setSavingPosition(true);
+    await fetch(`/api/clinics/${unwrappedParams.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ widgetPosition }),
+    });
+    setSavingPosition(false);
+    setHasSavedPosition(true);
+    setTimeout(() => setHasSavedPosition(false), 3000);
     fetchClinic();
   };
 
@@ -480,7 +501,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
            <div>
              <h3 className="text-xl font-bold mb-3 pt-6 border-t border-neutral-800">Configuración de Marca</h3>
              {!editingColor ? (
-               <div className="flex items-center justify-between gap-4 bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
+               <div className="flex items-center justify-between gap-4 bg-neutral-900 border border-neutral-700 rounded-2xl p-4">
                   <div className="flex items-center gap-4">
                     <div 
                       className="w-12 h-12 rounded-xl shadow-inner border border-neutral-700 cursor-pointer hover:scale-105 hover:ring-2 hover:ring-yellow-500/50 transition-all" 
@@ -574,51 +595,76 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
            </div>
 
            <div>
-             <h3 className="text-xl font-bold mb-3 pt-6 border-t border-neutral-800">Video Demo (Opcional)</h3>
-             {!editingVideo ? (
-               <div className="flex items-center justify-between gap-4 bg-neutral-950 border border-neutral-800 rounded-2xl p-4">
-                  <div className="flex flex-col gap-1 overflow-hidden">
-                     <p className="text-neutral-400 text-sm">URL Unlisted (YouTube/Loom/etc)</p>
-                     <a href={clinic.videoUrl || "#"} target="_blank" className="text-white font-mono text-xs truncate hover:text-yellow-500">{clinic.videoUrl || "Sin video configurado"}</a>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      setVideoUrl(clinic.videoUrl || "");
-                      setEditingVideo(true);
-                    }}
-                    className="text-neutral-400 hover:text-white px-4 py-2 border border-neutral-800 rounded-xl transition-colors text-sm font-medium shrink-0"
+             <h3 className="text-xl font-bold mb-3 pt-6 border-t border-neutral-800 flex items-center gap-2">
+                <Target size={20} className="text-blue-500" /> Posición del Widget (Chat y Voz)
+             </h3>
+             <div className="bg-blue-950/20 border border-blue-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full" />
+               <div className="relative z-10">
+                  <p className="text-neutral-400 text-sm mb-2">Para no solapar con el icono local de WhatsApp de tu cliente si lo tiene:</p>
+                  <select 
+                    value={widgetPosition} 
+                    onChange={e => setWidgetPosition(e.target.value)}
+                    className="bg-neutral-900 border border-neutral-800 text-white p-3 rounded-xl outline-none focus:border-yellow-500/50 w-full md:w-1/2"
                   >
-                    Editar
-                  </button>
+                    <option value="right">Botón a la Derecha</option>
+                    <option value="left">Botón a la Izquierda</option>
+                  </select>
                </div>
-             ) : (
-               <div className="bg-neutral-950 border border-yellow-500/50 rounded-2xl p-6 space-y-6">
-                  <div>
-                    <p className="text-neutral-400 text-sm mb-2">Pega la URL del vídeo a pantalla completa que quieres mostrar en The Pitch Modal:</p>
-                    <input 
-                      type="url" 
-                      value={videoUrl} 
-                      onChange={(e) => setVideoUrl(e.target.value)} 
-                      placeholder="https://www.youtube.com/embed/..."
-                      className="bg-neutral-900 border border-neutral-800 text-white p-3 rounded-xl outline-none focus:border-yellow-500/50 w-full" 
-                    />
-                  </div>
-                  <div className="flex gap-3 justify-end border-t border-neutral-800 pt-6">
-                    <button 
-                      onClick={() => setEditingVideo(false)} 
-                      className="text-neutral-400 hover:text-white px-5 py-2.5 text-sm font-medium transition-colors border border-neutral-800 hover:bg-neutral-800 rounded-xl"
-                    >
-                      Cancelar
-                    </button>
-                    <button 
-                      onClick={handleSaveVideo} 
-                      className="bg-yellow-500 text-black px-6 py-2.5 text-sm font-bold rounded-xl hover:bg-yellow-400 transition-colors shadow-lg"
-                    >
-                      Guardar Video
-                    </button>
-                  </div>
+               <div className="flex justify-end relative z-10">
+                 <button 
+                   onClick={handleSavePosition} 
+                   disabled={savingPosition || hasSavedPosition}
+                   className={`px-5 py-2 text-sm font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2 border disabled:opacity-80 ${
+                     hasSavedPosition 
+                       ? "bg-emerald-600 text-white border-emerald-500" 
+                       : "bg-neutral-800 text-white border-neutral-700 hover:bg-neutral-700 hover:text-yellow-500"
+                   }`}
+                 >
+                   {hasSavedPosition ? <Check size={16} /> : <Save size={16} />}
+                   {savingPosition ? "Guardando..." : hasSavedPosition ? "¡Guardado!" : "Guardar Posición"}
+                 </button>
                </div>
-             )}
+             </div>
+           </div>
+
+           <div>
+             <h3 className="text-xl font-bold mb-3 pt-6 border-t border-neutral-800 flex items-center gap-2">
+                <Video size={20} className="text-pink-500" /> Video Demo (Opcional)
+             </h3>
+             <div className="bg-pink-950/10 border border-pink-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 blur-3xl rounded-full" />
+               <div className="relative z-10">
+                 <p className="text-neutral-400 text-sm mb-2">URL del vídeo que vas a mostrar (YouTube / Loom / Vimeo)</p>
+                 <input 
+                   type="url" 
+                   value={videoUrl} 
+                   onChange={(e) => setVideoUrl(e.target.value)} 
+                   placeholder="https://www.youtube.com/embed/..."
+                   className="bg-neutral-900 border border-neutral-800 text-white p-3 rounded-xl outline-none focus:border-yellow-500/50 w-full font-mono text-sm" 
+                 />
+               </div>
+               <div className="flex items-center justify-between relative z-10">
+                 {videoUrl && (
+                   <a href={videoUrl} target="_blank" rel="noreferrer" className="text-xs text-yellow-500 truncate hover:underline flex items-center gap-1">
+                     <ExternalLink size={12}/> Probar Enlace
+                   </a>
+                 )}
+                 {!videoUrl && <span />}
+                 <button 
+                   onClick={handleSaveVideo} 
+                   disabled={savingVideo || hasSavedVideo}
+                   className={`px-5 py-2 text-sm font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2 border disabled:opacity-80 ${
+                     hasSavedVideo 
+                       ? "bg-emerald-600 text-white border-emerald-500" 
+                       : "bg-neutral-800 text-white border-neutral-700 hover:bg-neutral-700 hover:text-yellow-500"
+                   }`}
+                 >
+                   {hasSavedVideo ? <Check size={16} /> : <Save size={16} />}
+                   {savingVideo ? "Guardando..." : hasSavedVideo ? "¡Guardado!" : "Guardar Video"}
+                 </button>
+               </div>
+             </div>
            </div>
         </div>
       )}

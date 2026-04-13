@@ -83,10 +83,10 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
       >
         <div className="px-4 py-8 sm:px-12 sm:py-12 flex flex-col items-center text-center overflow-y-auto flex-1">
           <div 
-             className="hidden sm:flex w-20 h-20 rounded-[1.5rem] mb-6 items-center justify-center shadow-inner relative shrink-0"
+             className="hidden sm:flex w-20 h-20 rounded-3xl mb-6 items-center justify-center shadow-inner relative shrink-0"
              style={{ backgroundColor: `${color}15`, color }}
           >
-             <div className="absolute top-0 left-0 w-full h-full rounded-[1.5rem] border-2 opacity-20" style={{ borderColor: color }} />
+             <div className="absolute top-0 left-0 w-full h-full rounded-3xl border-2 opacity-20" style={{ borderColor: color }} />
              <Sparkles className="w-10 h-10" />
           </div>
           
