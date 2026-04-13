@@ -52,9 +52,25 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
 
   useEffect(() => {
     if (isVisible) {
-      setTimeout(calculatePosition, 50); // slight delay to let layout settle and avoid synchronous setState lint
-      window.addEventListener('resize', calculatePosition);
-      return () => window.removeEventListener('resize', calculatePosition);
+      const handleUpdate = () => calculatePosition();
+      
+      // Auto-scroll when step changes
+      const currentTarget = steps[step]?.targetId;
+      if (currentTarget && currentTarget !== 'center') {
+        const el = document.getElementById(currentTarget);
+        if (el) {
+           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
+      setTimeout(handleUpdate, 50); // initial calc
+      window.addEventListener('resize', handleUpdate);
+      window.addEventListener('scroll', handleUpdate, true); // capture phase to stick on scroll
+      
+      return () => {
+         window.removeEventListener('resize', handleUpdate);
+         window.removeEventListener('scroll', handleUpdate, true);
+      };
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, isVisible]);
