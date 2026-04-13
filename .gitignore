@@ -45,5 +45,6 @@ next-env.d.ts
 check_voices.js
 test_tts.js
 tmp_crop/
+tmp_*
 
 /src/generated/prisma
