@@ -79,11 +79,11 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-full max-w-3xl bg-white/95 backdrop-blur-xl rounded-4xl shadow-2xl overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[calc(100dvh-135px)] sm:max-h-[85vh]"
+        className="relative w-full max-w-3xl bg-white/95 backdrop-blur-xl rounded-4xl shadow-2xl overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[calc(100dvh-135px)] sm:max-h-[95vh]"
       >
-        <div className="px-4 py-8 sm:px-12 sm:py-12 flex flex-col items-center text-center overflow-y-auto flex-1">
+        <div className="px-4 py-8 sm:px-12 sm:py-8 flex flex-col items-center text-center overflow-y-auto flex-1">
           <div 
-             className="hidden sm:flex w-20 h-20 rounded-3xl mb-6 items-center justify-center shadow-inner relative shrink-0"
+             className="hidden sm:flex w-16 h-16 rounded-3xl mb-4 items-center justify-center shadow-inner relative shrink-0"
              style={{ backgroundColor: `${color}15`, color }}
           >
              <div className="absolute top-0 left-0 w-full h-full rounded-3xl border-2 opacity-20" style={{ borderColor: color }} />
@@ -98,7 +98,7 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
           <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2 sm:mb-3 mt-0">
              Sistemas de Automatización
           </h2>
-          <p className="text-gray-500 font-medium text-sm sm:text-base max-w-xl mb-6 sm:mb-10 leading-relaxed">
+          <p className="text-gray-500 font-medium text-sm sm:text-base max-w-xl mb-6 sm:mb-8 leading-relaxed">
              Simulación segura y en tiempo real. Explora cómo interactuarían estos agentes predictivos sobre tu web actual sin alterar tu código original.
           </p>
 
