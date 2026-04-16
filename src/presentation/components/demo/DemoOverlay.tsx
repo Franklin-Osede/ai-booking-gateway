@@ -58,6 +58,7 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
         onModeChange={handleModeChange} 
         onOpenPitch={() => setIsPitchOpen(true)}
         primaryColor={themeColor}
+        hasVideo={!!videoPitchUrl}
       />
 
       {/* 2. Video Pitch Modal */}

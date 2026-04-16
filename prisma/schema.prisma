@@ -15,6 +15,7 @@ model Clinic {
   countryCode String?
   videoUrl  String?
   seoMetrics Json?
+  techMetrics Json?
   widgetPosition String? @default("right")
 
   notes     String?

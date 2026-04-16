@@ -9,7 +9,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [clinic, setClinic] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"config" | "metrics" | "outreach">("config");
+  const [tab, setTab] = useState<"config" | "metrics" | "outreach" | "tech">("config");
   const router = useRouter();
   
   // Forms
@@ -29,6 +29,13 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [hasSaved, setHasSaved] = useState(false);
   const [isEditingMetrics, setIsEditingMetrics] = useState(false);
   const [copiedPitch, setCopiedPitch] = useState(false);
+  const [isSavingLog, setIsSavingLog] = useState(false);
+  
+  // Tech Metrics Form
+  const [techMetrics, setTechMetrics] = useState({ pageSpeedStatus: "", frogErrors: "", techPitch: "" });
+  const [savingTechMetrics, setSavingTechMetrics] = useState(false);
+  const [hasSavedTech, setHasSavedTech] = useState(false);
+  const [isEditingTechMetrics, setIsEditingTechMetrics] = useState(false);
 
   const fetchClinic = () => {
     fetch(`/api/clinics/${unwrappedParams.id}`)
@@ -38,6 +45,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
           setClinic(data.data);
           if (data.data.videoUrl) setVideoUrl(data.data.videoUrl);
           if (data.data.seoMetrics) setSeoMetrics(data.data.seoMetrics);
+          if (data.data.techMetrics) setTechMetrics(data.data.techMetrics);
           if (data.data.widgetPosition) setWidgetPosition(data.data.widgetPosition);
         }
         setLoading(false);
@@ -50,13 +58,15 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   }, [unwrappedParams.id]);
 
   const handleAddLog = async () => {
-    if (!status) return;
+    if (!status || isSavingLog) return;
+    setIsSavingLog(true);
     await fetch(`/api/clinics/${unwrappedParams.id}/outreach`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status, nextStep, channel: "email", contactDate }),
     });
     setNextStep("");
+    setIsSavingLog(false);
     fetchClinic();
   };
 
@@ -106,6 +116,19 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
     setSavingMetrics(false);
     setHasSaved(true);
     setTimeout(() => setHasSaved(false), 3000);
+    fetchClinic();
+  };
+
+  const handleSaveTechMetrics = async () => {
+    setSavingTechMetrics(true);
+    await fetch(`/api/clinics/${unwrappedParams.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ techMetrics }),
+    });
+    setSavingTechMetrics(false);
+    setHasSavedTech(true);
+    setTimeout(() => setHasSavedTech(false), 3000);
     fetchClinic();
   };
 
@@ -166,6 +189,12 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
             Métricas (Research)
           </button>
           <button 
+            onClick={() => setTab("tech")}
+            className={`pb-4 px-2 font-bold transition-all border-b-2 ${tab === "tech" ? "border-blue-500 text-blue-500" : "border-transparent text-neutral-500 hover:text-neutral-300"}`}
+          >
+            Tech & CRO (Frog)
+          </button>
+          <button 
             onClick={() => setTab("outreach")}
             className={`pb-4 px-2 font-bold transition-all border-b-2 ${tab === "outreach" ? "border-yellow-500 text-yellow-500" : "border-transparent text-neutral-500 hover:text-neutral-300"}`}
           >
@@ -210,22 +239,22 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
               </div>
 
               {/* Grid 2x2 Bento */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5 hover:border-yellow-500/30 transition-colors">
-                  <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2 flex items-center gap-2"><Activity size={14} className="text-yellow-500"/> Tráfico Orgánico Mensual</h4>
-                  <p className="text-neutral-200">{seoMetrics.traffic || "N/A"}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 hover:border-yellow-500/30 transition-colors">
+                  <h4 className="text-neutral-400 font-bold text-sm uppercase mb-3 flex items-center gap-2"><Activity size={16} className="text-yellow-500"/> Tráfico Orgánico Mensual</h4>
+                  <p className="text-neutral-200 text-lg md:text-xl font-medium leading-relaxed whitespace-pre-wrap">{seoMetrics.traffic || "N/A"}</p>
                 </div>
-                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5 hover:border-red-500/30 transition-colors">
-                   <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2 flex items-center gap-2"><TrendingDown size={14} className="text-red-500"/> Coste de Oportunidad / Fuga</h4>
-                   <p className="text-neutral-200">{seoMetrics.cost || "N/A"}</p>
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 hover:border-red-500/30 transition-colors">
+                   <h4 className="text-neutral-400 font-bold text-sm uppercase mb-3 flex items-center gap-2"><TrendingDown size={16} className="text-red-500"/> Coste de Oportunidad / Fuga</h4>
+                   <p className="text-neutral-200 text-lg md:text-xl font-medium leading-relaxed whitespace-pre-wrap">{seoMetrics.cost || "N/A"}</p>
                 </div>
-                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5">
-                   <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2">Top Pages / Fugas Secundarias</h4>
-                   <p className="text-neutral-300 text-sm whitespace-pre-wrap">{seoMetrics.topPages || "N/A"}</p>
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6">
+                   <h4 className="text-neutral-400 font-bold text-sm uppercase mb-3">Top Pages / Fugas Secundarias</h4>
+                   <p className="text-neutral-300 text-base md:text-lg whitespace-pre-wrap leading-relaxed">{seoMetrics.topPages || "N/A"}</p>
                 </div>
-                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5">
-                   <h4 className="text-neutral-500 font-bold text-xs uppercase mb-2">Competencia</h4>
-                   <p className="text-neutral-300 text-sm whitespace-pre-wrap">{seoMetrics.competitors || "N/A"}</p>
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6">
+                   <h4 className="text-neutral-400 font-bold text-sm uppercase mb-3">Competencia</h4>
+                   <p className="text-neutral-300 text-base md:text-lg whitespace-pre-wrap leading-relaxed">{seoMetrics.competitors || "N/A"}</p>
                 </div>
               </div>
 
@@ -343,6 +372,99 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
         </div>
       )}
 
+      {tab === "tech" && (
+        <div className="bg-neutral-900 border border-blue-500/30 rounded-3xl p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-500/20 p-3 rounded-xl text-blue-500"><Activity size={24} /></div>
+              <div>
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  Auditoría de Fricción 
+                  <span className="bg-neutral-800 text-neutral-400 text-xs px-2 py-1 rounded-md uppercase tracking-wider">Tech & CRO</span>
+                </h3>
+                <p className="text-neutral-400 text-sm">Resumen de Screaming Frog y PageSpeed Insights.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setIsEditingTechMetrics(!isEditingTechMetrics)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border ${isEditingTechMetrics ? 'bg-neutral-800 border-neutral-700 text-white' : 'bg-transparent border-neutral-700 text-neutral-400 hover:text-white hover:bg-neutral-800'}`}
+            >
+              {isEditingTechMetrics ? <><Check size={16}/> Ver Informe</> : <><Edit2 size={16}/> Editar Datos</>}
+            </button>
+          </div>
+
+          {!isEditingTechMetrics ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6">
+                  <h4 className="text-neutral-400 font-bold text-sm uppercase mb-3 flex items-center gap-2"><Activity size={16} className="text-blue-500"/> PageSpeed & Carga Móvil</h4>
+                  <p className="text-neutral-200 text-base md:text-lg whitespace-pre-wrap leading-relaxed">{techMetrics.pageSpeedStatus || "N/A"}</p>
+                </div>
+                <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6">
+                   <h4 className="text-neutral-400 font-bold text-sm uppercase mb-3 flex items-center gap-2"><Target size={16} className="text-red-500"/> Alertas Screaming Frog (404s/Lentitud)</h4>
+                   <p className="text-neutral-200 text-base md:text-lg whitespace-pre-wrap leading-relaxed">{techMetrics.frogErrors || "N/A"}</p>
+                </div>
+              </div>
+
+              {/* Pitch */}
+              <div className="bg-linear-to-br from-blue-500/10 to-transparent border border-blue-500/50 rounded-2xl p-6 md:p-8 mt-8 shadow-inner relative">
+                 <div className="absolute -top-3 left-6 bg-neutral-900 border border-blue-500/50 text-blue-500 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                    <Quote size={12}/> The Tech Closer Pitch
+                 </div>
+                 <p className="text-blue-400 font-medium text-lg md:text-xl leading-relaxed whitespace-pre-wrap">
+                   {techMetrics.techPitch || "Sube datos técnicos para generar el pitch de fricción comercial."}
+                 </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 animate-in fade-in slide-in-from-top-4">
+              <div>
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Estado de PageSpeed Insights (Móvil)</label>
+                <textarea 
+                  placeholder="Ej: LCP de 5s. La mitad de los pacientes se van antes de ver la web."
+                  value={techMetrics.pageSpeedStatus}
+                  onChange={e => setTechMetrics({ ...techMetrics, pageSpeedStatus: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-blue-500/50 min-h-[150px]"
+                />
+              </div>
+              <div>
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Alertas de Screaming Frog</label>
+                <textarea 
+                  placeholder="Ej: La URL de Implantes sufre cadenas de redirecciones, ralentizando la conversión."
+                  value={techMetrics.frogErrors}
+                  onChange={e => setTechMetrics({ ...techMetrics, frogErrors: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-blue-500/50 min-h-[150px]"
+                />
+              </div>
+              <div>
+                <label className="text-neutral-400 text-sm mb-1 block font-bold">Traducción Comercial a Ventas (Pitch)</label>
+                <textarea 
+                  placeholder="Ej: Tu web es un Ferrari con el freno puesto, necesitas la IA saltando casi de inmediato para retenerlos..."
+                  value={techMetrics.techPitch}
+                  onChange={e => setTechMetrics({ ...techMetrics, techPitch: e.target.value })}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-white text-base md:text-lg leading-relaxed outline-none focus:border-blue-500/50 min-h-[250px]"
+                />
+              </div>
+              
+              <div className="flex justify-end pt-4 border-t border-neutral-800 mt-6">
+                <button 
+                  onClick={handleSaveTechMetrics}
+                  disabled={savingTechMetrics || hasSavedTech}
+                  className={`font-bold py-3 px-8 rounded-xl transition-all shadow-lg flex items-center gap-2 ${
+                    hasSavedTech 
+                      ? "bg-emerald-600 text-white" 
+                      : "bg-blue-600 hover:bg-blue-500 text-white"
+                  }`}
+                >
+                  {hasSavedTech ? <Check size={18} /> : <Save size={18} />} 
+                  {savingTechMetrics ? "Guardando..." : hasSavedTech ? "¡Guardado!" : "Guardar Ficha Tech"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {tab === "outreach" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
@@ -414,9 +536,10 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                 </div>
                 <button 
                   onClick={handleAddLog}
-                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 rounded-xl transition-colors shadow-lg"
+                  disabled={isSavingLog || !status}
+                  className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black font-bold py-3 rounded-xl transition-colors shadow-lg"
                 >
-                  Guardar Log
+                  {isSavingLog ? "Guardando..." : "Guardar Log"}
                 </button>
               </div>
             </div>
@@ -630,10 +753,10 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
 
            <div>
              <h3 className="text-xl font-bold mb-3 pt-6 border-t border-neutral-800 flex items-center gap-2">
-                <Video size={20} className="text-pink-500" /> Video Demo (Opcional)
+                <Video size={20} className="text-red-500" /> Video Demo (Opcional)
              </h3>
-             <div className="bg-pink-950/10 border border-pink-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 blur-3xl rounded-full" />
+             <div className="bg-red-950/10 border border-red-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 blur-3xl rounded-full" />
                <div className="relative z-10">
                  <p className="text-neutral-400 text-sm mb-2">URL del vídeo que vas a mostrar (YouTube / Loom / Vimeo)</p>
                  <input 

@@ -19,9 +19,10 @@ interface TopPillNavigationProps {
   activeMode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone";
   onModeChange: (mode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone") => void;
   primaryColor?: string;
+  hasVideo?: boolean;
 }
 
-export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#1a4b8c" }: TopPillNavigationProps) {
+export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#1a4b8c", hasVideo = false }: TopPillNavigationProps) {
   const contrastColor = getContrastColor(primaryColor);
 
   return (
@@ -33,15 +34,19 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
       >
         <span className="w-2 h-2 rounded-full animate-pulse mr-1" style={{ backgroundColor: primaryColor }} /> Asistentes
       </button>
-      <div className="w-px h-6 bg-gray-200 mx-1"></div>
 
-      <button 
-        id="tour-video-intro"
-        onClick={onOpenPitch}
-        className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 px-3 py-2 sm:py-2.5 rounded-full text-xs font-medium transition-colors hover:bg-gray-100"
-      >
-        <PlayCircle size={16} /> <span className="hidden sm:inline">Vídeo Intro</span>
-      </button>
+      {hasVideo && (
+        <>
+          <div className="w-px h-6 bg-gray-200 mx-1"></div>
+          <button 
+            id="tour-video-intro"
+            onClick={onOpenPitch}
+            className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 px-3 py-2 sm:py-2.5 rounded-full text-xs font-medium transition-colors hover:bg-gray-100"
+          >
+            <PlayCircle size={16} /> <span className="hidden sm:inline">Vídeo Intro</span>
+          </button>
+        </>
+      )}
 
       <button 
         id="tour-agendar"

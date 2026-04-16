@@ -18,6 +18,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       },
     });
 
+    // Añadirlo automáticamente al Calendario como ClinicEvent
+    await prisma.clinicEvent.create({
+      data: {
+        clinicId: id,
+        eventDate: contactDate ? new Date(contactDate) : new Date(),
+        feedback: `[Log Guardado] Estado: ${status}. ${nextStep || ''}`,
+        nextAction: "Revisar"
+      }
+    });
+
     return NextResponse.json({ success: true, data: log }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to create log" }, { status: 500 });
