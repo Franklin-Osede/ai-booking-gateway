@@ -184,30 +184,30 @@ export default function AdminDashboard() {
           <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={isExcelUploading}
-            className="hidden sm:flex bg-neutral-900 border border-neutral-700 text-white px-4 py-2 rounded-xl font-bold items-center gap-2 hover:border-yellow-500 hover:text-yellow-500 transition-colors disabled:opacity-50"
+            className="hidden sm:flex bg-card border border-border text-foreground px-4 py-2 rounded-xl font-bold items-center gap-2 hover:border-yellow-500 hover:text-yellow-500 transition-colors disabled:opacity-50"
           >
             <FileSpreadsheet size={18} /> {isExcelUploading ? "Cargando..." : "Subir Excel"}
           </button>
           
           <button 
             onClick={() => { setIsModalOpen(true); setProcessState("idle"); setBulkUrls(""); setResults([]); }}
-            className="bg-white text-black px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors"
+            className="bg-foreground text-background px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors"
           >
             <Plus size={18} /> Nueva Clínica
           </button>
         </div>
       </div>
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6">
+      <div className="bg-card border border-border rounded-3xl p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
           <div className="relative w-full sm:w-64 shrink-0">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
             <input 
               type="text"
               placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 pl-11 pr-4 outline-none focus:border-neutral-500/50 text-white text-sm"
+              className="w-full bg-muted border border-border rounded-xl py-2.5 pl-11 pr-4 outline-none focus:border-neutral-500/50 text-foreground text-sm"
             />
           </div>
           
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
                <select 
                   value={selectedIndustry}
                   onChange={(e) => setSelectedIndustry(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-white text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer"
                >
                   <option value="All">Todos los nichos / Categorías</option>
                   {uniqueIndustries.map(ind => (
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
                <select 
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-white text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer"
                >
                   <option value="All">Todas las Ubicaciones</option>
                   <option value="SinEspecificar">📍 Sin especificar</option>
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
                <select 
                   value={selectedCountry}
                   onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-white text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer"
                >
                   <option value="All">🌍 Todos los Países</option>
                   <option value="ES">🇪🇸 España</option>
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
                <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 outline-none focus:border-yellow-500/50 text-yellow-500 text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-yellow-500/50 text-yellow-500 text-sm font-bold cursor-pointer"
                >
                   <option value="updated">⏱️ Recién Editadas</option>
                   <option value="created">🆕 Añadidas Recientemente</option>
@@ -266,18 +266,18 @@ export default function AdminDashboard() {
         </div>
 
         {loading ? (
-          <div className="text-center py-10 text-neutral-500">Cargando clínicas...</div>
+          <div className="text-center py-10 text-muted-foreground">Cargando clínicas...</div>
         ) : sortedClinics.length === 0 ? (
-          <div className="text-center py-10 text-neutral-500">
+          <div className="text-center py-10 text-muted-foreground">
             <Search size={48} className="mx-auto mb-4 opacity-50" />
-            <p className="font-medium text-lg text-white mb-1">Sin resultados</p>
+            <p className="font-medium text-lg text-foreground mb-1">Sin resultados</p>
             <p>No hemos encontrado clínicas en ese nicho o ubicación.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
-                <tr className="border-b border-neutral-800 text-neutral-500 text-xs tracking-widest uppercase">
+                <tr className="border-b border-border text-muted-foreground text-xs tracking-widest uppercase">
                   <th className="font-bold py-4 px-4">CLÍNICA Y NICHO</th>
                   <th className="font-bold py-4 px-4 w-40">UBICACIÓN</th>
                   <th className="font-bold py-4 px-4 w-40 text-right">AÑADIDO EL</th>
@@ -289,34 +289,34 @@ export default function AdminDashboard() {
                      <tr 
                        key={clinic.id} 
                        onClick={() => router.push(`/admin/clinics/${clinic.id}`)}
-                       className="border-b border-neutral-800/40 hover:bg-neutral-900 cursor-pointer transition-colors group"
+                       className="border-b border-border/40 hover:bg-card cursor-pointer transition-colors group"
                      >
                        <td className="py-4 px-4 font-bold flex items-center gap-4">
-                         <div className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 shrink-0 group-hover:bg-white group-hover:text-black transition-colors">
+                         <div className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground shrink-0 group-hover:bg-foreground group-hover:text-background transition-colors">
                            <Building2 size={18} />
                          </div>
                          <div>
-                            <span className="text-white capitalize text-base flex flex-wrap items-center gap-2 font-bold tracking-tight">
+                            <span className="text-foreground capitalize text-base flex flex-wrap items-center gap-2 font-bold tracking-tight">
                                 {clinic.name}
                                 {clinic.seoMetrics && (
-                                  <span className="flex items-center gap-1 bg-green-500/10 text-green-400 border border-green-500/20 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                                  <span className="flex items-center gap-1 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">
                                     <Brain size={12} /> Datos Inyectados
                                   </span>
                                 )}
                             </span>
-                            <span className="text-xs text-neutral-500 font-medium">{clinic.industry}</span>
+                            <span className="text-xs text-muted-foreground font-medium">{clinic.industry}</span>
                          </div>
                        </td>
                        <td className="py-4 px-4">
                           {clinic.location ? (
-                            <div className="flex items-center gap-2 text-neutral-300 text-sm font-medium">
-                              <MapPin size={16} className="text-neutral-500"/> {clinic.location}
+                            <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
+                              <MapPin size={16} className="text-muted-foreground"/> {clinic.location}
                             </div>
                           ) : (
-                            <span className="text-neutral-600 text-sm italic">Sin especificar</span>
+                            <span className="text-muted-foreground text-sm italic">Sin especificar</span>
                           )}
                        </td>
-                       <td className="py-4 px-4 text-sm text-neutral-400 font-mono tracking-tight text-right flex items-center justify-end gap-4">
+                       <td className="py-4 px-4 text-sm text-muted-foreground font-mono tracking-tight text-right flex items-center justify-end gap-4">
                          {new Date(clinic.createdAt).toLocaleDateString()}
                          <button 
                            onClick={(e) => {
@@ -329,11 +329,11 @@ export default function AdminDashboard() {
                                  });
                              }
                            }}
-                           className="p-2 hover:bg-red-500/10 text-neutral-600 hover:text-red-500 rounded-lg transition-colors"
+                           className="p-2 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-lg transition-colors"
                          >
                            <Trash2 size={18} />
                          </button>
-                         <ChevronRight size={18} className="text-neutral-600 group-hover:text-white transition-colors" />
+                         <ChevronRight size={18} className="text-muted-foreground group-hover:text-foreground transition-colors" />
                        </td>
                      </tr>
                    )
@@ -347,36 +347,36 @@ export default function AdminDashboard() {
 
       {/* MODAL CREADOR MASIVO */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-neutral-900 border border-neutral-800 p-8 rounded-3xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-background/60 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border p-8 rounded-3xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col">
             <button 
               onClick={() => setIsModalOpen(false)} 
-              className="absolute top-6 right-6 text-neutral-500 hover:text-white transition-colors"
+              className="absolute top-6 right-6 text-muted-foreground hover:text-foreground transition-colors"
             >
               <X size={24} />
             </button>
             
             <h2 className="text-2xl font-bold mb-2">Creador de Clínicas Mágico</h2>
-            <p className="text-neutral-400 mb-6 font-medium text-sm">Pega las URLs de tus prospectos y generaré todos los enlaces con base de datos en 1 clic.</p>
+            <p className="text-muted-foreground mb-6 font-medium text-sm">Pega las URLs de tus prospectos y generaré todos los enlaces con base de datos en 1 clic.</p>
 
             {processState === "idle" && (
               <div className="space-y-6 overflow-y-auto pr-2">
                 <div>
-                  <label className="block text-sm font-bold text-neutral-300 mb-2">Pega desde Excel (URL, Nombre, Ciudad) o 1 URL por línea</label>
+                  <label className="block text-sm font-bold text-muted-foreground mb-2">Pega desde Excel (URL, Nombre, Ciudad) o 1 URL por línea</label>
                   <textarea 
                     value={bulkUrls}
                     onChange={(e) => setBulkUrls(e.target.value)}
                     placeholder={`ej. https://clinicadental.com\tMi Clínica\tMadrid\nej. https://imassalud.es`}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-4 min-h-[200px] outline-none focus:border-neutral-500/50 text-white font-mono text-sm leading-relaxed"
+                    className="w-full bg-muted border border-border rounded-2xl p-4 min-h-[200px] outline-none focus:border-neutral-500/50 text-foreground font-mono text-sm leading-relaxed"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-neutral-300 mb-2">Nicho / Sector Aplicado (Para todas)</label>
+                  <label className="block text-sm font-bold text-muted-foreground mb-2">Nicho / Sector Aplicado (Para todas)</label>
                   <select 
                     value={bulkNiche}
                     onChange={(e) => setBulkNiche(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-4 outline-none focus:border-neutral-500/50 text-white cursor-pointer appearance-none"
+                    className="w-full bg-muted border border-border rounded-2xl p-4 outline-none focus:border-neutral-500/50 text-foreground cursor-pointer appearance-none"
                   >
                     <option value="Clínica Capilar">Clínica Capilar (Especialistas)</option>
                     <option value="Medicina Regenerativa">Medicina Regenerativa / Stem Cells</option>
@@ -391,11 +391,11 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-neutral-300 mb-2">País Destino / Mercado</label>
+                  <label className="block text-sm font-bold text-muted-foreground mb-2">País Destino / Mercado</label>
                   <select 
                     value={bulkCountry}
                     onChange={(e) => setBulkCountry(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-4 outline-none focus:border-neutral-500/50 text-white cursor-pointer appearance-none"
+                    className="w-full bg-muted border border-border rounded-2xl p-4 outline-none focus:border-neutral-500/50 text-foreground cursor-pointer appearance-none"
                   >
                     <option value="ES">🇪🇸 España (ES)</option>
                     <option value="EN">🇬🇧 Reino Unido (EN)</option>
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
                   <button 
                     onClick={handleBulkSubmit}
                     disabled={!bulkUrls.trim()}
-                    className="w-full bg-white text-black py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-foreground text-background py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Procesar y Crear Clínicas
                   </button>
@@ -416,9 +416,9 @@ export default function AdminDashboard() {
 
             {processState === "processing" && (
               <div className="flex flex-col items-center justify-center py-20">
-                 <div className="w-16 h-16 border-4 border-neutral-800 border-t-white rounded-full animate-spin mb-6"></div>
+                 <div className="w-16 h-16 border-4 border-border border-t-white rounded-full animate-spin mb-6"></div>
                  <h3 className="text-xl font-bold animate-pulse">Escaneando y Construyendo...</h3>
-                 <p className="text-neutral-500 mt-2">Agregando tus leads a Supabase</p>
+                 <p className="text-muted-foreground mt-2">Agregando tus leads a Supabase</p>
               </div>
             )}
 
@@ -435,26 +435,26 @@ export default function AdminDashboard() {
                     const prodLink = `https://app.tudominio.com/demo/${r.id}`; // Cambia esto por tu dominio Vercel
                     
                     return (
-                      <div key={idx} className="bg-neutral-950 border border-neutral-800 p-4 rounded-2xl">
-                        <div className="flex items-center justify-between mb-3 border-b border-neutral-800 pb-3">
-                          <h4 className="font-bold text-lg text-white capitalize">{r.name}</h4>
-                          <span className="text-xs text-neutral-500 font-mono">{r.url}</span>
+                      <div key={idx} className="bg-muted border border-border p-4 rounded-2xl">
+                        <div className="flex items-center justify-between mb-3 border-b border-border pb-3">
+                          <h4 className="font-bold text-lg text-foreground capitalize">{r.name}</h4>
+                          <span className="text-xs text-muted-foreground font-mono">{r.url}</span>
                         </div>
                         
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <span className="w-16 text-xs text-neutral-500 font-bold shrink-0">LOCAL</span>
-                            <input readOnly value={localLink} className="flex-1 bg-neutral-900 text-xs font-mono text-neutral-300 p-2 rounded-lg border-none outline-none" />
-                            <button onClick={() => { navigator.clipboard.writeText(localLink); alert("Copiado"); }} className="p-2 hover:bg-neutral-800 text-yellow-500 rounded-lg">
+                            <span className="w-16 text-xs text-muted-foreground font-bold shrink-0">LOCAL</span>
+                            <input readOnly value={localLink} className="flex-1 bg-card text-xs font-mono text-muted-foreground p-2 rounded-lg border-none outline-none" />
+                            <button onClick={() => { navigator.clipboard.writeText(localLink); alert("Copiado"); }} className="p-2 hover:bg-muted text-yellow-500 rounded-lg">
                               <Copy size={16} />
                             </button>
-                            <a href={localLink} target="_blank" className="p-2 hover:bg-neutral-800 text-yellow-500 rounded-lg"><ExternalLink size={16}/></a>
+                            <a href={localLink} target="_blank" className="p-2 hover:bg-muted text-yellow-500 rounded-lg"><ExternalLink size={16}/></a>
                           </div>
 
                           <div className="flex items-center gap-2">
                             <span className="w-16 text-xs text-green-500/80 font-bold shrink-0">VERCEL</span>
-                            <input readOnly value={prodLink} className="flex-1 bg-neutral-900 text-xs font-mono text-neutral-300 p-2 rounded-lg border-none outline-none" />
-                            <button onClick={() => { navigator.clipboard.writeText(prodLink); alert("Copiado"); }} className="p-2 hover:bg-neutral-800 text-yellow-500 rounded-lg">
+                            <input readOnly value={prodLink} className="flex-1 bg-card text-xs font-mono text-muted-foreground p-2 rounded-lg border-none outline-none" />
+                            <button onClick={() => { navigator.clipboard.writeText(prodLink); alert("Copiado"); }} className="p-2 hover:bg-muted text-yellow-500 rounded-lg">
                               <Copy size={16} />
                             </button>
                           </div>
@@ -467,7 +467,7 @@ export default function AdminDashboard() {
                 <div className="pt-6 mt-2">
                    <button 
                      onClick={() => setIsModalOpen(false)}
-                     className="w-full bg-neutral-800 text-white hover:bg-neutral-700 py-4 rounded-xl font-bold transition-colors"
+                     className="w-full bg-muted text-foreground hover:bg-muted py-4 rounded-xl font-bold transition-colors"
                    >
                      Cerrar y ver en el Dashboard
                    </button>
@@ -479,44 +479,44 @@ export default function AdminDashboard() {
       )}
 
       {isExcelPreviewOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-100 flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-6 border-b border-neutral-800 flex justify-between items-center bg-neutral-950">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-100 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted">
               <div>
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                   <FileSpreadsheet className="text-yellow-500" /> Previsualización del Excel
                 </h2>
-                <p className="text-neutral-400 text-sm mt-1">Se han detectado {pendingExcelClinics.length} filas válidas.</p>
+                <p className="text-muted-foreground text-sm mt-1">Se han detectado {pendingExcelClinics.length} filas válidas.</p>
               </div>
-              <button onClick={() => setIsExcelPreviewOpen(false)} className="text-neutral-500 hover:text-white transition-colors bg-neutral-800 rounded-full p-2">
+              <button onClick={() => setIsExcelPreviewOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors bg-muted rounded-full p-2">
                 <X size={20} />
               </button>
             </div>
             
             {excelResult ? (
-              <div className="p-10 flex flex-col items-center justify-center text-center space-y-6 bg-neutral-900/50 flex-1">
+              <div className="p-10 flex flex-col items-center justify-center text-center space-y-6 bg-card/50 flex-1">
                  <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-2">
                    <CheckCircle size={40} className="text-green-500" />
                  </div>
                  <div>
-                   <h2 className="text-2xl font-bold text-white mb-2">¡Inyección Completada!</h2>
-                   <p className="text-neutral-400">Las clínicas han sido añadidas a la base de datos B2B.</p>
+                   <h2 className="text-2xl font-bold text-foreground mb-2">¡Inyección Completada!</h2>
+                   <p className="text-muted-foreground">Las clínicas han sido añadidas a la base de datos B2B.</p>
                  </div>
-                 <div className="flex gap-6 mt-4 bg-neutral-950 p-6 rounded-2xl border border-neutral-800 w-full max-w-sm">
+                 <div className="flex gap-6 mt-4 bg-muted p-6 rounded-2xl border border-border w-full max-w-sm">
                     <div className="flex flex-col items-center flex-1">
-                       <span className="text-4xl font-bold text-white">{excelResult.added}</span>
-                       <span className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">Añadidas</span>
+                       <span className="text-4xl font-bold text-foreground">{excelResult.added}</span>
+                       <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-2">Añadidas</span>
                     </div>
-                    <div className="w-px bg-neutral-800"></div>
+                    <div className="w-px bg-muted"></div>
                     <div className="flex flex-col items-center flex-1">
-                       <span className="text-4xl font-bold text-neutral-600">{excelResult.skipped}</span>
-                       <span className="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">Omitidas</span>
+                       <span className="text-4xl font-bold text-muted-foreground">{excelResult.skipped}</span>
+                       <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-2">Omitidas</span>
                     </div>
                  </div>
                  <div className="pt-6 w-full max-w-sm">
                    <button 
                      onClick={() => { setIsExcelPreviewOpen(false); setExcelResult(null); }}
-                     className="w-full bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-neutral-200 transition-colors"
+                     className="w-full bg-foreground text-background px-8 py-4 rounded-xl font-bold hover:bg-neutral-200 transition-colors"
                      >
                      Volver al Dashboard
                    </button>
@@ -524,9 +524,9 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <>
-                <div className="flex-1 overflow-y-auto p-6 bg-neutral-900/50">
+                <div className="flex-1 overflow-y-auto p-6 bg-card/50">
                   <table className="w-full text-left">
-                    <thead className="text-xs uppercase tracking-wider text-neutral-500 border-b border-neutral-800">
+                    <thead className="text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                       <tr>
                         <th className="pb-3 pr-4">Nombre (Cliente)</th>
                         <th className="pb-3 pr-4">URL</th>
@@ -536,10 +536,10 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody className="divide-y divide-neutral-800/50 text-sm">
                       {pendingExcelClinics.map((clinic, idx) => (
-                        <tr key={idx} className="hover:bg-neutral-800/20 transition-colors">
-                          <td className="py-3 pr-4 font-bold text-white">{clinic.name}</td>
-                          <td className="py-3 pr-4 text-neutral-400 truncate max-w-[200px]">{clinic.url || '-'}</td>
-                          <td className="py-3 pr-4 text-neutral-400">{clinic.location || '-'}</td>
+                        <tr key={idx} className="hover:bg-muted/20 transition-colors">
+                          <td className="py-3 pr-4 font-bold text-foreground">{clinic.name}</td>
+                          <td className="py-3 pr-4 text-muted-foreground truncate max-w-[200px]">{clinic.url || '-'}</td>
+                          <td className="py-3 pr-4 text-muted-foreground">{clinic.location || '-'}</td>
                           <td className="py-3 text-right text-yellow-500 font-bold text-xs">{clinic.industry}</td>
                         </tr>
                       ))}
@@ -547,10 +547,10 @@ export default function AdminDashboard() {
                   </table>
                 </div>
 
-                <div className="p-6 border-t border-neutral-800 bg-neutral-950 flex justify-between items-center">
+                <div className="p-6 border-t border-border bg-muted flex justify-between items-center">
                    <button 
                      onClick={() => setIsExcelPreviewOpen(false)}
-                     className="px-6 py-3 font-bold text-neutral-400 hover:text-white transition-colors"
+                     className="px-6 py-3 font-bold text-muted-foreground hover:text-foreground transition-colors"
                    >
                      Cancelar
                    </button>
@@ -577,7 +577,7 @@ export default function AdminDashboard() {
                           setIsExcelUploading(false);
                         }
                      }}
-                     className="bg-white text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50"
+                     className="bg-foreground text-background px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50"
                    >
                      {isExcelUploading ? "Inyectando Base de Datos..." : "Confirmar Inyección Segura"}
                    </button>

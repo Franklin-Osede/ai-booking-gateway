@@ -93,30 +93,30 @@ export default function CalendarPage() {
         </h1>
       </div>
       
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-xl">
+      <div className="bg-card border border-border rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-xl">
         {/* Lado izquierdo: Calendario */}
-        <div className="w-full md:w-2/3 p-6 border-b md:border-b-0 md:border-r border-neutral-800">
+        <div className="w-full md:w-2/3 p-6 border-b md:border-b-0 md:border-r border-border">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <CalendarIcon className="text-yellow-500" />
               Vista Mensual
             </h2>
             <div className="flex items-center gap-4">
-              <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 hover:bg-neutral-800 rounded-full transition-colors">
+              <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 hover:bg-muted rounded-full transition-colors">
                 <ChevronLeft size={20} />
               </button>
               <span className="font-bold text-lg capitalize w-32 text-center">
                 {format(currentMonth, 'MMMM yyyy', { locale: es })}
               </span>
-              <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 hover:bg-neutral-800 rounded-full transition-colors">
+              <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 hover:bg-muted rounded-full transition-colors">
                 <ChevronRight size={20} />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-px bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-800">
+          <div className="grid grid-cols-7 gap-px bg-muted rounded-2xl overflow-hidden border border-border">
             {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
-              <div key={day} className="bg-neutral-950 p-3 text-center text-xs font-bold text-neutral-500">
+              <div key={day} className="bg-muted p-3 text-center text-xs font-bold text-muted-foreground">
                 {day}
               </div>
             ))}
@@ -130,12 +130,12 @@ export default function CalendarPage() {
                  <div 
                    key={date.toString()}
                    onClick={() => setSelectedDate(date)}
-                   className={`bg-neutral-900 min-h-[100px] p-2 cursor-pointer transition-colors relative group
-                     ${!isCurrentMonth ? 'opacity-30' : 'hover:bg-neutral-800'}
-                     ${isSelected ? 'ring-2 ring-inset ring-yellow-500 bg-neutral-800' : ''}
+                   className={`bg-card min-h-[100px] p-2 cursor-pointer transition-colors relative group
+                     ${!isCurrentMonth ? 'opacity-30' : 'hover:bg-muted'}
+                     ${isSelected ? 'ring-2 ring-inset ring-yellow-500 bg-muted' : ''}
                    `}
                  >
-                   <span className={`text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full ${isSelected ? 'bg-yellow-500 text-black' : 'text-neutral-400'}`}>
+                   <span className={`text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full ${isSelected ? 'bg-yellow-500 text-background' : 'text-muted-foreground'}`}>
                      {format(date, 'd')}
                    </span>
                    {dayEvents.length > 0 && (
@@ -143,7 +143,7 @@ export default function CalendarPage() {
                        {dayEvents.slice(0, 3).map((e, idx) => (
                          <div key={idx} className="w-2 h-2 rounded-full bg-blue-500" title={e.clinic?.name}></div>
                        ))}
-                       {dayEvents.length > 3 && <span className="text-[10px] text-neutral-500 ml-1">+{dayEvents.length-3}</span>}
+                       {dayEvents.length > 3 && <span className="text-[10px] text-muted-foreground ml-1">+{dayEvents.length-3}</span>}
                      </div>
                    )}
                  </div>
@@ -153,25 +153,25 @@ export default function CalendarPage() {
         </div>
 
         {/* Lado derecho: Eventos del día */}
-        <div className="w-full md:w-1/3 p-6 bg-neutral-950 flex flex-col">
-           <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-white border-b border-neutral-800 pb-4">
+        <div className="w-full md:w-1/3 p-6 bg-muted flex flex-col">
+           <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-foreground border-b border-border pb-4">
              <span>Eventos del {format(selectedDate, "d 'de' MMMM", { locale: es })}</span>
            </h3>
 
            <div className="flex-1 overflow-y-auto space-y-3 mb-6" style={{ maxHeight: '400px' }}>
              {events.filter(e => isSameDay(new Date(e.eventDate), selectedDate)).length === 0 ? (
-                <div className="text-center py-12 text-neutral-600">
+                <div className="text-center py-12 text-muted-foreground">
                   <CalendarIcon size={48} className="mx-auto mb-4 opacity-20" />
                   <p className="text-sm">No hay eventos este día.</p>
                 </div>
              ) : (
                 events.filter(e => isSameDay(new Date(e.eventDate), selectedDate)).map(e => (
-                  <div key={e.id} className="bg-neutral-900 border border-neutral-800 p-4 rounded-xl relative group">
-                     <button onClick={() => handleDeleteEvent(e.id)} className="absolute top-3 right-3 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                  <div key={e.id} className="bg-card border border-border p-4 rounded-xl relative group">
+                     <button onClick={() => handleDeleteEvent(e.id)} className="absolute top-3 right-3 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
                        <Trash2 size={16} />
                      </button>
                      <p className="font-bold text-sm text-yellow-500 mb-1">{e.clinic?.name || "Clínica borrada"}</p>
-                     {e.feedback && <p className="text-sm text-neutral-300 mb-2 whitespace-pre-wrap"><MessageSquare size={12} className="inline mr-1 text-neutral-500"/> {e.feedback}</p>}
+                     {e.feedback && <p className="text-sm text-muted-foreground mb-2 whitespace-pre-wrap"><MessageSquare size={12} className="inline mr-1 text-muted-foreground"/> {e.feedback}</p>}
                      {e.nextAction && (
                        <div className="bg-blue-500/10 text-blue-400 text-xs px-2 py-1.5 rounded-lg border border-blue-500/20 font-medium mt-2">
                          Acción: {e.nextAction}
@@ -183,8 +183,8 @@ export default function CalendarPage() {
            </div>
 
            {/* Formulario Añadir */}
-           <div className="bg-neutral-900 border border-neutral-800 p-5 rounded-xl">
-              <h4 className="font-bold text-sm mb-4 border-b border-neutral-800 pb-2">Registrar Nuevo Seguimiento</h4>
+           <div className="bg-card border border-border p-5 rounded-xl">
+              <h4 className="font-bold text-sm mb-4 border-b border-border pb-2">Registrar Nuevo Seguimiento</h4>
               <form onSubmit={handleAddEvent} className="space-y-3 flex flex-col">
                 <div className="relative z-50">
                   <input
@@ -197,12 +197,12 @@ export default function CalendarPage() {
                     }}
                     onFocus={() => setIsClinicDropdownOpen(true)}
                     placeholder="Buscar clínica por nombre..."
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none focus:border-yellow-500 transition-colors"
+                    className="w-full bg-muted border border-border rounded-lg p-2.5 text-sm text-foreground outline-none focus:border-yellow-500 transition-colors"
                   />
                   {isClinicDropdownOpen && searchClinic.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto bg-neutral-900 border border-neutral-700 rounded-lg shadow-2xl">
+                    <div className="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto bg-card border border-border rounded-lg shadow-2xl">
                       {clinics.filter(c => c.name.toLowerCase().includes(searchClinic.toLowerCase())).length === 0 ? (
-                        <div className="p-3 text-sm text-neutral-500 text-center">No hay coincidencias</div>
+                        <div className="p-3 text-sm text-muted-foreground text-center">No hay coincidencias</div>
                       ) : (
                         clinics.filter(c => c.name.toLowerCase().includes(searchClinic.toLowerCase())).map(c => (
                           <div 
@@ -212,7 +212,7 @@ export default function CalendarPage() {
                               setSearchClinic(c.name);
                               setIsClinicDropdownOpen(false);
                             }}
-                            className={`p-3 text-sm cursor-pointer hover:bg-neutral-800 transition-colors ${newEventClinicId === c.id ? 'bg-neutral-800 text-yellow-500 font-bold' : 'text-neutral-300'}`}
+                            className={`p-3 text-sm cursor-pointer hover:bg-muted transition-colors ${newEventClinicId === c.id ? 'bg-muted text-yellow-500 font-bold' : 'text-muted-foreground'}`}
                           >
                             {c.name}
                           </div>
@@ -230,19 +230,19 @@ export default function CalendarPage() {
                   value={newEventFeedback}
                   onChange={e => setNewEventFeedback(e.target.value)}
                   placeholder="Feedback de la reunión o llamada..."
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none resize-none min-h-[80px] relative z-10"
+                  className="w-full bg-muted border border-border rounded-lg p-2.5 text-sm text-foreground outline-none resize-none min-h-[80px] relative z-10"
                 />
                 <input 
                   type="text"
                   value={newEventAction}
                   onChange={e => setNewEventAction(e.target.value)}
                   placeholder="Siguiente paso (ej. Llamar el martes)"
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white outline-none relative z-10"
+                  className="w-full bg-muted border border-border rounded-lg p-2.5 text-sm text-foreground outline-none relative z-10"
                 />
                 <button 
                   type="submit" 
                   disabled={isSubmittingEvent || !newEventClinicId}
-                  className="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 mt-2 relative z-10"
+                  className="w-full bg-foreground text-background font-bold py-3 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 mt-2 relative z-10"
                 >
                   {isSubmittingEvent ? "Guardando..." : "Programar Evento"}
                 </button>
@@ -252,28 +252,28 @@ export default function CalendarPage() {
       </div>
 
       {/* HISTORIAL GLOBAL DE EVENTOS MENSUAL */}
-      <div className="mt-8 bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-xl">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 border-b border-neutral-800 pb-4">
+      <div className="mt-8 bg-card border border-border rounded-3xl p-6 shadow-xl">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 border-b border-border pb-4">
           <MessageSquare className="text-yellow-500" />
-          Historial de Eventos ({format(currentMonth, 'MMMM yyyy', { locale: es })})
+          Detalle de Eventos ({format(selectedDate, "d 'de' MMMM, yyyy", { locale: es })})
         </h2>
         
-        {events.length === 0 ? (
-          <div className="text-center py-8 text-neutral-500">
-            No hay ningún evento registrado en este mes.
+        {events.filter(e => isSameDay(new Date(e.eventDate), selectedDate)).length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No hay ningún evento registrado en este día.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {events.sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()).map(e => (
-              <div key={`hist-${e.id}`} className="bg-neutral-950 border border-neutral-800 p-5 rounded-xl flex flex-col group relative">
-                <button onClick={() => handleDeleteEvent(e.id)} className="absolute top-4 right-4 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+            {events.filter(e => isSameDay(new Date(e.eventDate), selectedDate)).sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()).map(e => (
+              <div key={`hist-${e.id}`} className="bg-muted border border-border p-5 rounded-xl flex flex-col group relative">
+                <button onClick={() => handleDeleteEvent(e.id)} className="absolute top-4 right-4 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
                   <Trash2 size={16} />
                 </button>
-                <div className="text-xs text-neutral-500 mb-2 font-medium bg-neutral-900 px-2 py-1 rounded inline-block w-fit">
+                <div className="text-xs text-muted-foreground mb-2 font-medium bg-card px-2 py-1 rounded inline-block w-fit">
                   {format(new Date(e.eventDate), "d 'de' MMM, yyyy", { locale: es })}
                 </div>
                 <p className="font-bold text-yellow-500 mb-2">{e.clinic?.name || "Clínica borrada"}</p>
-                {e.feedback && <p className="text-sm text-neutral-300 mb-3 flex-1">{e.feedback}</p>}
+                {e.feedback && <p className="text-sm text-muted-foreground mb-3 flex-1">{e.feedback}</p>}
                 {e.nextAction && (
                   <div className="bg-blue-500/10 text-blue-400 text-xs px-3 py-2 rounded-lg border border-blue-500/20 font-medium mt-auto">
                     Próximo paso: {e.nextAction}

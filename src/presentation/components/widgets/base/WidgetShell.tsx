@@ -28,22 +28,22 @@ export function WidgetShell({
   const showBackButton = step > 1 && step < totalSteps && !hideBackButtonOnSteps.includes(step);
 
   return (
-    <div className={`fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6 pointer-events-none`}>
-      <div className="fixed inset-0 bg-black/20 pointer-events-none" />
+    <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 pointer-events-none`}>
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm pointer-events-none transition-opacity duration-300" />
 
       <AnimatePresence mode="wait">
         <motion.div 
            initial={{ opacity: 0, scale: 0.95, y: 30 }}
            animate={{ opacity: 1, scale: 1, y: 0 }}
            exit={{ opacity: 0, scale: 0.95, y: 30 }}
-           className={`relative w-[95vw] md:w-full max-w-[420px] md:max-w-[480px] min-h-[400px] md:min-h-[500px] max-h-[85vh] md:max-h-[80vh] bg-[#f8fafc] rounded-4xl md:rounded-[2.5rem] shadow-[0_25px_65px_-15px_rgba(0,0,0,0.15)] ring-1 ring-gray-900/5 flex flex-col overflow-hidden pointer-events-auto font-sans antialiased text-gray-900`}
+           className={`relative w-[95vw] md:w-full max-w-[420px] md:max-w-[480px] min-h-[400px] md:min-h-[500px] max-h-[85vh] md:max-h-[80vh] bg-card rounded-4xl md:rounded-[2.5rem] shadow-2xl ring-1 ring-border flex flex-col overflow-hidden pointer-events-auto font-sans antialiased text-foreground transition-colors duration-200`}
         >
           {/* Top Header: Progress Bar */}
-          <header className="px-6 sm:px-8 pt-7 sm:pt-8 pb-3 sm:pb-4 shrink-0 bg-[#f8fafc] flex flex-col gap-3">
-             <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
+          <header className="px-6 sm:px-8 pt-7 sm:pt-8 pb-3 sm:pb-4 shrink-0 bg-card flex flex-col gap-3 transition-colors duration-200">
+             <div className="flex items-center justify-between text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
                <div className="flex items-center gap-3">
                   {showBackButton ? (
-                    <button onClick={onPrev} className="hover:text-gray-900 transition-colors flex items-center gap-1">
+                    <button onClick={onPrev} className="hover:text-foreground transition-colors flex items-center gap-1">
                       <ChevronLeft size={16} strokeWidth={3} /> Atrás
                     </button>
                   ) : (
@@ -52,15 +52,15 @@ export function WidgetShell({
                </div>
                {step <= totalSteps && (
                  <div className="flex items-center gap-1">
-                   <span className="text-gray-400 font-extrabold text-xl tracking-tighter" style={{color}}>{step}</span> 
-                   <span className="text-gray-400 font-bold text-sm">/ {totalSteps}</span>
+                   <span className="text-foreground font-extrabold text-xl tracking-tighter">{step}</span> 
+                   <span className="font-bold text-sm">/ {totalSteps}</span>
                  </div>
                )}
              </div>
 
              {/* Progress Line */}
              {step <= totalSteps && (
-               <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+               <div className="h-1.5 w-full bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
                  <motion.div 
                    className="h-full rounded-full"
                    style={{ backgroundColor: color }}
