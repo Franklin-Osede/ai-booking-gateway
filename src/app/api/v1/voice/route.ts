@@ -25,23 +25,30 @@ async function applyTTSDictionary(text: string, clinicId?: string, niche: string
       const nRules = (nicheRules?.rules as TermRule[]) || [];
       const cRules = (clinicRules?.rules as TermRule[]) || [];
 
+      const isEnglish = locale.toLowerCase().startsWith("en");
+
       // Base rules
       const baseRules: TermRule[] = [
         { match: "\\bFUE\\b", replace: "F. U. E.", priority: -1 },
         { match: "\\bDHI\\b", replace: "D. H. I.", priority: -1 },
         { match: "\\bPRP\\b", replace: "P. R. P.", priority: -1 },
-        { match: "\\bFinasteride\\b", replace: "finastéride", priority: -1 },
-        { match: "\\bDutasteride\\b", replace: "dutastéride", priority: -1 },
-        { match: "\\bMinoxidil\\b", replace: "minoxídil", priority: -1 },
-        { match: "\\bInvisalign\\b", replace: "Invisálain", priority: -1 },
-        { match: "\\bBotox\\b", replace: "Bótox", priority: -1 },
-        { match: "\\bLifting\\b", replace: "Lífting", priority: -1 },
-        { match: "\\bPeeling\\b", replace: "Píling", priority: -1 },
-        { match: "\\bAnti-aging\\b", replace: "anti éiying", priority: -1 },
         { match: "\\bIA\\b", replace: "I. A.", priority: -1 },
-        { match: "\\bDr\\.", replace: "Doctor", priority: -1 },
-        { match: "\\bDra\\.", replace: "Doctora", priority: -1 }
       ];
+
+      if (!isEnglish) {
+        baseRules.push(
+          { match: "\\bFinasteride\\b", replace: "finastéride", priority: -1 },
+          { match: "\\bDutasteride\\b", replace: "dutastéride", priority: -1 },
+          { match: "\\bMinoxidil\\b", replace: "minoxídil", priority: -1 },
+          { match: "\\bInvisalign\\b", replace: "Invisálain", priority: -1 },
+          { match: "\\bBotox\\b", replace: "Bótox", priority: -1 },
+          { match: "\\bLifting\\b", replace: "Lífting", priority: -1 },
+          { match: "\\bPeeling\\b", replace: "Píling", priority: -1 },
+          { match: "\\bAnti-aging\\b", replace: "anti éiying", priority: -1 },
+          { match: "\\bDr\\.", replace: "Doctor", priority: -1 },
+          { match: "\\bDra\\.", replace: "Doctora", priority: -1 }
+        );
+      }
 
       for (const rule of baseRules) {
         merged.set(rule.match, rule);
@@ -91,7 +98,7 @@ const polly = new PollyClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F", clinicId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic female es-ES voice
+    const { text, intent, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F", clinicId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic female es-ES voice
 
     if (!text) {
        return NextResponse.json({ error: "Missing text payload" }, { status: 400 });
@@ -127,6 +134,17 @@ export async function POST(req: NextRequest) {
         // Just strip any accidental HTML/XML tags that might bleed through from the LLM in free-flow mode
         const noSsmlText = cleanText.replace(/<[^>]*>/g, '');
           
+        // Map semantic intents to voice modulation
+        let stability = 0.5;
+        let similarity_boost = 0.75;
+        if (intent === "GREETING") {
+          stability = 0.70; similarity_boost = 0.85;
+        } else if (intent === "QUESTION") {
+          stability = 0.40; similarity_boost = 0.65;
+        } else if (intent === "CONFIRMATION") {
+          stability = 0.85; similarity_boost = 0.90;
+        }
+
         const elRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}?optimize_streaming_latency=3`, {
           method: "POST",
           headers: {
@@ -137,7 +155,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             text: noSsmlText,
             model_id: locale.toLowerCase().startsWith('en') ? "eleven_turbo_v2_5" : "eleven_multilingual_v2",
-            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+            voice_settings: { stability, similarity_boost }
           })
         });
 

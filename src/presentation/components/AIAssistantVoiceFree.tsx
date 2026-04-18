@@ -1,8 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, Play, Menu, Camera, ChevronLeft, ChevronRight, CheckCircle2, ChevronDown, Check } from "lucide-react";
 import { getVoices, VoiceProfile } from "../config/voiceConfig";
@@ -206,7 +206,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
        const confirmationText = isEng 
          ? `Perfect. Your appointment for the ${selectedDate} of ${monthNameStr} at ${selectedTime} has been successfully booked. We've sent you an email with all the details. See you soon!` 
          : `Perfecto. Tu cita para el día ${selectedDate} de ${monthNameStr} a las ${selectedTime} ha sido reservada con éxito. Te hemos enviado un correo con todos los detalles. ¡Nos vemos pronto!`;
-       fetchAudio(confirmationText, "bot-done-audio", () => {});
+       fetchAudio(confirmationText, "bot-done-audio", () => {}, { intent: "CONFIRMATION" });
     }, 500);
   };
   const endRef = useRef<HTMLDivElement>(null);
@@ -251,7 +251,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName, locale: lang || 'es' })
+          body: JSON.stringify({ text: greeting, intent: "GREETING", provider: voiceProvider, voiceType: 'free', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName, locale: lang || 'es' })
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -338,7 +338,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen, stepInfo]);
 
-  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraProps?: Partial<Msg> & { overrideVoice?: VoiceProfile }) => {
+  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraProps?: Partial<Msg> & { overrideVoice?: VoiceProfile, intent?: string }) => {
     try {
       setIsProcessing(true);
       if (audioRef.current && !audioRef.current.paused) {
@@ -358,7 +358,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, elevenlabs_voice_id: voiceToUse.elevenLabsId, provider: voiceProvider, voiceType: 'free', gender: voiceToUse.gender, locale: lang || 'es' })
+          body: JSON.stringify({ text, intent: extraProps?.intent || "OTHERS", elevenlabs_voice_id: voiceToUse.elevenLabsId, provider: voiceProvider, voiceType: 'free', gender: voiceToUse.gender, locale: lang || 'es' })
         });
         if (!res.ok) throw new Error("Voice API Error");
         const blob = await res.blob();
@@ -451,7 +451,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
             if (data.showCalendar) {
                setMessages(p => [...p, { id: "bot-cal", text: isEng ? "Calendar" : "Calendario", sender: "bot", isCalendar: true }]);
             }
-         });
+         }, { intent: "QUESTION" });
        } catch(err) {
          console.error(err);
          setIsProcessing(false);
@@ -460,7 +460,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
          const fb = isEng ? "Sorry, there was a small network hiccup. Would you like to schedule directly?" : "Disculpa, ha habido un pequeño corte de red. ¿Te gustaría que agendemos una valoración directamente?";
          fetchAudio(fb, "bot-fb", () => {
              setMessages(p => [...p, { id: "bot-cal", text: isEng ? "Calendar" : "Calendario", sender: "bot", isCalendar: true }]);
-         });
+         }, { intent: "QUESTION" });
        }
     }
   };
@@ -638,7 +638,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
               <div className="px-5 py-3 text-black flex justify-between items-center bg-gray-50/95 backdrop-blur-md border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full shrink-0 relative overflow-hidden shadow-sm border border-gray-200">
-                    <img src={activeVoice.avatarUrl} alt={activeVoice.name} className="w-full h-full object-cover" />
+                    <Image src={activeVoice.avatarUrl} alt={activeVoice.name} fill sizes="40px" unoptimized className="object-cover" />
                   </div>
                   <div className="flex flex-col">
                     <h3 className="font-bold text-[13px] sm:text-[14px] leading-tight text-gray-900 whitespace-nowrap">{activeVoice.fullName}</h3>
@@ -696,7 +696,9 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                                onClick={() => handleVoiceSelection(v.id, v.name)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
-                                <img src={v.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0">
+                                  <Image src={v.avatarUrl} alt={v.name} fill sizes="40px" unoptimized className="object-cover" />
+                                </div>
                                 <div className="flex-1 min-w-0">
                                    <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
                                    <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>
@@ -712,7 +714,9 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                                onClick={() => handleVoiceSelection(v.id, v.name)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
-                                <img src={v.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-gray-200 opacity-90" />
+                                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0 opacity-90">
+                                  <Image src={v.avatarUrl} alt={v.name} fill sizes="40px" unoptimized className="object-cover" />
+                                </div>
                                 <div className="flex-1 min-w-0">
                                    <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
                                    <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>
@@ -783,8 +787,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                       <div className="flex gap-2 p-1">
                         {msg.photoUrls.slice(0, 3).map((url, i) => (
                            <div key={i} className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-gray-800 overflow-hidden border-2 border-transparent shadow-md">
-                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                             <img src={url} alt="Uploaded" className="w-full h-full object-cover" />
+                             <Image src={url} alt="Uploaded" width={96} height={96} unoptimized className="w-full h-full object-cover" />
                            </div>
                         ))}
                       </div>

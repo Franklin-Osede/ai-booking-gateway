@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Play, Menu, ChevronDown, Check } from "lucide-react";
 import { resolveConfig } from "../config/resolveConfig";
@@ -240,7 +241,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     setTimeout(() => {
        fetchAudio(greeting, "bot-res-" + Date.now(), () => {
          setStepInfo({ options: [confLocale.chat_scripts?.options_first_step[0] || "¿Cuánto cuesta?", "Quiero ver resultados", "Agendar cita"], stepId: 1 });
-       }, { overrideVoice: selectedVoice });
+       }, { overrideVoice: selectedVoice, intent: "GREETING" });
     }, 100);
   };
 
@@ -353,7 +354,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen, stepInfo, selectedDate, selectedTime]);
 
-  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraParams?: { isSuccess?: boolean; isFinalCard?: boolean; image?: string; isDoctorList?: boolean; doctorListData?: DoctorData[], overrideVoice?: VoiceProfile }) => {
+  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraParams?: { isSuccess?: boolean; isFinalCard?: boolean; image?: string; isDoctorList?: boolean; doctorListData?: DoctorData[], overrideVoice?: VoiceProfile, intent?: string }) => {
     try {
       setIsProcessing(true);
       if (audioRef.current && !audioRef.current.paused) {
@@ -370,7 +371,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender, niche: activeNiche, clinicId: brandName || null, locale: lang || 'es' })
+        body: JSON.stringify({ text, intent: extraParams?.intent || "OTHERS", provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender, niche: activeNiche, clinicId: brandName || null, locale: lang || 'es' })
       });
       
       if (!res.ok) throw new Error("Voice API Error");
@@ -448,7 +449,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         fetchAudio(greeting, "bot-0", () => {
           const initialChips = categories.slice(0, 3).map((c: { name: string }) => c.name);
           setStepInfo({ options: initialChips, stepId: 1 });
-        });
+        }, { intent: "GREETING" });
       } 
       else if (nextStepId === 1) {
         let voiceProvider = "elevenlabs";
@@ -462,7 +463,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
           } else {
              setStepInfo({ options: ["Agendar Cita", "Más información"], stepId: 2 });
           }
-        });
+        }, { intent: "QUESTION" });
       }
       else if (nextStepId === 15) {
         let voiceProvider = "elevenlabs";
@@ -471,7 +472,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         
         fetchAudio(deepDivePrompt, "bot-15", () => {
           setStepInfo({ options: ["Agendar Cita", "Más información"], stepId: 2 });
-        });
+        }, { intent: "QUESTION" });
       }
       else if (nextStepId === 2) {
         let currentService = "nuestros tratamientos";
@@ -518,7 +519,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         
         fetchAudio(docPitch, "bot-2", () => {
            setStepInfo({ options: ["Agendar Cita", "Ver Especialistas"], stepId: 25 });
-        }, { image: photoUrl });
+        }, { image: photoUrl, intent: "QUESTION" });
       }
       else if (nextStepId === 25) {
         let voiceProvider = "elevenlabs";
@@ -528,7 +529,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            const byeMsg = VoicePromptService.getPrompt(VoiceIntent.BYE, { locale: lang || 'es' }, voiceProvider);
            fetchAudio(byeMsg, "bot-bye", () => {
              setStepInfo({ options: [], stepId: 0 });
-           });
+           }, { intent: "GREETING" });
            return;
         }
 
@@ -582,7 +583,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            
            fetchAudio(othersMsg, "bot-others", () => {
              setStepInfo({ options: [effectiveConfig.locale.chat_scripts?.doctor_found_options[0] || "Cualquiera disponible"], stepId: 25 });
-           }, { isDoctorList: true, doctorListData: docPayload });
+           }, { isDoctorList: true, doctorListData: docPayload, intent: "QUESTION" });
            return;
         }
 
@@ -600,7 +601,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            const pQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_PHOTOS, { userSelection, doctorName: docNameExtracted, locale: lang || 'es' }, voiceProvider);
            fetchAudio(pQuestion, "bot-photos", () => {
               setStepInfo({ options: effectiveConfig.locale.chat_scripts?.photos_options || ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
-           });
+           }, { intent: "QUESTION" });
         } else {
            setTimeout(() => triggerFlowStep(3), 100);
         }
@@ -614,7 +615,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         fetchAudio(calQuestion, "bot-3", () => {
            const isEng = (lang || "es").toLowerCase().startsWith("en");
            setMessages(prev => [...prev, { id: "bot-cal", text: isEng ? "Calendar" : "Calendario", sender: "bot", isCalendar: true }]);
-        });
+        }, { intent: "QUESTION" });
       }
     }, 600);
   };
@@ -660,7 +661,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         
         const confirmMsg = VoicePromptService.getPrompt(VoiceIntent.CONFIRM_BOOKING, { doctorName: docName, selectedDate: selectedDate || 1, spokenTime, niche: activeNiche, locale: lang || 'es' }, voiceProvider);
         
-        fetchAudio(confirmMsg, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
+        fetchAudio(confirmMsg, "bot-success", () => {}, { isSuccess: true, isFinalCard: true, intent: "CONFIRMATION" });
      }, 600);
   };
 
@@ -714,7 +715,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
               <div className="px-5 py-3 text-black flex justify-between items-center bg-gray-50/95 backdrop-blur-md border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full shrink-0 relative overflow-hidden shadow-sm border border-gray-200">
-                    <img src={activeVoice.avatarUrl} alt={activeVoice.name} className="w-full h-full object-cover" />
+                    <Image src={activeVoice.avatarUrl} alt={activeVoice.name} fill sizes="40px" unoptimized className="object-cover" />
                   </div>
                   <div className="flex flex-col">
                     <h3 className="font-bold text-[13px] sm:text-[14px] leading-tight text-gray-900 whitespace-nowrap">{activeVoice.fullName}</h3>
@@ -772,7 +773,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                onClick={() => handleVoiceSelection(v.id, v.name)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
-                                <img src={v.avatarUrl} alt={v.name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0">
+                                  <Image src={v.avatarUrl} alt={v.name} fill sizes="40px" unoptimized className="object-cover" />
+                                </div>
                                 <div className="flex-1 min-w-0">
                                    <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
                                    <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>
@@ -788,7 +791,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                onClick={() => handleVoiceSelection(v.id, v.name)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
-                                <img src={v.avatarUrl} alt={v.name} className="w-10 h-10 rounded-full object-cover border border-gray-200 opacity-90" />
+                                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0 opacity-90">
+                                  <Image src={v.avatarUrl} alt={v.name} fill sizes="40px" unoptimized className="object-cover" />
+                                </div>
                                 <div className="flex-1 min-w-0">
                                    <p className={`text-sm font-semibold truncate ${activeVoiceId === v.id ? 'text-blue-700' : 'text-gray-900'}`}>{v.name} · <span className="font-normal opacity-70">{v.role}</span></p>
                                    <p className="text-xs text-gray-500 truncate">{v.tone} <span className="opacity-50">|</span> {v.useCase}</p>
@@ -917,13 +922,13 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                             
                             <div className="mt-3 pt-2.5 border-t border-gray-100/80 w-full overflow-hidden">
                               {msg.image && (
-                                <motion.img 
+                                <motion.div
                                   initial={{ opacity: 0, scale: 0.95 }}
                                   animate={{ opacity: 1, scale: 1 }}
-                                  src={msg.image} 
-                                  alt="Visual Context" 
-                                  className="w-[calc(100%+0.5rem)] -mx-1 h-[140px] sm:h-[150px] object-cover rounded-[14px] mt-1 mb-3.5 shadow-sm border border-gray-100/50" 
-                                />
+                                  className="w-[calc(100%+0.5rem)] -mx-1 h-[140px] sm:h-[150px] rounded-[14px] mt-1 mb-3.5 shadow-sm border border-gray-100/50 overflow-hidden relative"
+                                >
+                                  <Image src={msg.image} alt="Visual Context" fill sizes="(max-width: 640px) 100vw, 320px" unoptimized className="object-cover" />
+                                </motion.div>
                               )}
                               <button 
                                 onClick={() => toggleTranscript(msg.id)}
@@ -942,8 +947,14 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                          <div className="flex items-center justify-between">
                                            <div className="flex items-center gap-3">
                                              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-gray-100 shadow-sm relative">
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={doc.image || `https://randomuser.me/api/portraits/${/(Dra\.|Maria|Ana|Laura|Elena|Sofia)/i.test(doc.name) ? 'women' : 'men'}/${40 + idx}.jpg`} className="w-full h-full object-cover" alt={doc.name} />
+                                                <Image
+                                                  src={doc.image || `https://randomuser.me/api/portraits/${/(Dra\.|Maria|Ana|Laura|Elena|Sofia)/i.test(doc.name) ? 'women' : 'men'}/${40 + idx}.jpg`}
+                                                  alt={doc.name}
+                                                  fill
+                                                  sizes="48px"
+                                                  unoptimized
+                                                  className="object-cover"
+                                                />
                                              </div>
                                              <div className="flex flex-col">
                                                <span className="text-[14px] font-bold text-gray-900 tracking-tight leading-none mb-1">{doc.name}</span>

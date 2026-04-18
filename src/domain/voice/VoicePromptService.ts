@@ -18,9 +18,10 @@ export class VoicePromptService {
     const key = provider.toLowerCase();
     const strategy = this.strategies[key] || this.strategies['polly'];
     
-    // Force perfect Spanish pronunciation of 'clínica' even if the user forgets the accent mark
+    // Force perfect Spanish pronunciation of 'clínica' even if the user forgets the accent mark, but only for Spanish locales
     const safeParams = { ...params };
-    if (safeParams.brandName) {
+    const isEn = String(params.locale || 'es').toLowerCase().startsWith('en');
+    if (safeParams.brandName && !isEn) {
       safeParams.brandName = safeParams.brandName.replace(/clinica/gi, 'Clínica');
     }
     

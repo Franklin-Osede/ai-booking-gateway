@@ -55,8 +55,8 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
           if (data.data.widgetPosition) setWidgetPosition(data.data.widgetPosition);
           if (data.data.countryCode) {
             const cc = String(data.data.countryCode).toLowerCase();
-            if (cc === "en" || cc === "en-gb" || cc === "en-us") {
-              setLanguage(cc === "en-us" ? "en-US" : "en-GB");
+            if (cc === "en" || cc.startsWith("en-") || cc === "gb" || cc === "uk" || cc === "us") {
+              setLanguage((cc === "en-us" || cc === "us") ? "en-US" : "en-GB");
             } else {
               setLanguage("es-ES");
             }
