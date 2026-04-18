@@ -427,8 +427,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     if (userSelection) {
        setMessages(prev => [...prev, { id: "user-" + Date.now(), text: userSelection, sender: "user" }]);
        // Extract contextual data organically based on the conversational funnel depth
-       if (nextStepId === 2) setSelectedService(userSelection);
-       if (nextStepId === 3) setSelectedDoctor(userSelection);
+       const _isMeta = (val: string) => !!val.toLowerCase().match(/(omitir|skip|cualquiera|anyone|agendar|book|ver|see|foto|photo)/);
+       if (nextStepId === 2 && !_isMeta(userSelection)) setSelectedService(userSelection);
+       if (nextStepId === 3 && !_isMeta(userSelection)) setSelectedDoctor(userSelection);
     }
     setStepInfo({ options: [], stepId: nextStepId });
 
@@ -477,7 +478,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       }
       else if (nextStepId === 2) {
         let currentService = "nuestros tratamientos";
-        if (userSelection && userSelection !== "Más información" && userSelection !== "Agendar Videollamada") {
+        if (userSelection && userSelection !== "Más información" && userSelection !== "Agendar Videollamada" && userSelection !== "More info") {
            currentService = userSelection;
         } else if (categories[0] && categories[0].name) {
            currentService = categories[0].name;
@@ -526,7 +527,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
 
-        if (userSelection === "Ahora no") {
+        if (userSelection === "Ahora no" || userSelection === "Not now") {
            const byeMsg = VoicePromptService.getPrompt(VoiceIntent.BYE, { locale: lang || 'es' }, voiceProvider);
            fetchAudio(byeMsg, "bot-bye", () => {
              setStepInfo({ options: [], stepId: 0 });
@@ -534,7 +535,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            return;
         }
 
-        if (userSelection === "Ver Especialistas" || userSelection === "Ver otros Especialistas") {
+        if (userSelection === "Ver Especialistas" || userSelection === "Ver otros Especialistas" || userSelection === "View Specialists" || userSelection === "View other Specialists") {
            const othersMsg = VoicePromptService.getPrompt(VoiceIntent.OTHERS, { locale: lang || 'es' }, voiceProvider);
            const category = categories[0];
            const rawDocs = category.docs.slice(0, 3);

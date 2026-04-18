@@ -146,8 +146,9 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
        }
     }
 
-    if (resolvedNextStepId === 2) setSelectedService(userSelection || "");
-    if (resolvedNextStepId === 3) setSelectedDoctor(userSelection || "");
+    const _isMeta = (val: string) => !!val.toLowerCase().match(/(omitir|skip|cualquiera|anyone|agendar|book|ver|see|foto|photo)/);
+    if (resolvedNextStepId === 2 && userSelection && !_isMeta(userSelection)) setSelectedService(userSelection);
+    if (resolvedNextStepId === 3 && userSelection && !_isMeta(userSelection)) setSelectedDoctor(userSelection);
     setStepInfo({ options: [], stepId: resolvedNextStepId });
 
     if (resolvedNextStepId === 0) {
