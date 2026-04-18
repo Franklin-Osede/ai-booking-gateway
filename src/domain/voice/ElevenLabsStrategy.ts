@@ -18,14 +18,14 @@ export class ElevenLabsStrategy implements IVoiceStrategy {
         }
 
         const exactMatch = params.userSelection && scripts.ask_service_options[params.userSelection];
-        const introText = exactMatch || (isEn ? "Perfect, how can we focus your visit today?" : scripts.ask_service_intro);
+        const introText = exactMatch || scripts.ask_service_intro;
         
         // Si la categoría tiene Deep Dive, el texto introductorio YA TIENE la pregunta de cualificación final
         if (params.userSelection && scripts.deep_dive_chips && scripts.deep_dive_chips[params.userSelection]) {
            return introText;
         }
 
-        let customFallback = isEn ? "TEXT_INTRO Would you prefer to book an assessment now, or need more info?" : scripts.ask_service_fallback;
+        let customFallback = scripts.ask_service_fallback;
         if (customFallback.includes('TEXT_INTRO')) {
            customFallback = customFallback.replace('TEXT_INTRO', introText);
            return customFallback;
@@ -40,7 +40,7 @@ export class ElevenLabsStrategy implements IVoiceStrategy {
       case VoiceIntent.SERVICE_DEEP_DIVE: {
         if (!scripts) return isEn ? "Perfect... Would you like to schedule an appointment or see our specialists?" : "Perfecto... ¿Te gustaría agendar una cita o ver a nuestros especialistas?";
         
-        const fallbackMsg = isEn ? "TEXT_INTRO Would you like to schedule an appointment or see our specialists?" : scripts.ask_service_fallback;
+        const fallbackMsg = scripts.ask_service_fallback;
         const deepDiveText = (params.userSelection && scripts.deep_dive_scripts && scripts.deep_dive_scripts[params.userSelection]) || (isEn ? "Excellent choice." : "Excelente elección.");
         
         if (fallbackMsg.includes("TEXT_INTRO")) {
@@ -83,7 +83,7 @@ export class ElevenLabsStrategy implements IVoiceStrategy {
                ? `Great!... Your reservation with ${params.doctorName} for the ${params.selectedDate} at ${params.spokenTime} has been confirmed.` 
                : `¡Estupendo!... Tu reserva con ${params.doctorName} para el día ${params.selectedDate} a las ${params.spokenTime} ha quedado confirmada.`;
         }
-        let msg = isEn ? "Great! Your reservation with DR_NAME for SELECTED_DATE at SPOKEN_TIME has been officially confirmed." : scripts.confirm_booking;
+        let msg = scripts.confirm_booking;
         msg = msg.replace('DR_NAME', params.doctorName || (isEn ? 'our expert' : 'nuestro experto'));
         msg = msg.replace('SELECTED_DATE', params.selectedDate?.toString() || (isEn ? 'today' : 'hoy'));
         msg = msg.replace('SPOKEN_TIME', params.spokenTime || (isEn ? 'the indicated time' : 'la hora indicada'));
