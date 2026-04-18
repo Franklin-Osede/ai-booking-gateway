@@ -853,7 +853,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                            </div>
                            {selectedDate && (
                              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-gray-100 pt-3">
-                               <p className="text-[11px] font-bold text-gray-500 mb-2">Horarios:</p>
+                               <p className="text-[11px] font-bold text-gray-500 mb-2">{isEng ? "Availability:" : "Horarios:"}</p>
                                <div className="grid grid-cols-3 gap-2">
                                  {times.map(t => (
                                    <button key={t} onClick={() => setSelectedTime(t)} className={`w-full py-1.5 rounded-[10px] text-[12px] font-bold transition-all ${selectedTime === t ? 'shadow-md border-transparent text-white' : 'border border-gray-200 text-gray-600'}`} style={selectedTime === t ? { backgroundColor: color, color: contrastText } : {}}>{t}</button>
@@ -879,30 +879,30 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                            <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm ring-1 ring-gray-50">
                              <CheckCircle2 size={28} className="text-green-500" />
                            </div>
-                           <h3 className="font-extrabold text-[17px] text-gray-900 mb-1 tracking-tight">¡Reserva Confirmada!</h3>
-                           <p className="text-[12px] text-gray-500 mb-6 font-medium leading-relaxed px-2">Hemos enviado un email con todos los detalles y preparación previa para tu visita.</p>
+                           <h3 className="font-extrabold text-[17px] text-gray-900 mb-1 tracking-tight">{isEng ? "Booking Confirmed!" : "¡Reserva Confirmada!"}</h3>
+                           <p className="text-[12px] text-gray-500 mb-6 font-medium leading-relaxed px-2">{isEng ? "We have sent an email with all the details and preparation guidelines for your visit." : "Hemos enviado un email con todos los detalles y preparación previa para tu visita."}</p>
                            
                            <div className="bg-gray-50/80 rounded-2xl p-4 mb-6 text-left space-y-3.5 border border-gray-100">
                              {selectedDoctor && (
                                <div className="flex flex-col gap-1 border-b border-gray-200/60 pb-3">
-                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Especialista</span>
+                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{isEng ? "Specialist" : "Especialista"}</span>
                                  <span className="text-[14px] font-bold text-gray-800 tracking-tight">{selectedDoctor}</span>
                                </div>
                              )}
                              {selectedService && (
                                <div className="flex flex-col gap-1 border-b border-gray-200/60 pb-3">
-                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Servicio</span>
+                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{isEng ? "Service" : "Servicio"}</span>
                                  <span className="text-[14px] font-bold text-gray-800 tracking-tight">{selectedService}</span>
                                </div>
                              )}
                              <div className="flex flex-col gap-1">
-                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fecha y Horario</span>
+                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{isEng ? "Date and Time" : "Fecha y Horario"}</span>
                                <span className="text-[14px] font-bold text-gray-800 tracking-tight">{monthShort} {selectedDate}, {selectedTime}</span>
                              </div>
                            </div>
 
                            <button onClick={() => setIsOpen(false)} className="w-full py-4 rounded-xl font-bold shadow-md active:scale-95 transition-all text-[14px] flex items-center justify-center gap-2 group" style={{ backgroundColor: color, color: contrastText }}>
-                             Volver a la web <ChevronRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                             {isEng ? "Back to website" : "Volver a la web"} <ChevronRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
                            </button>
                          </div>
                       </div>
