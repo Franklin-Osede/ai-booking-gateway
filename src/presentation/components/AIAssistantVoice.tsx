@@ -462,7 +462,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
           if (userSelection && nicheConf?.voice_scripts?.deep_dive_chips && nicheConf.voice_scripts.deep_dive_chips[userSelection]) {
              setStepInfo({ options: nicheConf.voice_scripts.deep_dive_chips[userSelection], stepId: 15 });
           } else {
-             setStepInfo({ options: ["Agendar Cita", "Más información"], stepId: 2 });
+             setStepInfo({ options: isEng ? ["Book Appointment", "More info"] : ["Agendar Cita", "Más información"], stepId: 2 });
           }
         }, { intent: "QUESTION" });
       }
@@ -472,7 +472,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         const deepDivePrompt = VoicePromptService.getPrompt(VoiceIntent.SERVICE_DEEP_DIVE, { userSelection, niche: activeNiche, locale: lang || 'es' }, voiceProvider);
         
         fetchAudio(deepDivePrompt, "bot-15", () => {
-          setStepInfo({ options: ["Agendar Cita", "Más información"], stepId: 2 });
+          setStepInfo({ options: isEng ? ["Book Appointment", "More info"] : ["Agendar Cita", "Más información"], stepId: 2 });
         }, { intent: "QUESTION" });
       }
       else if (nextStepId === 2) {
@@ -497,29 +497,29 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         if (srv.includes("fue") || srv.includes("dhi") || srv.includes("implante") || srv.includes("injerto") || srv.includes("trasplante") || srv.includes("técnica capilar")) {
            match = {
              img: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2000&auto=format&fit=crop",
-             text: "Nuestra intervención capilar, es verdaderamente el tratamiento estrella. Extraemos los folículos uno a uno, sin dejar cicatrices... asegurando un diseño natural y la máxima densidad posible, gracias a tecnología de punta."
+             text: isEng ? "Our hair intervention is truly our flagship treatment. We extract follicles one by one, leaving no scars... ensuring a natural design and maximum possible density, thanks to cutting-edge technology." : "Nuestra intervención capilar, es verdaderamente el tratamiento estrella. Extraemos los folículos uno a uno, sin dejar cicatrices... asegurando un diseño natural y la máxima densidad posible, gracias a tecnología de punta."
            };
         } else if (srv.includes("preventivo") || srv.includes("prp") || srv.includes("mesoterapia") || srv.includes("plasma")) {
            match = {
              img: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2000&auto=format&fit=crop",
-             text: "Nuestros tratamientos preventivos intervienen de raíz, frenando la caída capilar y estimulando el crecimiento natural desde la primera sesión con aparatología indolora."
+             text: isEng ? "Our preventive treatments intervene at the root, stopping hair loss and stimulating natural growth from the first session with painless equipment." : "Nuestros tratamientos preventivos intervienen de raíz, frenando la caída capilar y estimulando el crecimiento natural desde la primera sesión con aparatología indolora."
            };
         } else if (srv.includes("seguimiento") || srv.includes("post") || srv.includes("revisión")) {
            match = {
              img: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=2000&auto=format&fit=crop",
-             text: "El postoperatorio es crucial para lograr el éxito. Nuestro equipo te acompañará con revisiones presenciales para garantizar que la intervención evolucione de forma impecable."
+             text: isEng ? "Post-operative care is crucial for success. Our team will accompany you with face-to-face check-ups to ensure the intervention evolves flawlessly." : "El postoperatorio es crucial para lograr el éxito. Nuestro equipo te acompañará con revisiones presenciales para garantizar que la intervención evolucione de forma impecable."
            };
         }
         
         const photoUrl = match ? match.img : (fallbackImages[activeNiche] || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop');
-        const pitchText = match ? match.text : `En nuestra clínica garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`;
+        const pitchText = match ? match.text : (isEng ? `In our clinic we guarantee excellent results thanks to cutting-edge technology and our top-tier specialists.` : `En nuestra clínica garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`);
         
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         const docPitch = VoicePromptService.getPrompt(VoiceIntent.DOCTOR_PITCH, { pitchText, locale: lang || 'es' }, voiceProvider);
         
         fetchAudio(docPitch, "bot-2", () => {
-           setStepInfo({ options: ["Agendar Cita", "Ver Especialistas"], stepId: 25 });
+           setStepInfo({ options: isEng ? ["Book Appointment", "View Specialists"] : ["Agendar Cita", "Ver Especialistas"], stepId: 25 });
         }, { image: photoUrl, intent: "QUESTION" });
       }
       else if (nextStepId === 25) {
@@ -586,16 +586,16 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            });
            
            fetchAudio(othersMsg, "bot-others", () => {
-             setStepInfo({ options: [effectiveConfig.locale.chat_scripts?.doctor_found_options[0] || "Cualquiera disponible"], stepId: 25 });
+             setStepInfo({ options: [isEng ? "Anyone available" : (effectiveConfig.locale.chat_scripts?.doctor_found_options[0] || "Cualquiera disponible")], stepId: 25 });
            }, { isDoctorList: true, doctorListData: docPayload, intent: "QUESTION" });
            return;
         }
 
         let docNameExtracted = isEng ? "medical team" : "equipo médico";
         if (userSelection && (userSelection.startsWith("Reservar") || userSelection.startsWith("Book"))) {
-           docNameExtracted = userSelection.replace("Reservar con ", "");
+           docNameExtracted = userSelection.replace("Reservar con ", "").replace("Book with ", "");
            setSelectedDoctor(docNameExtracted);
-        } else if (userSelection && userSelection !== "Cualquiera disponible" && userSelection !== "Agendar Cita") {
+        } else if (userSelection && userSelection !== "Cualquiera disponible" && userSelection !== "Agendar Cita" && userSelection !== "Book Appointment" && userSelection !== "Anyone available") {
            setSelectedDoctor(userSelection);
            docNameExtracted = userSelection;
         }
@@ -604,7 +604,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         if (nicheCfg.requiresPhotos) {
            const pQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_PHOTOS, { userSelection, doctorName: docNameExtracted, locale: lang || 'es' }, voiceProvider);
            fetchAudio(pQuestion, "bot-photos", () => {
-              setStepInfo({ options: effectiveConfig.locale.chat_scripts?.photos_options || ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
+              setStepInfo({ options: isEng ? ["📸 Upload photos", "Skip to calendar"] : (effectiveConfig.locale.chat_scripts?.photos_options || ["📸 Subir fotos", "Omitir e ir al calendario"]), stepId: 3 });
            }, { intent: "QUESTION" });
         } else {
            setTimeout(() => triggerFlowStep(3), 100);
@@ -1032,7 +1032,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                     className="flex flex-col gap-2 mt-4 items-end"
                   >
                     {stepInfo.options.map((opt, i) => {
-                      const isPrimary = opt === "📸 Subir fotos";
+                      const isPrimary = opt === "📸 Subir fotos" || opt === "📸 Upload photos";
                       const isSecondary = opt.includes("Omitir");
                       return (
                         <button

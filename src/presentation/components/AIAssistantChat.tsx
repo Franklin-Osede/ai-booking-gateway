@@ -560,7 +560,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                     className="flex flex-wrap gap-2 mt-2 items-start pl-12"
                   >
                     {stepInfo.options.map((opt, i) => {
-                        const isPrimary = opt === "📸 Subir fotos";
+                        const isPrimary = opt === "📸 Subir fotos" || opt === "📸 Upload photos";
                         const isSecondary = opt.includes("Omitir");
                         return (
                           <button
