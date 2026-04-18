@@ -21,6 +21,28 @@ export type NicheConfig = {
     ask_service_fallback: string;
     confirm_booking: string;
   };
+  chat_scripts?: {
+    welcome_message: string;
+    quick_consult_prompt: string;
+    quick_consult_options: string[];
+    quick_consult_no_thanks: string;
+    options_first_step: string[];
+    specialty_prompt: string;
+    doctor_found_prompt: string;
+    doctor_found_options: string[];
+    photos_prompt_generic: string;
+    photos_prompt_doctor: string;
+    photos_options: string[];
+    think_skip_message: string;
+  };
+  ui_scripts?: {
+    brand_placeholder: string;
+    dental_brand: string;
+    aesthetic_brand: string;
+    hair_brand: string;
+    voice_listening: string;
+    call_me: string;
+  };
 };
 
 export const ES_DICTIONARY: Record<string, NicheConfig> = {
@@ -38,7 +60,29 @@ export const ES_DICTIONARY: Record<string, NicheConfig> = {
       { icon: Activity, name: "Fisioterapia", docs: ["Fisioterapeuta Jefe", "Rehabilitador", "Especialista"] },
       { icon: User, name: "Ginecología", docs: ["Ginecólogo/a Titular", "Especialista de Guardia"] },
       { icon: User, name: "Psicología", docs: ["Psicólogo/a Clínico", "Terapeuta", "Especialista"] }
-    ]
+    ],
+    chat_scripts: {
+      welcome_message: "¡Hola! Bienvenido a BRAND_NAME. Soy tu asistente virtual. ¿En qué te puedo ayudar hoy?",
+      quick_consult_prompt: "Entiendo. ¿Te gustaría agendar una breve consulta con alguno de nuestros profesionales para que estudien tu caso y te asesoren personalmente?",
+      quick_consult_options: ["Sí, ver profesionales", "No, solo información"],
+      quick_consult_no_thanks: "Sin problema, escríbeme tu duda. Si luego prefieres verlo en persona:",
+      options_first_step: ["Agendar una cita", "Tengo una consulta rápida"],
+      specialty_prompt: "¡Perfecto! Nos encantará recibirte. ¿Con qué especialidad o tratamiento te gustaría tener tu sesión?",
+      doctor_found_prompt: "He revisado disponibilidad y tengo a varios de nuestros mejores especialistas listos para ayudarte. ¿Con cuál preferirías agendar?",
+      doctor_found_options: ["Cualquiera disponible"],
+      photos_prompt_generic: "Excelente decisión. Antes de abrir el calendario, ¿podrías subir 3 fotos rápidas de tu caso? Así el equipo médico las evaluará antes de tu cita.",
+      photos_prompt_doctor: "Excelente elección. Antes de abrir la agenda particular de DOCTOR_NAME, ¿podrías subir 3 fotos de tu caso? Así las revisará antes de conectarse contigo.",
+      photos_options: ["📸 Subir fotos", "Omitir e ir al calendario"],
+      think_skip_message: "Sin problema. Estaremos aquí cuando lo necesites. ¡Que tengas un gran día!"
+    },
+    ui_scripts: {
+      brand_placeholder: "nuestra clínica",
+      dental_brand: "la Clínica Dental",
+      aesthetic_brand: "la Clínica Estética",
+      hair_brand: "la Clínica Capilar",
+      voice_listening: "Escuchándote...",
+      call_me: "Llámame"
+    }
   },
   dental: {
     title: "Elige tu tratamiento ideal",

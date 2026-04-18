@@ -16,7 +16,7 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff';
 }
 
-export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "es" }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
+export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
   const [step, setStep] = useState(1);
   const [urgency, setUrgency] = useState("");
   const [quadrant, setQuadrant] = useState("");
@@ -43,6 +43,8 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
      nextStep();
   };
 
+  const isEng = (lang || '').toLowerCase().startsWith('en');
+
   return (
     <WidgetShell 
       isOpen={isOpen} 
@@ -51,6 +53,7 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
       color={color} 
       onPrev={prevStep}
       hideBackButtonOnSteps={[6]}
+      lang={lang}
     >
       
       {/* STEP 1: Main Category */}
@@ -61,11 +64,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
               
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                 Paso 1 de {TOTAL_STEPS}
+                 {isEng ? `Step 1 of ${TOTAL_STEPS}` : `Paso 1 de ${TOTAL_STEPS}`}
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">¿Qué te gustaría mejorar?</h2>
-              <p className="text-gray-500 font-medium text-sm sm:text-base mb-6">Selecciona el tratamiento principal en el que estás interesada/o.</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "What would you like to improve?" : "¿Qué te gustaría mejorar?"}</h2>
+              <p className="text-gray-500 font-medium text-sm sm:text-base mb-6">{isEng ? "Select the main treatment you are interested in." : "Selecciona el tratamiento principal en el que estás interesada/o."}</p>
               
               <div className="flex flex-col gap-3">
                  <button 
@@ -129,11 +132,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Estructura Facial</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">¿En qué zona sientes que necesitas mayor soporte o definición?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Pómulos y hundimiento de ojeras', 'Definición del óvalo y línea mandibular', 'Aumento o hidratación de Labios'].map((q) => (
                       <button 
                         key={q} onClick={() => setQuadrant(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={quadrant === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -147,11 +150,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Neuromoduladores y Rellenos</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">¿Cuál es tu principal objetivo estético con nosotros?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Suavizar arrugas al gesticular (Frente, Patas de gallo)', 'Tratar arrugas profundas y surco nasogeniano', 'Prevenir la flacidez con inductores de colágeno (Radiesse/Sculptra)'].map((q) => (
                       <button 
                         key={q} onClick={() => setQuadrant(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={quadrant === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -165,11 +168,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Dermatología Estética</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Contamos con tecnología láser avanzada. ¿Qué alteraciones presenta tu piel?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Manchas oscuras, melasma o daño solar', 'Marcas de acné o poros muy dilatados', 'Rojeces, rosácea o capilares dilatados'].map((q) => (
                       <button 
                         key={q} onClick={() => setQuadrant(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={quadrant === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -183,11 +186,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Medicina Corporal</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Indícanos cuál es tu principal prioridad a nivel corporal:</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Celulitis y retención de líquidos', 'Grasa localizada rebelde', 'Flacidez corporal intensa (Abdomen/Brazos)'].map((q) => (
                       <button 
                         key={q} onClick={() => setQuadrant(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={quadrant === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -223,11 +226,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Historial Médico Estético</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Para garantizar tu seguridad y evitar interacciones, ¿te has realizado infiltraciones faciales en los últimos meses?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Es mi primera vez, nunca me he inyectado', 'Sí, llevo rellenos o toxina de hace menos de 1 año', 'Tengo procedimientos de hace más de 2 años'].map((q) => (
                       <button 
                         key={q} onClick={() => setTailored2(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -239,11 +242,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Estado Base de tu Piel</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">El láser interactúa con los pigmentos. ¿Tienes actualmente un bronceado muy reciente o has tomado isotretinoína (Roacután)?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['No, mi piel no está bronceada ni tomo medicación', 'Sí, he tomado sol o rayos UVA hace menos de 1 mes', 'He tomado medicación fuerte contra el acné este año'].map((q) => (
                       <button 
                         key={q} onClick={() => setTailored2(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -255,11 +258,11 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Evolución del Problema</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">¿Acompañas esta situación con algún plan de ejercicio o dieta actualmente?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Hago dieta y ejercicio, pero esa zona no mejora', 'No tengo un plan específico de dieta/ejercicio', 'Acabo de ser mamá o tuve una gran pérdida de peso'].map((q) => (
                       <button 
                         key={q} onClick={() => setTailored2(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -295,15 +298,15 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Diagnóstico Avanzado</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Nuestros médicos emplean Ecografía Facial para infiltrar de forma 100% segura. Evita riesgos y reserva tu consulta médica hoy.</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Abonar 50€ por Consulta Médica (Reembolsable en Tto)', 'Agendar solo valoración visual general (Gratuita)'].map((q) => (
                       <button 
                         key={q} onClick={() => setPriority(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
-                        {q.includes("Abonar") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black uppercase rounded-full shadow-sm">Seguridad Médica</span>}
-                        <span className="block pr-4">{q}</span>
+                        {q.includes("Abonar") && <span className="absolute -top-3 right-3 px-3 py-1 text-[9px] font-black uppercase rounded-full shadow-sm" style={{ backgroundColor: color, color: contrastText }}>Seguridad Médica</span>}
+                        <span className="block pr-8">{q}</span>
                       </button>
                     ))}
                   </div>
@@ -312,15 +315,15 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Estudio Dermo-Epidérmico 3D</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">El éxito del láser depende de ver lo que el ojo no capta. Realizamos un escáner facial VISIA para analizar pigmentos internos y rojeces ocultas.</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Reservar Escáner Facial VISIA 3D (30€ a descontar)', 'Agendar valoración clínica estándar gratuita'].map((q) => (
                       <button 
                         key={q} onClick={() => setPriority(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
-                        {q.includes("Escáner") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-amber-400 text-amber-900 text-[9px] font-black uppercase rounded-full shadow-sm">Más Precisión</span>}
-                        <span className="block pr-4">{q}</span>
+                        {q.includes("Escáner") && <span className="absolute -top-3 right-3 px-3 py-1 text-[9px] font-black uppercase rounded-full shadow-sm" style={{ backgroundColor: color, color: contrastText }}>Más Precisión</span>}
+                        <span className="block pr-8">{q}</span>
                       </button>
                     ))}
                   </div>
@@ -329,15 +332,15 @@ export function AIAssistantWidgetAesthetic({ color, isOpen, setIsOpen, lang = "e
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Análisis Tisular Corporal</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Para definir el protocolo (onda de choque, criolipólisis, maderoterapia) medimos tu grasa visceral y retención líquida con Bioimpedancia InBody.</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Bloquear Diagnóstico InBody Medical (Prepago 20€)', 'Solo acudir a primera consulta para presupuesto'].map((q) => (
                       <button 
                         key={q} onClick={() => setPriority(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
-                        {q.includes("InBody") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-emerald-400 text-emerald-900 text-[9px] font-black uppercase rounded-full shadow-sm">Clínico</span>}
-                        <span className="block pr-4">{q}</span>
+                        {q.includes("InBody") && <span className="absolute -top-3 right-3 px-3 py-1 text-[9px] font-black uppercase rounded-full shadow-sm" style={{ backgroundColor: color, color: contrastText }}>Clínico</span>}
+                        <span className="block pr-8">{q}</span>
                       </button>
                     ))}
                   </div>

@@ -66,12 +66,13 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((clinic as any).countryCode === 'EN') {
-         detectedLang = 'en';
+      const countryOrLocale = String((clinic as any).countryCode || '').toLowerCase();
+      if (countryOrLocale === 'en' || countryOrLocale.startsWith('en-')) {
+         detectedLang = countryOrLocale === 'en-us' ? 'en-US' : 'en-GB';
       } else if (clinic.location) {
          const loc = clinic.location.toLowerCase();
          if (loc.includes('london') || loc.includes('uk') || loc.includes('england') || loc.includes('manchester') || loc.includes('reino unido') || loc.includes('brit')) {
-            detectedLang = 'en';
+            detectedLang = 'en-GB';
          }
       }
     } else {

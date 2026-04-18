@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Volume2, Phone, MessageCircle } from "lucide-react";
+import { resolveConfig } from "../config/resolveConfig";
 
 type Msg = { id: string; text: string; sender: "bot" | "user"; playing?: boolean; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean };
 
@@ -22,6 +23,8 @@ export function AIAssistantPhone({ color, niche, pos = "right", lang = "es" }: {
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string }[] } | null>(null);
 
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
+  const effectiveConfig = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
+  const isEnglish = (lang || "es").toLowerCase().startsWith("en");
 
   useEffect(() => {
     try {
@@ -104,7 +107,7 @@ export function AIAssistantPhone({ color, niche, pos = "right", lang = "es" }: {
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voiceId: "Sergio" }) // Male voice!
+        body: JSON.stringify({ text, voiceId: "Sergio", locale: lang || 'es' }) // Male voice!
       });
       
       if (!res.ok) throw new Error("Voice API Error");
@@ -138,37 +141,36 @@ export function AIAssistantPhone({ color, niche, pos = "right", lang = "es" }: {
     setTimeout(() => {
       // Inbound Phone Call Flow (Pure Voice, No Chat/Calendar UI)
       if (nextStepId === 0) {
-        const greeting = lang === 'en' 
+        const greeting = isEnglish
           ? `Hello, you've reached the web reception of ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. My name is Mark, how can I help you today?` 
           : `Hola, te comunicas con la recepción web de ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. Mi nombre es Marcos, ¿en qué te puedo ayudar hoy?`;
         fetchAudio(greeting, "bot-0", () => {
-          setStepInfo({ options: lang === 'en' ? ["What services do you offer?"] : ["¿Qué servicios tenéis?"], stepId: 1 });
+          setStepInfo({ options: isEnglish ? ["What services do you offer?"] : ["¿Qué servicios tenéis?"], stepId: 1 });
         });
       } 
       else if (nextStepId === 1) {
-        const fallbacks = activeNiche === 'dental' 
-           ? ["Odontología Estética", "Ortodoncia", "Implantología Avanzada"] 
-           : ["Injerto Capilar FUE", "Tratamiento DHI", "Mesoterapia"];
+        const nicheCfg = effectiveConfig.niche;
+        const fallbacks = nicheCfg.categories.map((c: { name: string }) => c.name);
            
         const catNames = scrapedData?.categories?.map(c => c.name) || fallbacks;
         const listedCats = catNames.slice(0, 3).join(", ");
-        const serviceQuestion = lang === 'en' 
+        const serviceQuestion = isEnglish
           ? `Sure, we have excellent specialists in areas like ${listedCats}, would you like to schedule an appointment with one of them this week?` 
           : `Claro, contamos con especialistas excelentes en áreas como ${listedCats}, ¿te gustaría agendar una cita con alguno de ellos para esta semana?`;
         fetchAudio(serviceQuestion, "bot-1", () => {
-          setStepInfo({ options: lang === 'en' ? ["Yes please"] : ["Sí"], stepId: 2 });
+          setStepInfo({ options: isEnglish ? ["Yes please"] : ["Sí"], stepId: 2 });
         });
       }
       else if (nextStepId === 2) {
-        const calQuestion = lang === 'en' 
+        const calQuestion = isEnglish
            ? "Perfect, I've checked the doctor's calendar and I have a free slot tomorrow at 10 AM, or Thursday afternoon. Which time do you prefer?" 
            : "Perfecto, he revisado el calendario del doctor y tengo un hueco libre mañana a las 10 de la mañana, o el jueves por la tarde. ¿Qué horario prefieres?";
         fetchAudio(calQuestion, "bot-2", () => {
-           setStepInfo({ options: lang === 'en' ? ["Thursday"] : ["El jueves"], stepId: 3 });
+           setStepInfo({ options: isEnglish ? ["Thursday"] : ["El jueves"], stepId: 3 });
         });
       }
       else if (nextStepId === 3) {
-        const confirm = lang === 'en' 
+        const confirm = isEnglish
            ? "Great! Your appointment has been booked in our agenda, I've just sent you an SMS with the details so you have them at hand. See you soon!" 
            : "¡Estupendo! Tu cita ha quedado reservada en nuestra agenda, te acabo de enviar un SMS con los detalles para que lo tengas a mano. ¡Nos vemos pronto!";
         fetchAudio(confirm, "bot-3", () => {
@@ -200,7 +202,7 @@ export function AIAssistantPhone({ color, niche, pos = "right", lang = "es" }: {
              className={`fixed bottom-6 md:bottom-8 ${posClass} z-50 cursor-pointer group flex flex-col items-center gap-2`}
            >
              <div className="bg-white px-3 py-1.5 rounded-full shadow-md text-[11px] font-bold text-gray-800 animate-bounce">
-                {lang === 'en' ? "Call me" : "Llámame"}
+                {isEnglish ? "Call me" : "Llámame"}
              </div>
              <div 
                className="w-16 h-16 rounded-full flex items-center justify-center shadow-[0_10px_40px_rgba(34,197,94,0.4)] group-hover:scale-110 transition-transform relative overflow-hidden"
@@ -249,7 +251,7 @@ export function AIAssistantPhone({ color, niche, pos = "right", lang = "es" }: {
                    transition={{ repeat: Infinity, duration: 1.5 }}
                    className="text-green-400 text-sm font-medium tracking-wide mt-2"
                  >
-                   {lang === 'en' ? "Listening..." : "Escuchándote..."}
+                   {isEnglish ? "Listening..." : "Escuchándote..."}
                  </motion.p>
                )}
             </div>

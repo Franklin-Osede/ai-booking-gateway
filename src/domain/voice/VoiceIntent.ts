@@ -14,6 +14,7 @@ export interface VoiceContextParams {
   brandName?: string;
   isHT?: boolean;
   niche?: string;
+  locale?: string;
   userSelection?: string;
   deepDiveParent?: string;
   pitchText?: string;

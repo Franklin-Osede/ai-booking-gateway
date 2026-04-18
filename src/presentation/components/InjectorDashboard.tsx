@@ -13,6 +13,7 @@ export function InjectorDashboard() {
   const [brandColor, setBrandColor] = useState("#FFD700");
   const [pos, setPos] = useState("left");
   const [voiceProvider, setVoiceProvider] = useState("elevenlabs");
+  const [demoLanguage, setDemoLanguage] = useState("es-ES");
   const [demoUrl, setDemoUrl] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -35,10 +36,10 @@ export function InjectorDashboard() {
       
       const url = new URL(window.location.href);
       if (data.success && data.data?.id) {
-         url.search = `?c=${data.data.id}&widget=${widgetType}&pos=${pos}&voice=${voiceProvider}`;
+         url.search = `?c=${data.data.id}&widget=${widgetType}&pos=${pos}&voice=${voiceProvider}&lang=${encodeURIComponent(demoLanguage)}`;
       } else {
          // Fallback if DB insert fails
-         url.search = `?site=${siteUrl}&widget=${widgetType}&niche=${niche}&color=${brandColor.replace("#", "")}&pos=${pos}&voice=${voiceProvider}`;
+         url.search = `?site=${encodeURIComponent(siteUrl)}&widget=${widgetType}&niche=${encodeURIComponent(niche)}&color=${brandColor.replace("#", "")}&pos=${pos}&voice=${voiceProvider}&lang=${encodeURIComponent(demoLanguage)}`;
       }
       setDemoUrl(url.toString());
       setLoading(false);
@@ -200,6 +201,25 @@ export function InjectorDashboard() {
                 <option value="polly">AWS Polly (Estándar, Muy rápido)</option>
               </select>
             </div>
+          </div>
+
+          {/* Language Selection */}
+          <div>
+            <label className="block text-sm font-semibold text-neutral-300 mb-3">7. Idioma de la Demo IA</label>
+            <div className="relative">
+              <select
+                value={demoLanguage}
+                onChange={(e) => setDemoLanguage(e.target.value)}
+                className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white text-lg cursor-pointer appearance-none px-5"
+              >
+                <option value="es-ES">Español (España)</option>
+                <option value="en-GB">English (United Kingdom)</option>
+                <option value="en-US">English (United States)</option>
+              </select>
+            </div>
+            <p className="text-xs text-neutral-500 mt-2">
+              Cambia textos y voces automáticamente para la demo.
+            </p>
           </div>
 
           <button 

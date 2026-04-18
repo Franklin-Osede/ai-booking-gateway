@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, X, Send, Sparkles, ChevronRight } from "lucide-react";
 
-import { getDictionary } from "../i18n";
+import { resolveConfig } from "../config/resolveConfig";
 
 export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,13 +38,14 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
   const dispYear = displayedDate.getFullYear();
   const dispMonthIdx = displayedDate.getMonth();
   const daysInMonth = new Date(dispYear, dispMonthIdx + 1, 0).getDate();
-  const monthNameStr = displayedDate.toLocaleString('es-ES', { month: 'long' });
+  const monthNameStr = displayedDate.toLocaleString(lang || 'es-ES', { month: 'long' });
   const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
   const monthShort = monthNameStr.substring(0, 3);
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-  const config = getDictionary(lang)[activeNiche] || getDictionary(lang).medical;
+  const effectiveConfig = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
+  const config = effectiveConfig.locale;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
 
   const [scrapedData, setScrapedData] = useState<{ categories: { name?: string, docs: ({name: string, image?: string} | string)[] }[] } | null>(null);
@@ -116,26 +117,28 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
   const triggerFlowStep = (nextStepId: number, userSelection?: string) => {
     let resolvedNextStepId = nextStepId;
 
+    const chatScripts = effectiveConfig.locale.chat_scripts;
+    
     if (userSelection) {
        setMessages(prev => [...prev, { id: "user-" + Date.now(), text: userSelection, sender: "user" }]);
        
        const lowerSel = userSelection.toLowerCase();
        // Branch 1: User chose "consulta rápida"
-       if (resolvedNextStepId === 1 && lowerSel.includes("consulta rápida")) {
+       if (resolvedNextStepId === 1 && (lowerSel.includes("consulta rápida") || lowerSel.includes("quick question"))) {
           setStepInfo({ options: [], stepId: 1 });
-          pushBotMessage("Entiendo. ¿Te gustaría agendar una breve consulta con alguno de nuestros profesionales para que estudien tu caso y te asesoren personalmente?", 1200, () => {
-             setStepInfo({ options: ["Sí, ver profesionales", "No, solo información"], stepId: 10 });
+          pushBotMessage(chatScripts.quick_consult_prompt, 1200, () => {
+             setStepInfo({ options: chatScripts.quick_consult_options, stepId: 10 });
           });
           return;
        }
        // Branch 2: User answered the Yes/No for consulta rápida
        if (resolvedNextStepId === 10) {
           setStepInfo({ options: [], stepId: 10 });
-          if (lowerSel.includes("sí")) {
+          if (lowerSel.includes("sí") || lowerSel.includes("yes")) {
              resolvedNextStepId = 2; // Jump to Doctor selection
           } else {
-             pushBotMessage("Sin problema, escríbeme tu duda. Si luego prefieres verlo en persona:", 1000, () => {
-                setStepInfo({ options: ["Agendar una cita"], stepId: 100 });
+             pushBotMessage(chatScripts.quick_consult_no_thanks, 1000, () => {
+                setStepInfo({ options: [chatScripts.options_first_step[0]], stepId: 100 });
              });
              return;
           }
@@ -147,12 +150,12 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
     setStepInfo({ options: [], stepId: resolvedNextStepId });
 
     if (resolvedNextStepId === 0) {
-      pushBotMessage(`¡Hola! Bienvenido a ${brandName.charAt(0).toUpperCase() + brandName.slice(1)}. Soy tu asistente virtual. ¿En qué te puedo ayudar hoy?`, 800, () => {
-         setStepInfo({ options: ["Agendar una cita", "Tengo una consulta rápida"], stepId: 1 });
+      pushBotMessage(chatScripts.welcome_message.replace("BRAND_NAME", brandName.charAt(0).toUpperCase() + brandName.slice(1)), 800, () => {
+         setStepInfo({ options: chatScripts.options_first_step, stepId: 1 });
       });
     } 
     else if (resolvedNextStepId === 1) {
-      pushBotMessage(`¡Perfecto! Nos encantará recibirte. ¿Con qué especialidad o tratamiento te gustaría tener tu sesión?`, 1000, () => {
+      pushBotMessage(chatScripts.specialty_prompt, 1000, () => {
          const chips = categories.filter((c: { name: string }) => c.name).map((c: { name: string }) => c.name);
          setStepInfo({ options: chips, stepId: 2 });
       });
@@ -160,52 +163,65 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
     else if (resolvedNextStepId === 2) {
       const category = categories.find((c: { name: string }) => c.name === userSelection) || categories[0];
       const docsObj = category.docs ? category.docs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
-         const hairSpecialties = ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"];
-         const dentalSpecialties = ["Implantóloga", "Ortodoncista Invisible", "Odontología Estética", "Odontólogo General", "Directora Médica", "Cirujano Maxilofacial"];
+         const nicheCfg = effectiveConfig.niche;
+         const dynamicSpecialties = nicheCfg.fallbackSpecialties;
          
-         const assignedSpecialty = activeNiche === 'dental' ? dentalSpecialties[idx % dentalSpecialties.length] : hairSpecialties[idx % hairSpecialties.length];
-         const fallbackBio = activeNiche === 'dental' 
-            ? 'Especialista con cientos de sonrisas diseñadas, utilizando tecnología de precisión 3D y enfoques mínimamente invasivos.' 
-            : 'Especialista con miles de folículos trasplantados, apostando por técnica indolora y diseño natural.';
+         const assignedSpecialty = dynamicSpecialties[idx % dynamicSpecialties.length];
+         const fallbackBio = nicheCfg.fallbackBio;
             
          if (typeof d === 'string') return { name: d, specialty: assignedSpecialty, bio: fallbackBio };
          return { ...d, specialty: d.specialty || assignedSpecialty, bio: d.bio || fallbackBio };
       }) : [];
-      pushBotMessage(`He revisado disponibilidad y tengo a varios de nuestros mejores especialistas listos para ayudarte. ¿Con cuál preferirías agendar?`, 1200, () => {
-         setStepInfo({ options: ["Cualquiera disponible"], stepId: 25 });
+      pushBotMessage(chatScripts.doctor_found_prompt, 1200, () => {
+         setStepInfo({ options: chatScripts.doctor_found_options, stepId: 25 });
       }, { isDoctorList: true, doctorListData: docsObj });
     }
-    else if (resolvedNextStepId === 25) {
-      let docNameExtracted = "";
-      let pQuestion = `Excelente decisión. Antes de abrir el calendario, ¿podrías subir 3 fotos rápidas de tu caso? Así el equipo médico las evaluará antes de tu cita.`;
+    let skipPhotosFallback = false;
+    if (resolvedNextStepId === 25) {
+      if (!effectiveConfig.niche.requiresPhotos) {
+         skipPhotosFallback = true;
+      } else {
+         let docNameExtracted = "";
+         let pQuestion = chatScripts.photos_prompt_generic;
 
-      if (userSelection && userSelection.startsWith("Reservar")) {
-         docNameExtracted = userSelection.replace("Reservar con ", "");
-         setSelectedDoctor(docNameExtracted);
-         pQuestion = `Excelente elección. Antes de abrir la agenda particular de ${docNameExtracted}, ¿podrías subir 3 fotos de tu caso? Así las revisará antes de conectarse contigo.`;
-      } else if (userSelection && userSelection !== "Cualquiera disponible" && userSelection !== "Agendar Cita") {
-         setSelectedDoctor(userSelection);
+         if (userSelection && (userSelection.startsWith("Reservar") || userSelection.startsWith("Book"))) {
+            docNameExtracted = userSelection.replace("Reservar con ", "").replace("Book with ", "");
+            setSelectedDoctor(docNameExtracted);
+            pQuestion = chatScripts.photos_prompt_doctor.replace("DOCTOR_NAME", docNameExtracted);
+         } else if (userSelection && userSelection !== chatScripts.doctor_found_options[0] && userSelection !== chatScripts.options_first_step[0]) {
+            setSelectedDoctor(userSelection);
+         }
+
+         pushBotMessage(pQuestion, 1200, () => {
+            setStepInfo({ options: chatScripts.photos_options, stepId: 3 });
+         });
+         return;
       }
-
-      pushBotMessage(pQuestion, 1200, () => {
-         setStepInfo({ options: ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
-      });
     }
-    else if (resolvedNextStepId === 3 || resolvedNextStepId === 10) {
-      if (userSelection && userSelection.toLowerCase().includes("pensar")) {
-         pushBotMessage("Sin problema. Estaremos aquí cuando lo necesites. ¡Que tengas un gran día!", 600, () => {
+    
+    if (resolvedNextStepId === 3 || resolvedNextStepId === 10 || skipPhotosFallback) {
+      if (!skipPhotosFallback && userSelection && (userSelection.toLowerCase().includes("pensar") || userSelection.toLowerCase().includes("skip"))) {
+         pushBotMessage(chatScripts.think_skip_message, 600, () => {
             setStepInfo({ options: [], stepId: 0 });
          });
          return;
       }
       
       let calQuestion = "¡Buena elección! Aquí tienes mi calendario interactivo. Haz clic en la fecha y luego elige la hora que mejor te cuadre.";
-      if (userSelection === "Fotos subidas") {
+      if (userSelection === "Fotos subidas" || userSelection === "📸 Upload photos" || userSelection === "📸 Subir fotos" || userSelection === "Uploaded photos") {
          calQuestion = "¡Perfecto! Hemos adjuntado las fotos de forma segura. Aquí tienes el calendario en tiempo real, elige tu ranura.";
       }
       
+      const isEn = (lang || "es").toLowerCase().startsWith("en");
+      if (isEn) {
+         calQuestion = "Great choice! Here is my interactive calendar. Choose the date and time that fits you best.";
+         if (userSelection === "Fotos subidas" || userSelection === "📸 Upload photos" || userSelection === "📸 Subir fotos" || userSelection === "Uploaded photos") {
+             calQuestion = "Perfect! Your photos have been safely attached. Here is the real-time calendar, pick your spot.";
+         }
+      }
+      
       pushBotMessage(calQuestion, 1000, () => {
-         setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
+         setMessages(prev => [...prev, { id: "bot-cal", text: isEn ? "Calendar" : "Calendario", sender: "bot", isCalendar: true }]);
       });
     }
   };
@@ -246,19 +262,14 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
        setMessages(prev => [...prev, { id: "user-" + Date.now(), text: txt, sender: "user" }]);
        
        const lowerTxt = txt.toLowerCase();
-       if (activeNiche === 'hair_transplant' && (lowerTxt.includes("turqu") || lowerTxt.includes("precio") || lowerTxt.includes("caro") || lowerTxt.includes("barato") || lowerTxt.includes("coste"))) {
+       const nicheCfg = effectiveConfig.niche;
+       
+       const isObjection = nicheCfg.chatObjection.keywords.some(k => lowerTxt.includes(k.toLowerCase()));
+       if (isObjection) {
          pushBotMessage(config.chatThinking, 800, () => {
-           pushBotMessage("Es normal que compares. El modelo 'Low Cost' suele ser más barato, pero nosotros garantizamos un diseño médico personalizado superior, densidad máxima y seguimiento presencial a tu lado si hay cualquier imprevisto. Además, ofrecemos financiación al 100% por solo 99€ al mes.", 1500, () => {
-              pushBotMessage("¿Quieres agendar una videollamada de 10 minutos para que el doctor te valore?", 500, () => {
-                 setStepInfo({ options: ["Agendar videollamada", "Lo pensaré"], stepId: 10 });
-              });
-           });
-         });
-       } else if (activeNiche === 'dental' && (lowerTxt.includes("precio") || lowerTxt.includes("caro") || lowerTxt.includes("barato") || lowerTxt.includes("coste") || lowerTxt.includes("presupuesto") || lowerTxt.includes("financiaci"))) {
-         pushBotMessage(config.chatThinking, 800, () => {
-           pushBotMessage("Es comprensible fijarse en el coste. Nosotros no somos una franquicia 'low-cost': priorizamos la salud a largo plazo usando los mejores materiales (implantes titanio, escáner 3D intraoral) para asegurar resultados definitivos. Además ofrecemos planes de pago y financiación al 100%.", 1500, () => {
-              pushBotMessage("¿Te gustaría agendar una valoración sin coste y te damos un diagnóstico real adaptado a ti?", 500, () => {
-                 setStepInfo({ options: ["Agendar primera cita", "Lo pensaré"], stepId: 10 });
+           pushBotMessage(nicheCfg.chatObjection.responseBot, 1500, () => {
+              pushBotMessage(nicheCfg.chatObjection.followUpBot, 500, () => {
+                 setStepInfo({ options: [nicheCfg.chatObjection.acceptOption, "Lo pensaré"], stepId: 10 });
               });
            });
          });
@@ -271,9 +282,16 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
   };
 
   const handleConfirmBooking = () => {
-     setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "user-confirm", text: `Confirmo la cita para el ${selectedDate} de ${monthNameStr} a las ${selectedTime}`, sender: "user" }]);
+     const isEng = (lang || '').toLowerCase().startsWith('en');
+     const confirmText = isEng 
+        ? `I confirm the appointment for the ${selectedDate} of ${monthNameStr} at ${selectedTime}`
+        : `Confirmo la cita para el ${selectedDate} de ${monthNameStr} a las ${selectedTime}`;
+     setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "user-confirm", text: confirmText, sender: "user" }]);
      
-     pushBotMessage(`¡Estupendo! Tu reserva con ${selectedDoctor || 'nuestro experto'} para el día ${selectedDate} a las ${selectedTime} ha quedado confirmada. Te esperamos.`, 600, () => {}, { isSuccess: true, isFinalCard: true });
+     const botResp = isEng
+        ? `Great! Your reservation with ${selectedDoctor || 'our expert'} for the ${selectedDate} at ${selectedTime} has been confirmed. We look forward to seeing you.`
+        : `¡Estupendo! Tu reserva con ${selectedDoctor || 'nuestro experto'} para el día ${selectedDate} a las ${selectedTime} ha quedado confirmada. Te esperamos.`;
+     pushBotMessage(botResp, 600, () => {}, { isSuccess: true, isFinalCard: true });
   };
 
   const primaryButtonStyle = {

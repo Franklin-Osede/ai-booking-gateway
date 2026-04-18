@@ -16,7 +16,7 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff';
 }
 
-export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void }) {
+export function AIAssistantWidgetDental({ color, isOpen, setIsOpen, lang }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
   const [step, setStep] = useState(1);
   const [urgency, setUrgency] = useState("");
   const [quadrant, setQuadrant] = useState("");
@@ -53,6 +53,8 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
      }
   };
 
+  const isEng = (lang || '').toLowerCase().startsWith('en');
+
   return (
     <WidgetShell 
       isOpen={isOpen} 
@@ -61,6 +63,7 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
       color={color} 
       onPrev={prevStep}
       hideBackButtonOnSteps={[6]}
+      lang={lang}
     >
       
       {/* STEP 1: Urgency / Main Pain */}
@@ -71,11 +74,11 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
               
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                 Paso 1 de {TOTAL_STEPS}
+                 {isEng ? `Step 1 of ${TOTAL_STEPS}` : `Paso 1 de ${TOTAL_STEPS}`}
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">¿En qué podemos ayudarte?</h2>
-              <p className="text-gray-500 font-medium text-sm sm:text-base mb-6">Selecciona el motivo principal de tu consulta hoy.</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "How can we help?" : "¿En qué podemos ayudarte?"}</h2>
+              <p className="text-gray-500 font-medium text-sm sm:text-base mb-6">{isEng ? "Select the main reason for your visit today." : "Selecciona el motivo principal de tu consulta hoy."}</p>
               
               <div className="flex flex-col gap-3">
                  <button 
@@ -150,11 +153,11 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Diseño de Sonrisa</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">¿Qué aspecto te gustaría mejorar principalmente?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Diseño de sonrisa completo', 'Mejorar dientes rotos o muy manchados', 'Solo Blanqueamiento Dental'].map((q) => (
                       <button 
                         key={q} onClick={() => setQuadrant(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={quadrant === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -168,11 +171,11 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Ortodoncia y Alineación</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">¿Has llevado ortodoncia en el pasado?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['No, sería mi primera vez', 'Sí, pero se me han movido los dientes (recidiva)', 'Quiero continuar un tratamiento empezado'].map((q) => (
                       <button 
                         key={q} onClick={() => setQuadrant(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={quadrant === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -186,11 +189,11 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Implantología y Cirugía</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Para ofrecerte la mejor solución quirúrgica, indícanos tu situación actual:</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Me falta un solo diente', 'Me faltan varios dientes consecutivos', 'Llevo dentadura postiza y quiero algo fijo', 'Tengo un diente muy dañado y necesito extraerlo'].map((q) => (
                       <button 
                         key={q} onClick={() => setQuadrant(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${quadrant === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={quadrant === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -226,11 +229,11 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Evaluación Estructural</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">¿Aprietas mucho los dientes o tienes fundas antiguas que quieras cambiar?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Sí, aprieto los dientes por la noche (Bruxismo)', 'Tengo coronas / fundas antiguas y oscurecidas', 'No, mis dientes están sanos pero no me gusta la forma/color'].map((q) => (
                       <button 
                         key={q} onClick={() => setTailored2(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -244,11 +247,11 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Análisis de tu Sonrisa</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">¿Qué es lo que más notas que necesitas corregir?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Tengo los dientes muy montados (Apiñamiento)', 'Mi mordida no encaja bien (Sobremordida / Abierta)', 'Tengo huecos entre los dientes (Diastemas)'].map((q) => (
                       <button 
                         key={q} onClick={() => setTailored2(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -262,11 +265,11 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Estado del Hueso Maxilar</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Para colocar el implante, necesitamos estimar el nivel de &quot;atrofia ósea&quot; (la cantidad de hueso). ¿Cuánto tiempo llevas sin el diente?</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Llevo más de un año sin él (Puede haber pérdida de hueso)', 'Es una pérdida muy reciente o a punto de caerse', 'Tengo los dientes con mucha movilidad o infección activa'].map((q) => (
                       <button 
                         key={q} onClick={() => setTailored2(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all ${tailored2 === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={tailored2 === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
                         {q}
@@ -302,15 +305,15 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Estudio Quirúrgico (TAC 3D)</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Para operar con máxima seguridad y precisión milimétrica requerimos un TAC 3D Maxilofacial preliminar en tu primera visita clínica.</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Abonar 80€ por TAC 3D y Reserva Prioritaria Quirófano', 'Agendar solo una primera exploración y presupuesto visual'].map((q) => (
                       <button 
                         key={q} onClick={() => setPriority(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
-                        {q.includes("Abonar") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black uppercase rounded-full shadow-sm">Fast-Track</span>}
-                        <span className="block pr-4">{q}</span>
+                        {q.includes("Abonar") && <span className="absolute -top-3 right-3 px-3 py-1 text-[9px] font-black uppercase rounded-full shadow-sm" style={{ backgroundColor: color, color: contrastText }}>Fast-Track</span>}
+                        <span className="block pr-8">{q}</span>
                       </button>
                     ))}
                   </div>
@@ -319,15 +322,15 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Planificación Digital 3D</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Para ver cómo quedará tu sonrisa en ordenador (ClinCheck Predictivo) usamos un Escáner Intraoral iTero de altísima precisión antes de la decisión del tratamiento.</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Abonar 45€ por Estudio Digital 3D (Reembolsable si inicias)', 'Agendar solo consulta de valoración gratuita visual'].map((q) => (
                       <button 
                         key={q} onClick={() => setPriority(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
-                        {q.includes("Abonar") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-blue-400 text-blue-900 text-[9px] font-black uppercase rounded-full shadow-sm">Paso Clínico Necesario</span>}
-                        <span className="block pr-4">{q}</span>
+                        {q.includes("Abonar") && <span className="absolute -top-3 right-3 px-3 py-1 text-[9px] font-black uppercase rounded-full shadow-sm" style={{ backgroundColor: color, color: contrastText }}>Paso Clínico Necesario</span>}
+                        <span className="block pr-8">{q}</span>
                       </button>
                     ))}
                   </div>
@@ -336,15 +339,15 @@ export function AIAssistantWidgetDental({ color, isOpen, setIsOpen }: { color: s
                 <>
                   <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Salud de tus Encías (Periodonto)</h2>
                   <p className="text-gray-500 font-medium text-sm mb-6">Para que la estética (Mock-up funcional) quede perfecta, las encías deben estar sanas como lienzo libre de placa basal.</p>
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-5 mb-6">
                     {['Tengo encías bastante sanas y no sangran', 'Me sangran un poco al cepillar o están mínimamente retraídas', 'No lo sé, prefiero que me evalúe primero el especialista periodoncista'].map((q) => (
                       <button 
                         key={q} onClick={() => setPriority(q)}
-                        className={`p-4 rounded-xl border-2 font-bold text-sm text-left transition-all ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                        className={`p-5 rounded-xl border-2 font-bold text-sm text-left transition-all relative ${priority === q ? 'border-transparent text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
                         style={priority === q ? { backgroundColor: color, color: contrastText } : {}}
                       >
-                        {q.includes("especialista periodoncista") && <span className="absolute -top-3 -right-2 px-2 py-1 bg-indigo-400 text-indigo-900 text-[9px] font-black uppercase rounded-full shadow-sm">Recomendado</span>}
-                        <span className="block pr-4">{q}</span>
+                        {q.includes("especialista periodoncista") && <span className="absolute -top-3 right-3 px-3 py-1 text-[9px] font-black uppercase rounded-full shadow-sm" style={{ backgroundColor: color, color: contrastText }}>Recomendado</span>}
+                        <span className="block pr-8">{q}</span>
                       </button>
                     ))}
                   </div>

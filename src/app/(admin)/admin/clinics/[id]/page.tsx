@@ -25,6 +25,11 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [widgetPosition, setWidgetPosition] = useState("right");
   const [savingPosition, setSavingPosition] = useState(false);
   const [hasSavedPosition, setHasSavedPosition] = useState(false);
+  
+  const [language, setLanguage] = useState("es-ES");
+  const [savingLanguage, setSavingLanguage] = useState(false);
+  const [hasSavedLanguage, setHasSavedLanguage] = useState(false);
+
   const [seoMetrics, setSeoMetrics] = useState({ summary: "", traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
   const [savingMetrics, setSavingMetrics] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
@@ -48,6 +53,14 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
           if (data.data.seoMetrics) setSeoMetrics(data.data.seoMetrics);
           if (data.data.techMetrics) setTechMetrics(data.data.techMetrics);
           if (data.data.widgetPosition) setWidgetPosition(data.data.widgetPosition);
+          if (data.data.countryCode) {
+            const cc = String(data.data.countryCode).toLowerCase();
+            if (cc === "en" || cc === "en-gb" || cc === "en-us") {
+              setLanguage(cc === "en-us" ? "en-US" : "en-GB");
+            } else {
+              setLanguage("es-ES");
+            }
+          }
         }
         setLoading(false);
       });
@@ -104,6 +117,19 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
     setSavingPosition(false);
     setHasSavedPosition(true);
     setTimeout(() => setHasSavedPosition(false), 3000);
+    fetchClinic();
+  };
+
+  const handleSaveLanguage = async () => {
+    setSavingLanguage(true);
+    await fetch(`/api/clinics/${unwrappedParams.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ countryCode: language }),
+    });
+    setSavingLanguage(false);
+    setHasSavedLanguage(true);
+    setTimeout(() => setHasSavedLanguage(false), 3000);
     fetchClinic();
   };
 
@@ -765,6 +791,41 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                  >
                    {hasSavedPosition ? <Check size={16} /> : <Save size={16} />}
                    {savingPosition ? "Guardando..." : hasSavedPosition ? "¡Guardado!" : "Guardar Posición"}
+                 </button>
+               </div>
+             </div>
+           </div>
+
+           <div>
+             <h3 className="text-xl font-bold mb-3 pt-6 border-t border-border flex items-center gap-2">
+                <MessageSquare size={20} className="text-green-500" /> Idioma / Locale Principal (Widget)
+             </h3>
+             <div className="bg-green-950/20 border border-green-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full" />
+               <div className="relative z-10">
+                  <p className="text-muted-foreground text-sm mb-2">Selecciona el locale oficial para Voz y Chat:</p>
+                  <select 
+                    value={language} 
+                    onChange={e => setLanguage(e.target.value)}
+                    className="bg-card border border-border text-foreground p-3 rounded-xl outline-none focus:border-yellow-500/50 w-full md:w-1/2"
+                  >
+                    <option value="es-ES">Español (España)</option>
+                    <option value="en-GB">English (United Kingdom)</option>
+                    <option value="en-US">English (United States)</option>
+                  </select>
+               </div>
+               <div className="flex justify-end relative z-10">
+                 <button 
+                   onClick={handleSaveLanguage} 
+                   disabled={savingLanguage || hasSavedLanguage}
+                   className={`px-5 py-2 text-sm font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2 border disabled:opacity-80 ${
+                     hasSavedLanguage 
+                       ? "bg-emerald-600 text-foreground border-emerald-500" 
+                       : "bg-muted text-foreground border-border hover:bg-muted hover:text-yellow-500"
+                   }`}
+                 >
+                   {hasSavedLanguage ? <Check size={16} /> : <Save size={16} />}
+                   {savingLanguage ? "Guardando..." : hasSavedLanguage ? "¡Guardado!" : "Guardar Idioma"}
                  </button>
                </div>
              </div>

@@ -11,6 +11,7 @@ interface WidgetShellProps {
   onPrev: () => void;
   children: React.ReactNode;
   hideBackButtonOnSteps?: number[];
+  lang?: string;
 }
 
 export function WidgetShell({
@@ -20,15 +21,17 @@ export function WidgetShell({
   color,
   onPrev,
   children,
-  hideBackButtonOnSteps = []
+  hideBackButtonOnSteps = [],
+  lang = "es"
 }: WidgetShellProps) {
 
   if (!isOpen) return null;
 
   const showBackButton = step > 1 && step < totalSteps && !hideBackButtonOnSteps.includes(step);
+  const isEng = lang.toLowerCase().startsWith("en");
 
   return (
-    <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 pointer-events-none`}>
+    <div className={`fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6 pointer-events-none`}>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm pointer-events-none transition-opacity duration-300" />
 
       <AnimatePresence mode="wait">
@@ -44,10 +47,10 @@ export function WidgetShell({
                <div className="flex items-center gap-3">
                   {showBackButton ? (
                     <button onClick={onPrev} className="hover:text-gray-900 transition-colors flex items-center gap-1">
-                      <ChevronLeft size={16} strokeWidth={3} /> Atrás
+                      <ChevronLeft size={16} strokeWidth={3} /> {isEng ? "Back" : "Atrás"}
                     </button>
                   ) : (
-                    <span className="opacity-0 cursor-default">Atrás</span>
+                    <span className="opacity-0 cursor-default">{isEng ? "Back" : "Atrás"}</span>
                   )}
                </div>
                {step <= totalSteps && (

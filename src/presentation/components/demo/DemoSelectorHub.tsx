@@ -22,46 +22,48 @@ function getContrastColor(hexcolor: string) {
   return (yiq >= 200) ? '#000000' : '#ffffff';
 }
 
-export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps) {
+export function DemoSelectorHub({ color, niche, lang, onSelect }: DemoSelectorHubProps) {
   const contrast = getContrastColor(color);
   const normalizedNiche = (niche || "").toLowerCase();
   const isDental = normalizedNiche.includes("dental") || normalizedNiche.includes("dentist") || normalizedNiche.includes("odont");
   const isAesthetic = normalizedNiche.includes("aesthetic") || normalizedNiche.includes("estetica") || normalizedNiche.includes("estética");
 
+  const isEng = (lang || '').toLowerCase().startsWith('en');
+
   const modules = [
     {
       id: "triage" as const,
-      title: isDental ? "Escáner Dental" : isAesthetic ? "Estudio Facial Quirúrgico" : "Escáner Triage",
-      tag: "Interactivo",
+      title: isDental ? (isEng ? "Dental Scanner" : "Escáner Dental") : isAesthetic ? (isEng ? "Surgical Facial Study" : "Estudio Facial Quirúrgico") : (isEng ? "Triage Scanner" : "Escáner Triage"),
+      tag: isEng ? "Interactive" : "Interactivo",
       desc: isDental 
-        ? "Formulario interactivo para captar urgencias y evaluar restauraciones dentales."
+        ? (isEng ? "Interactive form to capture emergencies and evaluate dental restorations." : "Formulario interactivo para captar urgencias y evaluar restauraciones dentales.")
         : isAesthetic
-        ? "Diagnóstico interactivo para pre-evaluar inyectables, bótox y calidad de la piel."
-        : "Formulario gamificado con subida de fotos y un simulador folicular visual.",
+        ? (isEng ? "Interactive diagnosis to pre-evaluate injectables, botox, and skin quality." : "Diagnóstico interactivo para pre-evaluar inyectables, bótox y calidad de la piel.")
+        : (isEng ? "Gamified form with photo upload and a visual follicular simulator." : "Formulario gamificado con subida de fotos y un simulador folicular visual."),
       icon: <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />,
       highlight: false
     },
     {
       id: "voice" as const,
-      title: "Voz Guiada",
-      tag: "Estructurado",
-      desc: "Lleva al usuario paso a paso por una entrevista clínica para captar sus datos.",
+      title: isEng ? "Guided Voice" : "Voz Guiada",
+      tag: isEng ? "Structured" : "Estructurado",
+      desc: isEng ? "Takes the user step-by-step through a clinical interview to capture their data." : "Lleva al usuario paso a paso por una entrevista clínica para captar sus datos.",
       icon: <Mic className="w-5 h-5 sm:w-6 sm:h-6" />,
       highlight: false
     },
     {
       id: "voice-free" as const,
-      title: "Asistente de Recepción",
-      tag: "Conversacional",
-      desc: "El apoyo perfecto para tu equipo. Atiende llamadas perdidas o fuera de horario, resuelve dudas y agenda citas 24/7.",
+      title: isEng ? "Reception Assistant" : "Asistente de Recepción",
+      tag: isEng ? "Conversational" : "Conversacional",
+      desc: isEng ? "The perfect support for your team. Handles missed calls or after-hours, resolves doubts and schedules appointments 24/7." : "El apoyo perfecto para tu equipo. Atiende llamadas perdidas o fuera de horario, resuelve dudas y agenda citas 24/7.",
       icon: <PhoneCall className="w-5 h-5 sm:w-6 sm:h-6" />,
       highlight: false
     },
     {
       id: "text" as const,
-      title: "Chat Inteligente",
+      title: isEng ? "Smart Chat" : "Chat Inteligente",
       tag: "Lead Gen",
-      desc: "Captación rápida en texto con flujos sutiles para empujar a dejar el contacto.",
+      desc: isEng ? "Fast text capture with subtle flows to encourage contact submission." : "Captación rápida en texto con flujos sutiles para empujar a dejar el contacto.",
       icon: <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />,
       highlight: false
     }
@@ -92,14 +94,14 @@ export function DemoSelectorHub({ color, niche, onSelect }: DemoSelectorHubProps
           
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}20`, color }}>
              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: color }} />
-             Entorno de Pruebas (Sandbox)
+             {isEng ? "Sandbox Environment" : "Entorno de Pruebas (Sandbox)"}
           </div>
           
           <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2 sm:mb-3 mt-0">
-             Sistemas de Automatización
+             {isEng ? "Automation Systems" : "Sistemas de Automatización"}
           </h2>
           <p className="text-gray-500 font-medium text-sm sm:text-base max-w-xl mb-6 sm:mb-8 leading-relaxed">
-             Simulación segura y en tiempo real. Explora cómo interactuarían estos agentes predictivos sobre tu web actual sin alterar tu código original.
+             {isEng ? "Secure and real-time simulation. Explore how these predictive agents would interact on your current website without altering your original code." : "Simulación segura y en tiempo real. Explora cómo interactuarían estos agentes predictivos sobre tu web actual sin alterar tu código original."}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">

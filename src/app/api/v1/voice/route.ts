@@ -91,7 +91,7 @@ const polly = new PollyClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F", clinicId, niche } = await req.json(); // Lucia is the premium realistic female es-ES voice
+    const { text, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F", clinicId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic female es-ES voice
 
     if (!text) {
        return NextResponse.json({ error: "Missing text payload" }, { status: 400 });
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       .replace(/&lt;break(.*?)\/?&gt;/g, "<break$1/>");
       
     // Apply Pronunciation Middleware correctly here
-    cleanText = await applyTTSDictionary(cleanText, clinicId, niche);
+    cleanText = await applyTTSDictionary(cleanText, clinicId, niche, locale);
 
     if (provider === "elevenlabs") {
       let elevenLabsVoiceId = elevenlabs_voice_id;
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             text: noSsmlText,
-            model_id: "eleven_multilingual_v2",
+            model_id: locale.toLowerCase().startsWith('en') ? "eleven_turbo_v2_5" : "eleven_multilingual_v2",
             voice_settings: { stability: 0.5, similarity_boost: 0.75 }
           })
         });
@@ -163,15 +163,27 @@ export async function POST(req: NextRequest) {
 
     // 2. Wrap in SSML and slightly reduce the reading speed to make it sound more relaxed and conversational
     const ssmlText = `<speak><prosody rate="90%">${cleanText}</prosody></speak>`;
-    const fallbackVoiceId = gender === "M" ? "Sergio" : "Lucia";
+    
+    // Select LanguageCode and Voice based on locale and gender
+    const isEnglish = locale.toLowerCase().startsWith("en");
+    const langCode = isEnglish ? "en-US" : "es-ES";
+    let fallbackVoiceId = "Lucia";
+    
+    if (isEnglish) {
+       fallbackVoiceId = gender === "M" ? "Matthew" : "Joanna";
+    } else {
+       fallbackVoiceId = gender === "M" ? "Sergio" : "Lucia";
+    }
 
     const command = new SynthesizeSpeechCommand({
       Engine: "neural",
-      LanguageCode: "es-ES",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      LanguageCode: langCode as any,
       OutputFormat: "mp3",
       Text: ssmlText,
       TextType: "ssml",
-      VoiceId: fallbackVoiceId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      VoiceId: fallbackVoiceId as any,
     });
 
     const response = await polly.send(command);

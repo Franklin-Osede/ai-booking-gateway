@@ -142,7 +142,14 @@ export default function AdminDashboard() {
                           urlMatch;
     const matchesIndustry = selectedIndustry === "All" || normalizeIndustry(clinic.industry) === selectedIndustry;
     const matchesLocation = selectedLocation === "All" || (selectedLocation === "SinEspecificar" && !clinic.location) || clinic.location === selectedLocation;
-    const matchesCountry = selectedCountry === "All" || (clinic.countryCode || 'ES') === selectedCountry;
+    const clinicCountry = String(clinic.countryCode || 'ES').toLowerCase();
+    const matchesCountry = selectedCountry === "All" || (
+      selectedCountry === "EN"
+        ? (clinicCountry === "en" || clinicCountry.startsWith("en-"))
+        : selectedCountry === "ES"
+          ? (clinicCountry === "es" || clinicCountry.startsWith("es-"))
+          : clinicCountry === selectedCountry.toLowerCase()
+    );
     return matchesSearch && matchesIndustry && matchesLocation && matchesCountry;
   });
 

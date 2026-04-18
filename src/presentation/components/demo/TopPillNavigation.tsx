@@ -20,10 +20,12 @@ interface TopPillNavigationProps {
   onModeChange: (mode: "hub" | "triage" | "text" | "voice" | "voice-free" | "phone") => void;
   primaryColor?: string;
   hasVideo?: boolean;
+  lang?: string;
 }
 
-export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#1a4b8c", hasVideo = false }: TopPillNavigationProps) {
+export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#1a4b8c", hasVideo = false, lang }: TopPillNavigationProps) {
   const contrastColor = getContrastColor(primaryColor);
+  const isEng = (lang || '').toLowerCase().startsWith('en');
 
   return (
     <div className={`fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-9000 flex items-center bg-white/85 backdrop-blur-xl border border-gray-100 p-1.5 sm:p-2 rounded-4xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-black/5`}>
@@ -32,7 +34,7 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
         onClick={() => onModeChange("hub")}
         className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-colors text-gray-800 hover:bg-gray-100"
       >
-        <span className="w-2 h-2 rounded-full animate-pulse mr-1" style={{ backgroundColor: primaryColor }} /> Asistentes
+        <span className="w-2 h-2 rounded-full animate-pulse mr-1" style={{ backgroundColor: primaryColor }} /> {isEng ? "Hub" : "Asistentes"}
       </button>
 
       {hasVideo && (
@@ -43,7 +45,7 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
             onClick={onOpenPitch}
             className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 px-3 py-2 sm:py-2.5 rounded-full text-xs font-medium transition-colors hover:bg-gray-100"
           >
-            <PlayCircle size={16} /> <span className="hidden sm:inline">Vídeo Intro</span>
+            <PlayCircle size={16} /> <span className="hidden sm:inline">{isEng ? "Watch Intro" : "Vídeo Intro"}</span>
           </button>
         </>
       )}
@@ -54,7 +56,7 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
         className="flex items-center gap-1.5 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all shadow-md hover:scale-105 active:scale-95 ml-2"
         style={{ backgroundColor: primaryColor, color: contrastColor }}
       >
-        <Calendar size={16} /> Agendar
+        <Calendar size={16} /> {isEng ? "Book" : "Agendar"}
       </button>
     </div>
   );

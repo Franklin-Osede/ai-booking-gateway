@@ -6,21 +6,24 @@ import { X, ChevronRight, Check } from "lucide-react";
 
 interface ProductTourProps {
   primaryColor?: string;
+  lang?: string;
 }
 
-export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
+export function ProductTour({ primaryColor = "#1a4b8c", lang }: ProductTourProps) {
   const [step, setStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [targetRect, setTargetRect] = useState<{ top: number; left: number; width: number; height: number; } | null>(null);
 
+  const isEng = (lang || '').toLowerCase().startsWith('en');
+
   const steps = [
-    { targetId: 'center', title: 'Automatización Integral', text: 'Filtra contactos 24/7, extrae datos críticos y los organiza en tu agenda antes de que saturen recepción.' },
-    { targetId: 'tour-mod-triage', title: 'Triaje Predictivo', text: 'Clasifica urgencias y patologías de forma interactiva. Descarta curiosos para que el equipo atienda casos rentables.' },
-    { targetId: 'tour-mod-voice', title: 'Entrevista por Voz Guiada', text: 'Conduce al usuario paso a paso de forma conversacional para recopilar sus datos clínicos antes de derivarlo al equipo.' },
-    { targetId: 'tour-mod-voice-free', title: 'Agente Telefónico Digital', text: 'Como tener un agente respondiendo llamadas 24/7. Escucha, comprende y responde con total coherencia.' },
-    { targetId: 'tour-mod-text', title: 'Asistente Textual', text: 'Un perfilado digital dinámico. El motor dialoga por chat con la visita para validar su perfil antes de capturarlo.' },
-    { targetId: 'tour-video-intro', title: 'Videodemostración', text: 'Te explico personalmente cómo funciona cada asistente y te enseño su vinculación invisible con tu agenda habitual.' },
-    { targetId: 'tour-agendar', title: 'Auditoría Técnica', text: 'Descubre en 15 min cómo integrar y adaptar este ecosistema a las especialidades concretas de tu propio centro.' }
+    { targetId: 'center', title: isEng ? 'Integral Automation' : 'Automatización Integral', text: isEng ? 'Filters contacts 24/7, extracts critical data and organizes them in your schedule before they saturate the reception.' : 'Filtra contactos 24/7, extrae datos críticos y los organiza en tu agenda antes de que saturen recepción.' },
+    { targetId: 'tour-mod-triage', title: isEng ? 'Predictive Triage' : 'Triaje Predictivo', text: isEng ? 'Classify emergencies and pathologies interactively. Filter out curiosity seekers so your team handles profitable cases.' : 'Clasifica urgencias y patologías de forma interactiva. Descarta curiosos para que el equipo atienda casos rentables.' },
+    { targetId: 'tour-mod-voice', title: isEng ? 'Guided Voice Interview' : 'Entrevista por Voz Guiada', text: isEng ? 'Lead the user step by step conversationally to collect their clinical data before referring them to the team.' : 'Conduce al usuario paso a paso de forma conversacional para recopilar sus datos clínicos antes de derivarlo al equipo.' },
+    { targetId: 'tour-mod-voice-free', title: isEng ? 'Digital Agent' : 'Agente Telefónico Digital', text: isEng ? 'Like having an agent answering calls 24/7. Listens, understands and responds with absolute coherence.' : 'Como tener un agente respondiendo llamadas 24/7. Escucha, comprende y responde con total coherencia.' },
+    { targetId: 'tour-mod-text', title: isEng ? 'Text Assistant' : 'Asistente Textual', text: isEng ? 'Dynamic digital profiling. The engine chats with the visitor to validate their profile before capturing them.' : 'Un perfilado digital dinámico. El motor dialoga por chat con la visita para validar su perfil antes de capturarlo.' },
+    { targetId: 'tour-video-intro', title: isEng ? 'Video Demonstration' : 'Videodemostración', text: isEng ? 'I will personally explain how each assistant works and show you its invisible link to your usual agenda.' : 'Te explico personalmente cómo funciona cada asistente y te enseño su vinculación invisible con tu agenda habitual.' },
+    { targetId: 'tour-agendar', title: isEng ? 'Technical Audit' : 'Auditoría Técnica', text: isEng ? 'Discover in 15 min how to integrate and adapt this ecosystem to the specific specialties of your own center.' : 'Descubre en 15 min cómo integrar y adaptar este ecosistema a las especialidades concretas de tu propio centro.' }
   ];
 
   useEffect(() => {
@@ -188,14 +191,14 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
           
           <div className="flex items-center justify-between mt-2 pt-4 border-t border-gray-800/50">
              <span className="text-xs font-semibold text-gray-500">
-               Paso {step + 1} de {steps.length}
+               {isEng ? `Step ${step + 1} of ${steps.length}` : `Paso ${step + 1} de ${steps.length}`}
              </span>
              <div className="flex gap-2">
                 <button 
                   onClick={handleClose} 
                   className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors"
                 >
-                  Saltar
+                  {isEng ? "Skip" : "Saltar"}
                 </button>
                 <button 
                   onClick={handleNext} 
@@ -203,9 +206,9 @@ export function ProductTour({ primaryColor = "#1a4b8c" }: ProductTourProps) {
                   style={{ backgroundColor: primaryColor }}
                 >
                   {step === steps.length - 1 ? (
-                    <>Comenzar <Check className="w-3 h-3 ml-0.5" /></>
+                    <>{isEng ? "Start" : "Comenzar"} <Check className="w-3 h-3 ml-0.5" /></>
                   ) : (
-                    <>Siguiente <ChevronRight className="w-3 h-3" /></>
+                    <>{isEng ? "Next" : "Siguiente"} <ChevronRight className="w-3 h-3" /></>
                   )}
                 </button>
              </div>

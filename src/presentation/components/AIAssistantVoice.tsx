@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Play, Menu, ChevronDown, Check } from "lucide-react";
-import { getDictionary } from "../i18n";
+import { resolveConfig } from "../config/resolveConfig";
 import { getVoices, VoiceProfile } from "../config/voiceConfig";
 import { VoiceIntent } from "../../domain/voice/VoiceIntent";
 import { VoicePromptService } from "../../domain/voice/VoicePromptService";
@@ -122,7 +122,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   useEffect(() => {
     // Pre-fetch greeting for instantaneous startup
     const preloadGreeting = async () => {
-      let currentBrand = "la Clínica Capilar";
+      const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
+      const { niche: nicheCfg } = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
+      let currentBrand = nicheCfg.brandLabel || "la clínica";
       try {
          const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
          const brandParam = new URLSearchParams(window.location.search).get('brand');
@@ -146,13 +148,13 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
       let voiceProvider = "elevenlabs";
       try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-      const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand }, voiceProvider);
+      const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand, locale: lang || 'es' }, voiceProvider);
       
       try {
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName || null })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName || null, locale: lang || 'es' })
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -189,7 +191,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const dispYear = displayedDate.getFullYear();
   const dispMonthIdx = displayedDate.getMonth();
   const daysInMonth = new Date(dispYear, dispMonthIdx + 1, 0).getDate();
-  const monthNameStr = displayedDate.toLocaleString('es-ES', { month: 'long' });
+  const monthNameStr = displayedDate.toLocaleString(lang || 'es-ES', { month: 'long' });
   const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
   const monthShort = monthNameStr.substring(0, 3);
 
@@ -205,7 +207,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     setMessages([]);
     setStepInfo({ options: [], stepId: 0 });
 
-    let currentBrand = "la Clínica Capilar";
+    const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
+    const { niche: nicheCfg, locale: confLocale } = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
+    let currentBrand = nicheCfg.brandLabel || "la clínica";
     try {
       const brandParam = new URLSearchParams(window.location.search).get('brand');
       const storedSite = localStorage.getItem('onboarding_site_url');
@@ -227,7 +231,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     const currentAvailVoices = getVoices(lang);
     const selectedVoice = currentAvailVoices.find(v => v.id === id) || currentAvailVoices[0];
 
-    const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand }, voiceProvider);
+    const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand, locale: lang || 'es' }, voiceProvider);
     let greeting = rawGreeting.replace(/Soy [a-zA-ZáéíóúÁÉÍÓÚñÑ]+/, `Soy ${name}`);
     if (selectedVoice.gender === 'M') {
         greeting = greeting.replace(/asesora/gi, 'asesor');
@@ -235,14 +239,15 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     
     setTimeout(() => {
        fetchAudio(greeting, "bot-res-" + Date.now(), () => {
-         setStepInfo({ options: ["¿Cuánto cuesta?", "Quiero ver resultados", "Agendar cita"], stepId: 1 });
+         setStepInfo({ options: [confLocale.chat_scripts?.options_first_step[0] || "¿Cuánto cuesta?", "Quiero ver resultados", "Agendar cita"], stepId: 1 });
        }, { overrideVoice: selectedVoice });
     }, 100);
   };
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
   const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-  const config = getDictionary(lang)[activeNiche] || getDictionary(lang).medical;
+  const effectiveConfig = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
+  const config = effectiveConfig.locale;
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
   const contrastText = getContrastColor(color);
   const darkerBorder = getDarkerColor(color);
@@ -285,9 +290,10 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     } catch {}
   }, []);
 
+  type Category = (typeof config.categories)[number];
   let categories = config.categories;
   if (scrapedData && scrapedData.categories) {
-    categories = categories.map((cat, i) => {
+    categories = categories.map((cat: Category, i: number) => {
        const scrapedCat = scrapedData.categories![i];
        if (!scrapedCat) return cat;
        return {
@@ -364,7 +370,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       const res = await fetch('/api/v1/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender, niche: activeNiche, clinicId: brandName || null })
+        body: JSON.stringify({ text, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender, niche: activeNiche, clinicId: brandName || null, locale: lang || 'es' })
       });
       
       if (!res.ok) throw new Error("Voice API Error");
@@ -433,7 +439,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         }
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-        const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: formattedBrand }, voiceProvider);
+        const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: formattedBrand, locale: lang || 'es' }, voiceProvider);
         let greeting = rawGreeting.replace(/Soy [a-zA-ZáéíóúÁÉÍÓÚñÑ]+/, `Soy ${activeVoice.name}`);
         if (activeVoice.gender === 'M') {
             greeting = greeting.replace(/asesora/gi, 'asesor');
@@ -445,14 +451,12 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         });
       } 
       else if (nextStepId === 1) {
-        const isHT = activeNiche === 'hair_transplant';
-
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-        const serviceQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_SERVICE, { isHT, userSelection, niche: activeNiche }, voiceProvider);
+        const serviceQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_SERVICE, { userSelection, niche: activeNiche, locale: lang || 'es' }, voiceProvider);
         
         fetchAudio(serviceQuestion, "bot-1", () => {
-          const nicheConf = getDictionary(lang)[activeNiche] || getDictionary(lang)['default'] || getDictionary(lang).medical;
+          const nicheConf = config;
           if (userSelection && nicheConf?.voice_scripts?.deep_dive_chips && nicheConf.voice_scripts.deep_dive_chips[userSelection]) {
              setStepInfo({ options: nicheConf.voice_scripts.deep_dive_chips[userSelection], stepId: 15 });
           } else {
@@ -463,7 +467,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       else if (nextStepId === 15) {
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-        const deepDivePrompt = VoicePromptService.getPrompt(VoiceIntent.SERVICE_DEEP_DIVE, { userSelection, niche: activeNiche }, voiceProvider);
+        const deepDivePrompt = VoicePromptService.getPrompt(VoiceIntent.SERVICE_DEEP_DIVE, { userSelection, niche: activeNiche, locale: lang || 'es' }, voiceProvider);
         
         fetchAudio(deepDivePrompt, "bot-15", () => {
           setStepInfo({ options: ["Agendar Cita", "Más información"], stepId: 2 });
@@ -506,11 +510,11 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         }
         
         const photoUrl = match ? match.img : (fallbackImages[activeNiche] || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop');
-        const pitchText = match ? match.text : `En ${currentService} garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`;
+        const pitchText = match ? match.text : `En nuestra clínica garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`;
         
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-        const docPitch = VoicePromptService.getPrompt(VoiceIntent.DOCTOR_PITCH, { pitchText }, voiceProvider);
+        const docPitch = VoicePromptService.getPrompt(VoiceIntent.DOCTOR_PITCH, { pitchText, locale: lang || 'es' }, voiceProvider);
         
         fetchAudio(docPitch, "bot-2", () => {
            setStepInfo({ options: ["Agendar Cita", "Ver Especialistas"], stepId: 25 });
@@ -521,7 +525,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
 
         if (userSelection === "Ahora no") {
-           const byeMsg = VoicePromptService.getPrompt(VoiceIntent.BYE, {}, voiceProvider);
+           const byeMsg = VoicePromptService.getPrompt(VoiceIntent.BYE, { locale: lang || 'es' }, voiceProvider);
            fetchAudio(byeMsg, "bot-bye", () => {
              setStepInfo({ options: [], stepId: 0 });
            });
@@ -529,7 +533,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         }
 
         if (userSelection === "Ver Especialistas" || userSelection === "Ver otros Especialistas") {
-           const othersMsg = VoicePromptService.getPrompt(VoiceIntent.OTHERS, {}, voiceProvider);
+           const othersMsg = VoicePromptService.getPrompt(VoiceIntent.OTHERS, { locale: lang || 'es' }, voiceProvider);
            const category = categories[0];
            const rawDocs = category.docs.slice(0, 3);
            const seenImages = new Set<string>();
@@ -538,8 +542,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
              
              let finalName = baseName;
              let isFemale = /^(Dra\.|Doctora|María|Ana|Laura|Sof[ií]a|Carmen|Luc[ií]a|Elena|Paula|Claudia|Blanca|Sara|Marta)/i.test(finalName);
-             const hairSpecialties = ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"];
-             let assignedSpecialty = hairSpecialties[idx % hairSpecialties.length];
+             const nicheConfig = effectiveConfig.niche;
+             const dynamicSpecialties = nicheConfig.fallbackSpecialties;
+             let assignedSpecialty = dynamicSpecialties[idx % dynamicSpecialties.length];
 
              // If the scraped "name" is actually a generic medical title...
              if (/^(Médico|Cirujan[oa]|Especialista|Tricólog[oa]|Director[a]?|Docente|Experto|Asesor)/i.test(finalName) && finalName.split(' ').length <= 4) {
@@ -569,20 +574,20 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
              }
 
              if (typeof d === 'string') {
-               return { name: finalName, specialty: assignedSpecialty, image: finalImg, bio: 'Especialista titular con miles de folículos trasplantados, apostando por el diseño 100% natural.' };
+               return { name: finalName, specialty: assignedSpecialty, image: finalImg, bio: nicheConfig.fallbackBio };
              } else {
-               return { ...d, name: finalName, specialty: d.specialty || assignedSpecialty, image: finalImg, bio: d.bio || 'Reconocida especialista internacional con gran experiencia en casos complejos de alopecia.' };
+               return { ...d, name: finalName, specialty: d.specialty || assignedSpecialty, image: finalImg, bio: d.bio || nicheConfig.fallbackBio };
              }
            });
            
            fetchAudio(othersMsg, "bot-others", () => {
-             setStepInfo({ options: ["Cualquiera disponible"], stepId: 25 });
+             setStepInfo({ options: [effectiveConfig.locale.chat_scripts?.doctor_found_options[0] || "Cualquiera disponible"], stepId: 25 });
            }, { isDoctorList: true, doctorListData: docPayload });
            return;
         }
 
         let docNameExtracted = "equipo médico";
-        if (userSelection && userSelection.startsWith("Reservar")) {
+        if (userSelection && (userSelection.startsWith("Reservar") || userSelection.startsWith("Book"))) {
            docNameExtracted = userSelection.replace("Reservar con ", "");
            setSelectedDoctor(docNameExtracted);
         } else if (userSelection && userSelection !== "Cualquiera disponible" && userSelection !== "Agendar Cita") {
@@ -590,20 +595,25 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            docNameExtracted = userSelection;
         }
 
-        const pQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_PHOTOS, { userSelection, doctorName: docNameExtracted }, voiceProvider);
-
-        fetchAudio(pQuestion, "bot-photos", () => {
-           setStepInfo({ options: ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
-        });
+        const nicheCfg = effectiveConfig.niche;
+        if (nicheCfg.requiresPhotos) {
+           const pQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_PHOTOS, { userSelection, doctorName: docNameExtracted, locale: lang || 'es' }, voiceProvider);
+           fetchAudio(pQuestion, "bot-photos", () => {
+              setStepInfo({ options: effectiveConfig.locale.chat_scripts?.photos_options || ["📸 Subir fotos", "Omitir e ir al calendario"], stepId: 3 });
+           });
+        } else {
+           setTimeout(() => triggerFlowStep(3), 100);
+        }
       }
       else if (nextStepId === 3) {
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         
-        const calQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_CALENDAR, { userSelection }, voiceProvider);
+        const calQuestion = VoicePromptService.getPrompt(VoiceIntent.ASK_CALENDAR, { userSelection, locale: lang || 'es' }, voiceProvider);
         
         fetchAudio(calQuestion, "bot-3", () => {
-           setMessages(prev => [...prev, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
+           const isEng = (lang || "es").toLowerCase().startsWith("en");
+           setMessages(prev => [...prev, { id: "bot-cal", text: isEng ? "Calendar" : "Calendario", sender: "bot", isCalendar: true }]);
         });
       }
     }, 600);
@@ -611,7 +621,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
   const handleUserSelect = (text: string, currentStep: number) => {
     if (isProcessing) return;
-    if (text === "📸 Subir fotos") {
+    if (text === "📸 Subir fotos" || text === "📸 Upload photos") {
        document.getElementById('hidden-photo-input')?.click();
        return;
     }
@@ -630,7 +640,11 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   };
 
   const handleConfirmBooking = () => {
-     setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "user-confirm", text: `Confirmo la cita para el ${selectedDate} de ${monthNameStr} a las ${selectedTime}`, sender: "user" }]);
+     const isEng = (lang || '').toLowerCase().startsWith('en');
+     const confirmText = isEng 
+        ? `I confirm the appointment for the ${selectedDate} of ${monthNameStr} at ${selectedTime}`
+        : `Confirmo la cita para el ${selectedDate} de ${monthNameStr} a las ${selectedTime}`;
+     setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "user-confirm", text: confirmText, sender: "user" }]);
      
      const spokenTime = selectedTime === "09.30" ? "nueve y media de la mañana" :
                         selectedTime === "10.00" ? "diez de la mañana" :
@@ -641,11 +655,10 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
 
      setTimeout(() => {
         const docName = selectedDoctor || 'nuestro experto';
-        const isHT = activeNiche === 'hair_transplant';
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         
-        const confirmMsg = VoicePromptService.getPrompt(VoiceIntent.CONFIRM_BOOKING, { isHT, doctorName: docName, selectedDate: selectedDate || 1, spokenTime }, voiceProvider);
+        const confirmMsg = VoicePromptService.getPrompt(VoiceIntent.CONFIRM_BOOKING, { doctorName: docName, selectedDate: selectedDate || 1, spokenTime, niche: activeNiche, locale: lang || 'es' }, voiceProvider);
         
         fetchAudio(confirmMsg, "bot-success", () => {}, { isSuccess: true, isFinalCard: true });
      }, 600);
@@ -682,7 +695,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[14px] sm:text-[15px]"
                style={{ backgroundColor: color, color: contrastText }}
              >
-               <Mic fill={contrastText} size={16} /> Tu Asistente {activeNiche === 'dental' ? 'Dental' : activeNiche === 'aesthetic' ? 'Médico' : 'Capilar'}
+               <Mic fill={contrastText} size={16} /> Tu Asistente {(effectiveConfig.niche && effectiveConfig.niche.title.includes('Especialistas')) ? 'Médico' : 'Virtual'}
              </button>
            </motion.div>
         )}
@@ -925,7 +938,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                    {msg.doctorListData.map((doc, idx) => {
                                      const isExpanded = expandedDocIdx === idx;
                                      return (
-                                       <motion.div layout key={idx} className="flex flex-col p-3 bg-white border border-gray-100 rounded-[16px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-gray-200 hover:-translate-y-0.5 transition-all cursor-pointer overflow-hidden relative" onClick={() => setExpandedDocIdx(isExpanded ? null : idx)}>
+                                       <motion.div layout key={idx} className="flex flex-col p-3 bg-white border-2 border-gray-200 rounded-[16px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-gray-300 hover:-translate-y-0.5 transition-all cursor-pointer overflow-hidden relative" onClick={() => setExpandedDocIdx(isExpanded ? null : idx)}>
                                          <div className="flex items-center justify-between">
                                            <div className="flex items-center gap-3">
                                              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-gray-100 shadow-sm relative">

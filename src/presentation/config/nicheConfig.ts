@@ -13,6 +13,17 @@ export type NicheConfig = {
     name: string;
     docs: (string | { name: string; image?: string })[];
   }[];
+  requiresPhotos: boolean;
+  fallbackSpecialties: string[];
+  fallbackBio: string;
+  brandLabel: string;
+  topicPrompt: string;
+  chatObjection: {
+    keywords: string[];
+    responseBot: string;
+    followUpBot: string;
+    acceptOption: string;
+  };
   voice_scripts?: {
     ask_service_intro: string;
     ask_service_options: Record<string, string>;
@@ -38,7 +49,18 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Activity, name: "Fisioterapia", docs: ["Fisioterapeuta Jefe", "Rehabilitador", "Especialista"] },
       { icon: User, name: "Ginecología", docs: ["Ginecólogo/a Titular", "Especialista de Guardia"] },
       { icon: User, name: "Psicología", docs: ["Psicólogo/a Clínico", "Terapeuta", "Especialista"] }
-    ]
+    ],
+    requiresPhotos: false,
+    fallbackSpecialties: ["Médico Especialista", "Director Médico", "Jefe de Servicio", "Médico Titular"],
+    fallbackBio: "Especialista titular con amplia experiencia en diagnóstico y tratamiento clínico.",
+    brandLabel: "la Clínica Médica",
+    topicPrompt: "qué dolencia te gustaría tratar con nosotros",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste", "seguro"],
+      responseBot: "Entendemos que el coste es importante. Priorizamos un cuidado médico de primera línea utilizando equipos modernos para asegurar un diagnóstico preciso y rápido.",
+      followUpBot: "¿Te gustaría agendar una valoración y lo miramos detenidamente?",
+      acceptOption: "Agendar primera cita"
+    }
   },
   dental: {
     title: "Elige tu tratamiento ideal",
@@ -80,6 +102,17 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       },
       ask_service_fallback: "TEXT_INTRO ¿Te gustaría que agendemos una cita de valoración... o prefieres que te dé más información de los tratamientos?",
       confirm_booking: "¡Estupendo! Tu reserva con DR_NAME para el día SELECTED_DATE a las SPOKEN_TIME ha quedado confirmada."
+    },
+    requiresPhotos: false,
+    fallbackSpecialties: ["Ortodoncista Experta", "Implantólogo Titular", "Directora Médica", "Especialista Odontopediatría", "Cirujano Dental"],
+    fallbackBio: "Especialista titular con amplia experiencia en diseños de sonrisa y casos clínicos complejos.",
+    brandLabel: "la Clínica Dental",
+    topicPrompt: "qué tratamiento buscas... o qué te preocupa de tus dientes",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste", "presupuesto", "financiacion", "financiación"],
+      responseBot: "Es comprensible fijarse en el coste. Nosotros no somos una franquicia 'low-cost': priorizamos la salud a largo plazo usando los mejores materiales (implantes titanio, escáner 3D). Además ofrecemos planes de pago y financiación al 100%.",
+      followUpBot: "¿Te gustaría agendar una valoración sin coste y te damos un diagnóstico real adaptado a ti?",
+      acceptOption: "Agendar primera cita"
     }
   },
   beauty: {
@@ -122,6 +155,17 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       },
       ask_service_fallback: "TEXT_INTRO ¿Buscamos un hueco en nuestra agenda para que vengas a cuidarte?",
       confirm_booking: "¡Estupendo! Tu sesión para el día SELECTED_DATE a las SPOKEN_TIME ha quedado súper confirmada."
+    },
+    requiresPhotos: false,
+    fallbackSpecialties: ["Estilista Senior", "Colorista Experto", "Directora Creativa", "Técnico Especialista"],
+    fallbackBio: "Profesional top del sector con años de experiencia creando estilos únicos y favorecedores.",
+    brandLabel: "el Salón de Belleza",
+    topicPrompt: "qué tratamiento o cambio de imagen te apetece hoy",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste", "oferta"],
+      responseBot: "El precio es clave, pero también lo es usar productos que cuiden tu salud y garanticen una belleza duradera. Nuestros tratamientos usan formulaciones orgánicas y técnicas avanzadas que marcan la diferencia.",
+      followUpBot: "¿Deseas reservar tu hueco y disfrutar de una experiencia premium?",
+      acceptOption: "Reservar sesión"
     }
   },
   legal: {
@@ -136,7 +180,18 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Scale, name: "Derecho Laboral", docs: ["Socio Principal Laboral", "Abogado Senior", "Asesor Jurídico"] },
       { icon: Briefcase, name: "Derecho Mercantil", docs: ["Asesor Legal Corporativo", "Socio Mercantil"] },
       { icon: FileText, name: "Derecho Civil", docs: ["Abogado Especialista", "Socio Titular"] }
-    ]
+    ],
+    requiresPhotos: false,
+    fallbackSpecialties: ["Socia Titular", "Abogado Senior", "Asesor Jurídico Jefe", "Directora Legal"],
+    fallbackBio: "Especialista con amplia experiencia en el sector, logrando siempre los mejores resultados.",
+    brandLabel: "el Despacho Legal",
+    topicPrompt: "de qué trata el caso legal que necesitas consultar",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste", "honorarios", "presupuesto"],
+      responseBot: "Sabemos que los honorarios son importantes. Por eso somos transparentes y ofrecemos facilidades de pago. En temas legales, un buen asesoramiento a tiempo previene grandes pérdidas a futuro.",
+      followUpBot: "¿Agenda tu primera consulta y analizamos tu viabilidad legal?",
+      acceptOption: "Agendar Consulta"
+    }
   },
   auto: {
     title: "Elige tu asesor comercial",
@@ -150,7 +205,18 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Car, name: "Ventas Vehículos Nuevos", docs: ["Asesor Comercial Senior", "Jefe de Ventas"] },
       { icon: ShieldCheck, name: "Vehículos de Ocasión", docs: ["Especialista en Ocasión", "Asesor de Ventas"] },
       { icon: Wrench, name: "Taller & Mantenimiento", docs: ["Jefe de Taller", "Mecánico Principal", "Recepción Taller"] }
-    ]
+    ],
+    requiresPhotos: false,
+    fallbackSpecialties: ["Asesor Comercial", "Jefe de Ventas", "Director de Concesionario", "Especialista de Marca"],
+    fallbackBio: "Apasionado del motor con gran experiencia guiando a clientes hacia su vehículo ideal.",
+    brandLabel: "el Concesionario",
+    topicPrompt: "qué modelo buscas... o en qué te puedo asesorar",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste", "descuento", "oferta", "financiación"],
+      responseBot: "Te entendemos. Analizamos continuamente el mercado para ofrecer vehículos garantizados y financiaciones exclusivas al 100%. La tranquilidad en la carretera es nuestra prioridad.",
+      followUpBot: "¿Quieres agendar una visita o prueba de conducción guiada?",
+      acceptOption: "Agendar visita"
+    }
   },
   b2b: {
     title: "Planes y Soluciones",
@@ -164,7 +230,18 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: Monitor, name: "Ventas y CRM", docs: ["Andrés Ramírez", "Laura Pérez"] },
       { icon: Server, name: "Infraestructura Cloud", docs: ["Miguel Sánchez", "Roberto Gómez"] },
       { icon: Zap, name: "Automatización & IA", docs: ["Sofía López", "Luis Ruiz", "Patricia Torres"] }
-    ]
+    ],
+    requiresPhotos: false,
+    fallbackSpecialties: ["Account Executive", "Consultor Senior", "Director de Cuentas", "Especialista en Soluciones"],
+    fallbackBio: "Ejecutivo experto en transformar los procesos de tu empresa con soluciones tecnológicas.",
+    brandLabel: "nuestra Empresa",
+    topicPrompt: "qué tipo de software o servicio estás buscando",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste", "tarifa"],
+      responseBot: "Comprendemos la importancia de la inversión. Nuestras soluciones aceleran la amortización aumentando dramáticamente la productividad de tu equipo operativo desde el primer mes.",
+      followUpBot: "¿Agendamos una breve sesión de descubrimiento y vemos viabilidad?",
+      acceptOption: "Agendar sesión"
+    }
   },
   default: {
     title: "Contacta con nuestro equipo",
@@ -178,7 +255,18 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       { icon: User, name: "Atención al Cliente", docs: ["Soporte L1", "Soporte L2", "Atención Premium"] },
       { icon: Briefcase, name: "Ventas y Comercial", docs: ["Ejecutivo Junior", "Director Comercial"] },
       { icon: FileText, name: "Administración / Facturación", docs: ["Dpto. Cobros", "Contabilidad"] }
-    ]
+    ],
+    requiresPhotos: false,
+    fallbackSpecialties: ["Especialista Atención al Cliente", "Ejecutivo de Soporte", "Consultor", "Responsable de Área"],
+    fallbackBio: "Profesional enfocado en brindar una atención excepcional y resolver cualquier consulta rápidamente.",
+    brandLabel: "nuestra Empresa",
+    topicPrompt: "en qué área necesitas ayuda hoy",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste"],
+      responseBot: "Es totalmente normal comparar. Nos centramos en brindar el máximo valor y resultados duraderos a través de profesionales de primer nivel.",
+      followUpBot: "¿Deseas avanzar y analizar tu caso en detalle con un consultor?",
+      acceptOption: "Avanzar reserva"
+    }
   },
   hair_transplant: {
     title: "Especialistas Capilares",
@@ -216,6 +304,17 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       },
       ask_service_fallback: "TEXT_INTRO ¿Te gustaría ver nuestro calendario para agendar tu consulta particular?",
       confirm_booking: "¡Estupendo! Tu reserva de valoración capilar con DR_NAME ha quedado confirmada. Te esperamos."
+    },
+    requiresPhotos: true,
+    fallbackSpecialties: ["Cirujana Capilar FUE", "Especialista DHI", "Directora Médica", "Tricóloga Avanzada", "Microinjerto Capilar", "Cirujano Titular"],
+    fallbackBio: "Especialista titular con miles de folículos trasplantados, apostando por el diseño 100% natural.",
+    brandLabel: "la Clínica Capilar",
+    topicPrompt: "qué es lo que más te preocupa de tu cabello",
+    chatObjection: {
+      keywords: ["turqu", "turquía", "precio", "caro", "barato", "coste"],
+      responseBot: "Es normal que compares. El modelo 'Low Cost' suele ser más barato, pero nosotros garantizamos un diseño médico personalizado superior, densidad máxima y seguimiento presencial a tu lado si hay cualquier imprevisto. Además, ofrecemos financiación al 100%.",
+      followUpBot: "¿Quieres agendar una videollamada de 10 minutos para que el doctor te valore?",
+      acceptOption: "Agendar videollamada"
     }
   },
   regenerative: {
@@ -253,6 +352,17 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       },
       ask_service_fallback: "Perfecto. TEXT_INTRO Es uno de los procedimientos más vanguardistas que existen. ¿Quieres bloquear una primera cita para analizar tu idoneidad?",
       confirm_booking: "¡Estupendo! Tu sesión de valoración con DR_NAME para el día SELECTED_DATE a las SPOKEN_TIME ha quedado confirmada."
+    },
+    requiresPhotos: true,
+    fallbackSpecialties: ["Especialista Stem Cells", "Biólogo Clínico", "Medicina Antiaging", "Director de Longevidad"],
+    fallbackBio: "Referente en terapias avanzadas de regeneración celular y medicina antienvejecimiento.",
+    brandLabel: "la Clínica Regenerativa",
+    topicPrompt: "qué dolencia te gustaría tratar con nosotros",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste", "seguro"],
+      responseBot: "Comprendemos tu postura. Nuestros tratamientos pioneros utilizan tecnología celular de última generación que es compleja, pero garantizan los máximos estándares de calidad y purificación clínica.",
+      followUpBot: "¿Quieres que agendemos una primera asesoría con el biólogo o terapeuta?",
+      acceptOption: "Agendar asesoría"
     }
   },
   aesthetic: {
@@ -290,6 +400,17 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       },
       ask_service_fallback: "TEXT_INTRO ¿Te gustaría agendar una primera visita de evaluación médica... o prefieres detalles sobre los precios?",
       confirm_booking: "¡Sensacional! Tus cita para valoración con DR_NAME para el dıa SELECTED_DATE a las SPOKEN_TIME ha quedado confirmada al cien por cien."
+    },
+    requiresPhotos: true,
+    fallbackSpecialties: ["Médico Estético", "Cirujana Plástica", "Directora Médica", "Especialista Inyectables", "Dermatóloga Quirúrgica"],
+    fallbackBio: "Especialista en medicina estética, apostando siempre por resultados elegantes y 100% naturales.",
+    brandLabel: "la Clínica Estética",
+    topicPrompt: "qué aspecto de tu rostro o cuerpo te gustaría mejorar hoy",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste"],
+      responseBot: "Es comprensible dudar por precio. En este sector utilizar toxina o inyectables de máxima calidad y pureza es innegociable para resultados elegantes y duraderos; trabajamos con los mejores laboratorios suizos y americanos.",
+      followUpBot: "¿Agendamos una evaluación facial con el equipo médico?",
+      acceptOption: "Agendar valoración"
     }
   },
   hair_salon: {
@@ -327,6 +448,17 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
       },
       ask_service_fallback: "TEXT_INTRO ¿Vamos revisando el calendario para reservar un hueco y dejarte espectacular?",
       confirm_booking: "¡Genial! Tu cita con DR_NAME para el día SELECTED_DATE a las SPOKEN_TIME está confirmadísima."
+    },
+    requiresPhotos: false,
+    fallbackSpecialties: ["Estilista Senior", "Colorista Experto", "Directora Creativa", "Técnico Especialista"],
+    fallbackBio: "Profesional top del sector con años de experiencia creando estilos únicos y favorecedores.",
+    brandLabel: "el Salón de Peluquería",
+    topicPrompt: "qué cambio de look o estilo tienes en mente",
+    chatObjection: {
+      keywords: ["precio", "caro", "barato", "coste"],
+      responseBot: "Sabemos que miras los precios. No obstante, para tratar el cabello y colorimetría aplicamos productos que cuidan tu fibra capilar, minimizan daños y unifican el color como deseas.",
+      followUpBot: "¿Quieres que agendemos la sesión y transformemos tu estilo?",
+      acceptOption: "Reservar sesión"
     }
   }
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -5,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, Play, Menu, Camera, ChevronLeft, ChevronRight, CheckCircle2, ChevronDown, Check } from "lucide-react";
 import { getVoices, VoiceProfile } from "../config/voiceConfig";
-import { getDictionary } from "../i18n";
+import { resolveConfig } from "../config/resolveConfig";
 
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
@@ -108,6 +109,10 @@ const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: b
 export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "left", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
+  
+  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
+  const effectiveConfig = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
+  const config = effectiveConfig.locale;
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -120,7 +125,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedDoctor] = useState("Laura - Asesora");
   const [selectedService] = useState("Valoración Capilar Gratuita");
-  const [brandName, setBrandName] = useState("la Clínica Capilar");
+  const [brandName, setBrandName] = useState(effectiveConfig.niche.brandLabel || "la clínica");
   const times = ["09:00", "10:30", "12:00", "16:00", "17:30", "18:45"];
 
   const [activeVoiceId, setActiveVoiceId] = useState("f_elena");
@@ -161,7 +166,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const dispYear = displayedDate.getFullYear();
   const dispMonthIdx = displayedDate.getMonth();
   const daysInMonth = new Date(dispYear, dispMonthIdx + 1, 0).getDate();
-  const monthNameStr = displayedDate.toLocaleString('es-ES', { month: 'long' });
+  const monthNameStr = displayedDate.toLocaleString(lang || 'es-ES', { month: 'long' });
   const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
   const monthShort = monthNameStr.substring(0, 3);
 
@@ -180,7 +185,10 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
     const currentAvailVoices = getVoices(lang);
     const selectedVoice = currentAvailVoices.find(v => v.id === id) || currentAvailVoices[3];
-    const newGreeting = `¡Hola! Bienvenido a ${brandName}. Soy ${name}. Cuéntame con tus palabras, ¿en qué te puedo ayudar o qué es lo que más te preocupa de tu cabello?`;
+    const nicheCfg = effectiveConfig.niche;
+    const topic = nicheCfg.topicPrompt;
+    
+    const newGreeting = `¡Hola! Bienvenido a ${brandName}. Soy ${name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
     setChatHistory([{ role: "assistant", content: newGreeting }]);
 
     setTimeout(() => {
@@ -191,16 +199,19 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   };
 
   const handleConfirmBooking = () => {
-    setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "bot-done-card", text: "¡Confirmado!", sender: "bot", isFinalCard: true }]);
+    const isEng = (lang || '').toLowerCase().startsWith('en');
+    const confirmLabel = isEng ? "Confirmed!" : "¡Confirmado!";
+    setMessages(prev => [...prev.filter(m => !m.isCalendar), { id: "bot-done-card", text: confirmLabel, sender: "bot", isFinalCard: true }]);
     setTimeout(() => {
-       const confirmationText = `Perfecto. Tu cita para el día ${selectedDate} de ${monthNameStr} a las ${selectedTime} ha sido reservada con éxito. Te hemos enviado un correo con todos los detalles. ¡Nos vemos pronto!`;
+       const confirmationText = isEng 
+         ? `Perfect. Your appointment for the ${selectedDate} of ${monthNameStr} at ${selectedTime} has been successfully booked. We've sent you an email with all the details. See you soon!` 
+         : `Perfecto. Tu cita para el día ${selectedDate} de ${monthNameStr} a las ${selectedTime} ha sido reservada con éxito. Te hemos enviado un correo con todos los detalles. ¡Nos vemos pronto!`;
        fetchAudio(confirmationText, "bot-done-audio", () => {});
     }, 500);
   };
   const endRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hasRecognizedRef = useRef(false);
   const preloadedGreetingRef = useRef<string | null>(null);
   const blobTrackerRef = useRef<string[]>([]);
   
@@ -214,7 +225,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   useEffect(() => {
     // Pre-fetch greeting for instantaneous startup
     const preloadGreeting = async () => {
-      let currentBrand = "la Clínica Capilar";
+      let currentBrand = effectiveConfig.niche.brandLabel || "la clínica";
       try {
          const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
          const brandParam = new URLSearchParams(window.location.search).get('brand');
@@ -230,14 +241,17 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         // Ignore
       }
 
-      const greeting = `¡Hola! Bienvenido a ${currentBrand}. Soy ${activeVoice.name}. Cuéntame con tus palabras, ¿en qué te puedo ayudar o qué es lo que más te preocupa de tu cabello?`;
+      const nicheCfg = effectiveConfig.niche;
+      const topic = nicheCfg.topicPrompt;
+      
+      const greeting = `¡Hola! Bienvenido a ${currentBrand}. Soy ${activeVoice.name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
       try {
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName })
+          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'free', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName, locale: lang || 'es' })
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -257,8 +271,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   
 
   // Ensure the explicitly selected niche from the dashboard takes precedence over auto-detection
-  const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-  const config = getDictionary(lang)[activeNiche] || getDictionary(lang).medical;
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _config = config; 
   const posClass = pos === "right" ? "right-4 sm:right-6" : pos === "center" ? "left-1/2 -translate-x-1/2" : "left-4 sm:left-6";
@@ -302,7 +315,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       }
       const silentAudio = new Audio("data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
       silentAudio.play().catch(() => {});
-    } catch (_) {}
+    } catch {}
 
     if (isOpen) {
       stopAudio();
@@ -345,7 +358,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
         const res = await fetch('/api/v1/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, elevenlabs_voice_id: voiceToUse.elevenLabsId, provider: voiceProvider, voiceType: 'free', gender: voiceToUse.gender })
+          body: JSON.stringify({ text, elevenlabs_voice_id: voiceToUse.elevenLabsId, provider: voiceProvider, voiceType: 'free', gender: voiceToUse.gender, locale: lang || 'es' })
         });
         if (!res.ok) throw new Error("Voice API Error");
         const blob = await res.blob();
@@ -397,16 +410,12 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
     if (nextStepId === 0) {
       setTimeout(() => {
-        let topic = "qué es lo que más te preocupa de tu cabello";
-        if (activeNiche === 'dental') topic = "qué tratamiento buscas... o qué te preocupa de tus dientes";
-        else if (activeNiche === 'aesthetic') topic = "qué aspecto de tu rostro o cuerpo te gustaría mejorar hoy";
-        else if (activeNiche === 'beauty') topic = "qué tratamiento o cambio de imagen te apetece hoy";
-        else if (activeNiche === 'legal') topic = "de qué trata el caso legal que necesitas consultar";
-        else if (activeNiche === 'auto') topic = "qué modelo buscas... o en qué te puedo asesorar";
-        else if (activeNiche === 'regenerative') topic = "qué dolencia te gustaría tratar con nosotros";
-        else if (activeNiche === 'hair_salon') topic = "qué cambio de look o estilo tienes en mente";
-        
-        const greeting = `¡Hola! Bienvenido a ${brandName}. Soy ${activeVoice.name}... Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
+        const nicheCfg = effectiveConfig.niche;
+        const topic = nicheCfg.topicPrompt;
+        const isEng = (lang || '').toLowerCase().startsWith('en');
+        const greeting = isEng 
+            ? `Hello! Welcome to ${brandName}. I am ${activeVoice.name}... Tell me in your own words. How can I help you... or ${topic}?`
+            : `¡Hola! Bienvenido a ${brandName}. Soy ${activeVoice.name}... Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
         setChatHistory([{ role: "assistant", content: greeting }]);
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: [], stepId: 1 });
@@ -428,7 +437,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
            body: JSON.stringify({ 
               messages: newHistory,
               niche: activeNiche,
-              brandName
+              brandName,
+              locale: lang || 'es'
            })
          });
          if (!res.ok) throw new Error("Chat Error");
@@ -436,18 +446,20 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
          
          setChatHistory(prev => [...prev, { role: "assistant", content: data.text }]);
          
+         const isEng = (lang || "es").toLowerCase().startsWith("en");
          fetchAudio(data.text, "bot-" + Date.now(), () => {
             if (data.showCalendar) {
-               setMessages(p => [...p, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
+               setMessages(p => [...p, { id: "bot-cal", text: isEng ? "Calendar" : "Calendario", sender: "bot", isCalendar: true }]);
             }
          });
        } catch(err) {
          console.error(err);
          setIsProcessing(false);
          // Fallback
-         const fb = "Disculpa, ha habido un pequeño corte de red. ¿Te gustaría que agendemos una valoración directamente?";
+         const isEng = (lang || "es").toLowerCase().startsWith("en");
+         const fb = isEng ? "Sorry, there was a small network hiccup. Would you like to schedule directly?" : "Disculpa, ha habido un pequeño corte de red. ¿Te gustaría que agendemos una valoración directamente?";
          fetchAudio(fb, "bot-fb", () => {
-             setMessages(p => [...p, { id: "bot-cal", text: "Calendario", sender: "bot", isCalendar: true }]);
+             setMessages(p => [...p, { id: "bot-cal", text: isEng ? "Calendar" : "Calendario", sender: "bot", isCalendar: true }]);
          });
        }
     }
@@ -581,16 +593,34 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                  <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at top left, ${color}, transparent)` }} />
                  <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: readableBrandText }} />
                </div>
-               <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-gray-800 leading-snug text-center">
-                 Da el primer paso<br /> hacia <strong className="font-extrabold" style={{ color: readableBrandText }}>tu cambio</strong>
-               </span>
+               
+               {(() => {
+                 const isEng = (lang || '').toLowerCase().startsWith('en');
+                 return isEng ? (
+                   <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-gray-800 leading-snug text-center">
+                     Take the first step<br /> towards <strong className="font-extrabold" style={{ color: readableBrandText }}>your change</strong>
+                   </span>
+                 ) : (
+                   <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-gray-800 leading-snug text-center">
+                     Da el primer paso<br /> hacia <strong className="font-extrabold" style={{ color: readableBrandText }}>tu cambio</strong>
+                   </span>
+                 );
+               })()}
+               
              </div>
              
              <button 
                className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[14px] sm:text-[15px]"
                style={{ backgroundColor: color, color: contrastText }}
              >
-               <Mic fill={contrastText} size={16} /> Tu Asistente {activeNiche === 'dental' ? 'Dental' : activeNiche === 'aesthetic' ? 'Médico' : 'Capilar'}
+               <Mic fill={contrastText} size={16} /> 
+               {(() => {
+                 const isEng = (lang || '').toLowerCase().startsWith('en');
+                 const typeLabel = (effectiveConfig.niche && effectiveConfig.niche.title.includes('Especialistas')) 
+                     ? (isEng ? 'Medical' : 'Médico') 
+                     : (isEng ? 'Virtual' : 'Virtual');
+                 return isEng ? `Your ${typeLabel} Assistant` : `Tu Asistente ${typeLabel}`;
+               })()}
              </button>
            </motion.div>
         )}

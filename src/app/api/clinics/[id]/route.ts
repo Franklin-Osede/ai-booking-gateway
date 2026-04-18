@@ -28,9 +28,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const { id } = await params;
     const body = await req.json();
-    const { name, industry, location, notes, primaryColor, videoUrl, seoMetrics, techMetrics, widgetPosition } = body;
+    const { name, industry, location, notes, primaryColor, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode } = body;
 
-    const updateData: Record<string, unknown> = { name, industry, location, notes, videoUrl, seoMetrics, techMetrics, widgetPosition };
+    const updateData: Record<string, unknown> = { name, industry, location, notes, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode };
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
     if (primaryColor) {

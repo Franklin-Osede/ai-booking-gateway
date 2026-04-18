@@ -17,13 +17,14 @@ export const metadata: Metadata = {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ site?: string; widget?: string; color?: string; niche?: string; pos?: string; c?: string }>;
+  searchParams: Promise<{ site?: string; widget?: string; color?: string; niche?: string; pos?: string; c?: string; lang?: string }>;
 }) {
   const params = await searchParams;
   let siteUrl = params.site;
   const widgetType = params.widget || "form";
   let niche = params.niche || "default";
   let brandColor = params.color ? `#${params.color}` : "#FFD700";
+  const lang = params.lang || "es-ES";
   const pos = "left";
 
   const clinicId = params.c;
@@ -70,21 +71,21 @@ export default async function Home({
         <div className="h-full w-full relative *:pointer-events-auto">
           {widgetType === "form" && <AIAssistantWidget color={brandColor} niche={niche} pos={pos} />}
           {widgetType === "capilar" && <AIAssistantWidgetProxy color={brandColor} niche={niche === "hair_transplant" ? "Clínica Capilar" : niche} isOpen={true} setIsOpen={() => {}} />}
-          {widgetType === "chat" && <AIAssistantChat color={brandColor} niche={niche} pos={pos} />}
+          {widgetType === "chat" && <AIAssistantChat color={brandColor} niche={niche} pos={pos} lang={lang} />}
           {widgetType === "banner" && <LeadGenBanner color={brandColor} pos={pos} />}
-          {widgetType === "voice" && <AIAssistantVoice color={brandColor} niche={niche} pos="right" />}
-          {widgetType === "voice-free" && <AIAssistantVoiceFree color={brandColor} niche={niche} pos="right" />}
+          {widgetType === "voice" && <AIAssistantVoice color={brandColor} niche={niche} pos="right" lang={lang} />}
+          {widgetType === "voice-free" && <AIAssistantVoiceFree color={brandColor} niche={niche} pos="right" lang={lang} />}
           {widgetType === "dual-voice" && (
             <>
-              <AIAssistantVoiceFree color={brandColor} niche={niche} pos="left" />
-              <AIAssistantVoice color={brandColor} niche={niche} pos="right" />
+              <AIAssistantVoiceFree color={brandColor} niche={niche} pos="left" lang={lang} />
+              <AIAssistantVoice color={brandColor} niche={niche} pos="right" lang={lang} />
             </>
           )}
-          {widgetType === "phone" && <AIAssistantPhone color={brandColor} niche={niche} pos={pos} />}
+          {widgetType === "phone" && <AIAssistantPhone color={brandColor} niche={niche} pos={pos} lang={lang} />}
           {widgetType === "both" && (
             <>
               <AIAssistantWidget color={brandColor} niche={niche} pos="left" />
-              <AIAssistantVoice color={brandColor} niche={niche} pos="right" />
+              <AIAssistantVoice color={brandColor} niche={niche} pos="right" lang={lang} />
             </>
           )}
         </div>

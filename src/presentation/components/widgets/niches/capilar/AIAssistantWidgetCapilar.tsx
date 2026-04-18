@@ -18,7 +18,7 @@ function getContrastColor(hexcolor: string) {
 import { WidgetShell } from "../../base/WidgetShell";
 import { BookingCheckoutStep, SuccessStep } from "../../base/shared-steps";
 
-export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
+export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen, lang }: { color: string, isOpen: boolean, setIsOpen: (b: boolean) => void, lang?: string }) {
 
   const [step, setStep] = useState(1);
   
@@ -46,7 +46,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
 
   const TOTAL_STEPS = 10;
   const contrastText = getContrastColor(color);
-  const sharedProps = { color, contrastText, nextStep: () => setStep(s => s+1), totalSteps: TOTAL_STEPS, prevStep: () => setStep(s => Math.max(1, s-1)) };
+  const sharedProps = { color, contrastText, nextStep: () => setStep(s => s+1), totalSteps: TOTAL_STEPS, prevStep: () => setStep(s => Math.max(1, s-1)), lang };
   
   const blobTrackerRef = useRef<string[]>([]);
 
@@ -138,8 +138,10 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
     // If showOpenFilePicker is not supported, it falls back to default browser behavior
   };
 
+  const isEng = (lang || '').toLowerCase().startsWith('en');
+
   return (
-    <WidgetShell isOpen={isOpen} step={step} totalSteps={TOTAL_STEPS} color={color} onPrev={prevStep} hideBackButtonOnSteps={[10]}>
+    <WidgetShell isOpen={isOpen} step={step} totalSteps={TOTAL_STEPS} color={color} onPrev={prevStep} hideBackButtonOnSteps={[10]} lang={lang}>
               {/* STEP 1: GENDER & AGE */}
               {step === 1 && (
                 <motion.div key="1" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5 sm:space-y-8">
@@ -150,20 +152,20 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                         Paso 1 de {TOTAL_STEPS}
+                         {isEng ? `Step 1 of ${TOTAL_STEPS}` : `Paso 1 de ${TOTAL_STEPS}`}
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Háblanos de ti</h2>
-                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">Lo usaremos para personalizar tu evaluación capilar&nbsp;clínica.</p>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "Tell us about yourself" : "Háblanos de ti"}</h2>
+                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">{isEng ? "We will use this to personalize your clinical hair assessment." : "Lo usaremos para personalizar tu evaluación capilar clínica."}</p>
                       
                       {/* Gender */}
                       <div className="mb-5 sm:mb-8">
-                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">SELECCIONA TU SEXO</label>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{isEng ? "SELECT YOUR SEX" : "SELECCIONA TU SEXO"}</label>
                         <div className="grid grid-cols-2 gap-3 sm:gap-4">
                           {['Hombre', 'Mujer'].map((g) => (
                             <button 
                               key={g} onClick={() => setGender(g)}
-                              className={`relative p-5 sm:p-6 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-4 ${gender === g ? 'bg-gray-50' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                              className={`relative p-5 sm:p-6 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-4 ${gender === g ? 'bg-gray-50' : 'bg-white border-gray-200 hover:border-gray-300'}`}
                               style={gender === g ? { borderColor: color } : {}}
                             >
                               {gender === g && (
@@ -172,7 +174,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                                 </div>
                               )}
                               <UserCircle2 size={48} strokeWidth={1.5} className={gender === g ? 'text-gray-800' : 'text-gray-400'} />
-                              <span className={`font-bold text-sm sm:text-base ${gender === g ? 'text-gray-900' : 'text-gray-500'}`}>{g}</span>
+                              <span className={`font-bold text-sm sm:text-base ${gender === g ? 'text-gray-900' : 'text-gray-500'}`}>{isEng ? (g === "Hombre" ? "Male" : "Female") : g}</span>
                             </button>
                           ))}
                         </div>
@@ -180,17 +182,17 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
 
                       {/* Age */}
                       <div>
-                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">RANGO DE EDAD</label>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{isEng ? "AGE RANGE" : "RANGO DE EDAD"}</label>
                         <div className="grid grid-cols-2 gap-3">
                           {[
-                            { label: 'Menor de 25', sub: 'INICIO TEMPRANO' },
-                            { label: '25–35', sub: 'MÁS COMÚN' },
-                            { label: '36–50', sub: 'PATRÓN MADURO' },
-                            { label: '50+', sub: 'AVANZADO' },
+                            { label: isEng ? 'Under 25' : 'Menor de 25', sub: isEng ? 'EARLY ONSET' : 'INICIO TEMPRANO' },
+                            { label: '25–35', sub: isEng ? 'MOST COMMON' : 'MÁS COMÚN' },
+                            { label: '36–50', sub: isEng ? 'MATURE PATTERN' : 'PATRÓN MADURO' },
+                            { label: '50+', sub: isEng ? 'ADVANCED' : 'AVANZADO' },
                           ].map(a => (
                             <button
                               key={a.label} onClick={() => setAgeGroup(a.label)}
-                              className={`p-4 rounded-xl border-2 text-left transition-all relative ${ageGroup === a.label ? 'bg-gray-50' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                              className={`p-4 rounded-xl border-2 text-left transition-all relative ${ageGroup === a.label ? 'bg-gray-50' : 'bg-white border-gray-200 hover:border-gray-300'}`}
                               style={ageGroup === a.label ? { borderColor: color } : {}}
                             >
                               {ageGroup === a.label && (
@@ -212,7 +214,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                         className={`w-full mt-8 py-4 rounded-xl font-bold transition-opacity ${gender && ageGroup ? 'text-white hover:opacity-90 active:scale-95' : 'text-gray-400'}`}
                         style={{ backgroundColor: (gender && ageGroup) ? color : '#E5E7EB', color: (gender && ageGroup) ? contrastText : '#9CA3AF', cursor: (gender && ageGroup) ? 'pointer' : 'not-allowed' }}
                       >
-                        Continuar
+                        {isEng ? "Continue" : "Continuar"}
                       </button>
                    </div>
                 </motion.div>
@@ -225,21 +227,21 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 2 de {TOTAL_STEPS}
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> {isEng ? `Step 2 of ${TOTAL_STEPS}` : `Paso 2 de ${TOTAL_STEPS}`}
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Historial Genético</h2>
-                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">¿Cómo ha sido la evolución de la alopecia en tu familia directa?</p>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "Genetic History" : "Historial Genético"}</h2>
+                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">{isEng ? "How has alopecia evolved in your direct family?" : "¿Cómo ha sido la evolución de la alopecia en tu familia directa?"}</p>
                       
                       <div className="space-y-3">
                         {[
-                          { id: 'light', title: 'Ligera', desc: 'Pérdida muy leve o indetectable.', img: gender === 'Mujer' ? '/images/triage/female/ligera.webp' : '/images/triage/ligera.webp' },
-                          { id: 'mod', title: 'Moderada', desc: 'Despoblación visible en entradas o coronilla.', img: gender === 'Mujer' ? '/images/triage/female/moderada.webp' : '/images/triage/moderada.webp' },
-                          { id: 'severe', title: 'Calvicie Severa', desc: 'Pérdida de densidad notable en la mayor parte del cráneo.', img: gender === 'Mujer' ? '/images/triage/female/severa.webp' : '/images/triage/severa.webp' }
+                          { id: 'light', title: isEng ? 'Mild' : 'Ligera', desc: isEng ? 'Very mild or barely noticeable loss.' : 'Pérdida muy leve o indetectable.', img: gender === 'Mujer' ? '/images/triage/female/ligera.webp' : '/images/triage/ligera.webp' },
+                          { id: 'mod', title: isEng ? 'Moderate' : 'Moderada', desc: isEng ? 'Visible thinning at temples or crown.' : 'Despoblación visible en entradas o coronilla.', img: gender === 'Mujer' ? '/images/triage/female/moderada.webp' : '/images/triage/moderada.webp' },
+                          { id: 'severe', title: isEng ? 'Severe Baldness' : 'Calvicie Severa', desc: isEng ? 'Notable density loss in most of the scalp.' : 'Pérdida de densidad notable en la mayor parte del cráneo.', img: gender === 'Mujer' ? '/images/triage/female/severa.webp' : '/images/triage/severa.webp' }
                         ].map(g => (
                           <button
                             key={g.id} onClick={() => setGenetics(g.id)}
-                            className={`w-full p-4 sm:p-5 rounded-2xl border-2 text-left flex items-center gap-4 transition-all group ${genetics === g.id ? 'bg-gray-50' : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm hover:-translate-y-0.5'}`}
+                            className={`w-full p-4 sm:p-5 rounded-2xl border-2 text-left flex items-center gap-4 transition-all group ${genetics === g.id ? 'bg-gray-50' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm hover:-translate-y-0.5'}`}
                             style={genetics === g.id ? { borderColor: color } : {}}
                           >
                             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 shrink-0 relative">
@@ -266,7 +268,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                         className={`w-full mt-8 py-4 rounded-xl font-bold transition-opacity ${genetics ? 'text-white hover:opacity-90 active:scale-95' : 'text-gray-400'}`}
                         style={{ backgroundColor: genetics ? color : '#E5E7EB', color: genetics ? contrastText : '#9CA3AF', cursor: genetics ? 'pointer' : 'not-allowed' }}
                       >
-                        Continuar
+                        {isEng ? "Continue" : "Continuar"}
                       </button>
                    </div>
                 </motion.div>
@@ -279,22 +281,22 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 3 de {TOTAL_STEPS}
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> {isEng ? `Step 3 of ${TOTAL_STEPS}` : `Paso 3 de ${TOTAL_STEPS}`}
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Identifica tu Patrón</h2>
-                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">¿Qué situación gráfica se parece más a tu alopecia actual?</p>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "Identify Your Pattern" : "Identifica tu Patrón"}</h2>
+                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">{isEng ? "Which graphic situation is closest to your current alopecia?" : "¿Qué situación gráfica se parece más a tu alopecia actual?"}</p>
                       
                       <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         {[
-                          { id: 'entradas', title: 'Entradas', desc: 'Retraso línea frontal', img: gender === 'Mujer' ? '/images/triage/female/step3_entradas.webp' : '/images/triage/step3_entradas.webp' },
-                          { id: 'coronilla', title: 'Coronilla', desc: 'Despoblación superior', img: gender === 'Mujer' ? '/images/triage/female/step3_coronilla.webp' : '/images/triage/step3_coronilla.webp' },
-                          { id: 'difusa', title: 'Pérdida Difusa', desc: 'Falta general de densidad', img: gender === 'Mujer' ? '/images/triage/female/step3_difusa.webp' : '/images/triage/step3_difusa.webp' },
-                          { id: 'avanzada', title: 'Avanzada', desc: 'Norwood V-VII', img: gender === 'Mujer' ? '/images/triage/female/step3_avanzada.webp' : '/images/triage/step3_avanzada.webp' }
+                          { id: 'entradas', title: isEng ? 'Temples' : 'Entradas', desc: isEng ? 'Frontal line recession' : 'Retraso línea frontal', img: gender === 'Mujer' ? '/images/triage/female/step3_entradas.webp' : '/images/triage/step3_entradas.webp' },
+                          { id: 'coronilla', title: isEng ? 'Crown' : 'Coronilla', desc: isEng ? 'Upper thinning' : 'Despoblación superior', img: gender === 'Mujer' ? '/images/triage/female/step3_coronilla.webp' : '/images/triage/step3_coronilla.webp' },
+                          { id: 'difusa', title: isEng ? 'Diffuse Loss' : 'Pérdida Difusa', desc: isEng ? 'General density loss' : 'Falta general de densidad', img: gender === 'Mujer' ? '/images/triage/female/step3_difusa.webp' : '/images/triage/step3_difusa.webp' },
+                          { id: 'avanzada', title: isEng ? 'Advanced' : 'Avanzada', desc: 'Norwood V-VII', img: gender === 'Mujer' ? '/images/triage/female/step3_avanzada.webp' : '/images/triage/step3_avanzada.webp' }
                         ].map(p => (
                           <button
                             key={p.id} onClick={() => setNorwoodPattern(p.title)}
-                            className={`p-3 sm:p-4 rounded-2xl border-2 text-center transition-all group ${norwoodPattern === p.title ? 'bg-gray-50 border-gray-400 shadow-inner' : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm'}`}
+                            className={`p-3 sm:p-4 rounded-2xl border-2 text-center transition-all group ${norwoodPattern === p.title ? 'bg-gray-50 border-gray-400 shadow-inner' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'}`}
                             style={norwoodPattern === p.title ? { borderColor: color } : {}}
                           >
                             <div className="w-full h-24 sm:h-28 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 mb-3 relative">
@@ -319,7 +321,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                         className={`w-full mt-8 py-4 rounded-xl font-bold transition-opacity ${norwoodPattern ? 'text-white hover:opacity-90 active:scale-95' : 'text-gray-400'}`}
                         style={{ backgroundColor: norwoodPattern ? color : '#E5E7EB', color: norwoodPattern ? contrastText : '#9CA3AF', cursor: norwoodPattern ? 'pointer' : 'not-allowed' }}
                       >
-                        Continuar
+                        {isEng ? "Continue" : "Continuar"}
                       </button>
                    </div>
                 </motion.div>
@@ -332,22 +334,22 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 4 de {TOTAL_STEPS}
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> {isEng ? `Step 4 of ${TOTAL_STEPS}` : `Paso 4 de ${TOTAL_STEPS}`}
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Historial de Medicación</h2>
-                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">¿Estás tomando inhibidores para estabilizar la caída del cabello?</p>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "Medication History" : "Historial de Medicación"}</h2>
+                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">{isEng ? "Are you taking inhibitors to stabilize hair loss?" : "¿Estás tomando inhibidores para estabilizar la caída del cabello?"}</p>
                       
                       <div className="space-y-3">
                         {[
-                          { id: 'fin', title: 'Finasteride / Dudasteride', desc: 'Bloqueador oral DHT — con receta', tag: 'Rx' },
-                          { id: 'minox', title: 'Minoxidil', desc: 'Vasodilatador tópico u oral', tag: 'OTC' },
-                          { id: 'both', title: 'Ambos', desc: 'Protocolo combinado activo', tag: '' },
-                          { id: 'none', title: 'Ninguno', desc: 'No tomo ninguna medicación', tag: '' }
+                          { id: 'fin', title: 'Finasteride / Dudasteride', desc: isEng ? 'Oral DHT blocker — prescription' : 'Bloqueador oral DHT — con receta', tag: 'Rx' },
+                          { id: 'minox', title: 'Minoxidil', desc: isEng ? 'Topical or oral vasodilator' : 'Vasodilatador tópico u oral', tag: 'OTC' },
+                          { id: 'both', title: isEng ? 'Both' : 'Ambos', desc: isEng ? 'Active combined protocol' : 'Protocolo combinado activo', tag: '' },
+                          { id: 'none', title: isEng ? 'None' : 'Ninguno', desc: isEng ? 'I am not taking medication' : 'No tomo ninguna medicación', tag: '' }
                         ].map(m => (
                           <button
                             key={m.id} onClick={() => setMedication(m.title)}
-                            className={`w-full p-5 sm:p-6 rounded-2xl border-2 text-left flex items-center gap-5 transition-all group ${medication === m.title ? 'bg-gray-50' : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm hover:-translate-y-0.5'}`}
+                            className={`w-full p-5 sm:p-6 rounded-2xl border-2 text-left flex items-center gap-5 transition-all group ${medication === m.title ? 'bg-gray-50' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm hover:-translate-y-0.5'}`}
                             style={medication === m.title ? { borderColor: color } : {}}
                           >
                             <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0" style={medication === m.title ? { borderColor: color } : {}}>
@@ -373,7 +375,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                         className={`w-full mt-8 py-4 rounded-xl font-bold transition-opacity ${medication ? 'text-white hover:opacity-90 active:scale-95' : 'text-gray-400'}`}
                         style={{ backgroundColor: medication ? color : '#E5E7EB', color: medication ? contrastText : '#9CA3AF', cursor: medication ? 'pointer' : 'not-allowed' }}
                       >
-                        Continuar
+                        {isEng ? "Continue" : "Continuar"}
                       </button>
                    </div>
                 </motion.div>
@@ -386,21 +388,21 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 5 de {TOTAL_STEPS}
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> {isEng ? `Step 5 of ${TOTAL_STEPS}` : `Paso 5 de ${TOTAL_STEPS}`}
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Zona Donante & Salud</h2>
-                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">¿Cómo es la densidad de pelo en tu nuca y laterales?</p>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "Donor Area & Health" : "Zona Donante & Salud"}</h2>
+                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">{isEng ? "How dense is the hair in your nape and sides?" : "¿Cómo es la densidad de pelo en tu nuca y laterales?"}</p>
                       
                       <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-8">
                         {[
-                          { id: 'thick', title: 'Grosa', desc: 'Mucha densidad', dots: 3 },
-                          { id: 'norm', title: 'Normal', desc: 'Promedio', dots: 2 },
-                          { id: 'thin', title: 'Fina', desc: 'Baja densidad', dots: 1 }
+                          { id: 'thick', title: isEng ? 'Thick' : 'Grosa', desc: isEng ? 'High density' : 'Mucha densidad', dots: 3 },
+                          { id: 'norm', title: isEng ? 'Normal' : 'Normal', desc: isEng ? 'Average' : 'Promedio', dots: 2 },
+                          { id: 'thin', title: isEng ? 'Thin' : 'Fina', desc: isEng ? 'Low density' : 'Baja densidad', dots: 1 }
                         ].map(d => (
                           <button
                             key={d.id} onClick={() => setDonorArea(d.title)}
-                            className={`p-4 sm:p-5 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center gap-3 ${donorArea === d.title ? 'bg-gray-50' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                            className={`p-4 sm:p-5 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center gap-3 ${donorArea === d.title ? 'bg-gray-50' : 'bg-white border-gray-200 hover:border-gray-300'}`}
                             style={donorArea === d.title ? { borderColor: color } : {}}
                           >
                             <div className="flex items-center gap-1.5 h-6">
@@ -416,13 +418,13 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                         ))}
                       </div>
 
-                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">HISTORIAL QUIRÚRGICO</label>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{isEng ? "SURGICAL HISTORY" : "HISTORIAL QUIRÚRGICO"}</label>
                        <div className="space-y-3">
                          {/* Togles */}
                          {[
-                           { title: '¿Trasplantes Capilares Previos?', desc: 'Has tenido procedimientos en el pasado', val: medFlagHT, setter: setMedFlagHT },
-                           { title: gender === 'Mujer' ? '¿Fumadora (>10 al día)?' : '¿Fumador (>10 al día)?', desc: 'Afecta salvajemente a la cicatrización', val: medFlagSmoke, setter: setMedFlagSmoke },
-                           { title: '¿Enfermedades Sistémicas?', desc: 'Diabetes, Hipertensión o corazón', val: medFlagDisease, setter: setMedFlagDisease },
+                           { title: isEng ? 'Previous Hair Transplants?' : '¿Trasplantes Capilares Previos?', desc: isEng ? 'You had prior procedures' : 'Has tenido procedimientos en el pasado', val: medFlagHT, setter: setMedFlagHT },
+                           { title: isEng ? (gender === 'Mujer' ? 'Smoker (>10/day)?' : 'Smoker (>10/day)?') : (gender === 'Mujer' ? '¿Fumadora (>10 al día)?' : '¿Fumador (>10 al día)?'), desc: isEng ? 'Strongly affects healing' : 'Afecta salvajemente a la cicatrización', val: medFlagSmoke, setter: setMedFlagSmoke },
+                           { title: isEng ? 'Systemic Diseases?' : '¿Enfermedades Sistémicas?', desc: isEng ? 'Diabetes, hypertension or heart issues' : 'Diabetes, Hipertensión o corazón', val: medFlagDisease, setter: setMedFlagDisease },
                          ].map(flag => (
                            <div key={flag.title} className="flex items-center justify-between p-4 sm:p-5 rounded-2xl border border-gray-100 bg-gray-50/50">
                               <div>
@@ -448,7 +450,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                                className="overflow-hidden"
                              >
                                <textarea 
-                                 placeholder="Por favor, nombra brevemente tu afección..."
+                                 placeholder={isEng ? "Please briefly describe your condition..." : "Por favor, nombra brevemente tu afección..."}
                                  value={systemicDetails}
                                  onChange={(e) => setSystemicDetails(e.target.value)}
                                  className="w-full p-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 text-sm sm:text-base resize-none bg-white shadow-inner text-gray-800"
@@ -460,11 +462,11 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       </div>
 
                       <button 
-                        onClick={() => donorArea ? nextStep() : alert("Por favor selecciona tu densidad de zona donante")} 
+                        onClick={() => donorArea ? nextStep() : alert(isEng ? "Please select your donor area density" : "Por favor selecciona tu densidad de zona donante")} 
                         className="w-full mt-6 py-4 rounded-xl font-bold text-white transition-opacity hover:opacity-90 active:scale-95" 
                         style={{ backgroundColor: donorArea ? color : '#E5E7EB', color: donorArea ? contrastText : '#9CA3AF', cursor: donorArea ? 'pointer' : 'not-allowed' }}
                       >
-                        Continuar
+                        {isEng ? "Continue" : "Continuar"}
                       </button>
                    </div>
                 </motion.div>
@@ -477,11 +479,11 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-3xl opacity-50" style={{ borderColor: color }} />
                       
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-5">
-                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> Paso 6 de {TOTAL_STEPS}
+                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} /> {isEng ? `Step 6 of ${TOTAL_STEPS}` : `Paso 6 de ${TOTAL_STEPS}`}
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Sube tus fotos</h2>
-                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">Nuestra IA necesita 3 fotos (Frontal, Coronilla y Nuca) para darte un presupuesto exacto en milisegundos.</p>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">{isEng ? "Upload your photos" : "Sube tus fotos"}</h2>
+                      <p className="text-gray-500 font-medium text-sm sm:text-base mb-5 sm:mb-8">{isEng ? "Our AI needs 3 photos (Frontal, Crown and Nape) to generate an accurate estimate in milliseconds." : "Nuestra IA necesita 3 fotos (Frontal, Coronilla y Nuca) para darte un presupuesto exacto en milisegundos."}</p>
                       
                       {uploadedPhotos.length === 0 ? (
                         <div className="border-2 border-dashed border-gray-200 rounded-3xl p-8 sm:p-10 mb-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition-colors relative group">
@@ -490,8 +492,8 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                           <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                             <Upload size={28} style={{ color }} />
                           </div>
-                          <h4 className="font-extrabold text-lg text-gray-900 mb-1">Arrastra tus fotos aquí</h4>
-                          <p className="text-sm font-medium text-gray-500">o toca para abrir galería (hasta 3 fotos)</p>
+                          <h4 className="font-extrabold text-lg text-gray-900 mb-1">{isEng ? "Drop your photos here" : "Arrastra tus fotos aquí"}</h4>
+                          <p className="text-sm font-medium text-gray-500">{isEng ? "or tap to open gallery (up to 3 photos)" : "o toca para abrir galería (hasta 3 fotos)"}</p>
                         </div>
                       ) : (
                         <div className="mb-6 flex gap-3 h-[100px]">
@@ -505,7 +507,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                             <label className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors shrink-0">
                               <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileUpload} onClick={handleAdvancedUploadClick} />
                               <Upload size={24} className="text-gray-400 mb-1" />
-                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Añadir</span>
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{isEng ? "Add" : "Añadir"}</span>
                             </label>
                           )}
                         </div>
@@ -516,22 +518,22 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                           <ShieldCheck size={20} className="text-green-600" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-gray-900">100% Confidencial y Seguro</h4>
-                          <p className="text-[11px] sm:text-xs text-gray-500 mt-1">Cumplimos estrictamente la RGPD Europea. Tus fotos no se almacenan ni se comparten nunca.</p>
+                          <h4 className="font-bold text-sm text-gray-900">{isEng ? "100% Confidential and Secure" : "100% Confidencial y Seguro"}</h4>
+                          <p className="text-[11px] sm:text-xs text-gray-500 mt-1">{isEng ? "We strictly follow GDPR. Your photos are never stored or shared." : "Cumplimos estrictamente la RGPD Europea. Tus fotos no se almacenan ni se comparten nunca."}</p>
                         </div>
                       </div>
 
                       {uploadedPhotos.length > 0 ? (
                         <button onClick={() => startAnalysis()} className="w-full mt-2 py-4 rounded-xl font-extrabold text-white transition-opacity hover:opacity-90 active:scale-95 shadow-md flex items-center justify-center gap-2" style={{ backgroundColor: color, color: contrastText }}>
-                          <Check size={18} strokeWidth={3} /> Imágenes listas. Continuar
+                          <Check size={18} strokeWidth={3} /> {isEng ? "Images ready. Continue" : "Imágenes listas. Continuar"}
                         </button>
                       ) : (
                         <div className="flex flex-col gap-2">
                           <button disabled className="w-full py-4 rounded-xl font-bold bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 border-dashed">
-                            Esperando fotos...
+                            {isEng ? "Waiting for photos..." : "Esperando fotos..."}
                           </button>
                           <button onClick={() => setUploadedPhotos([gender === 'Mujer' ? '/images/triage/female/step3_difusa.webp' : '/images/triage/step3_difusa.webp'])} className="w-full py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors">
-                            Cargar fotos demo
+                            {isEng ? "Load demo photos" : "Cargar fotos demo"}
                           </button>
                         </div>
                       )}
@@ -555,7 +557,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                    </div>
 
                    <div className="flex items-end justify-center gap-4 w-full mb-3">
-                     <p className="text-[10px] font-black tracking-widest uppercase text-gray-500">ANALIZANDO TU PERFIL CAPILAR...</p>
+                     <p className="text-[10px] font-black tracking-widest uppercase text-gray-500">{isEng ? "ANALYZING YOUR HAIR PROFILE..." : "ANALIZANDO TU PERFIL CAPILAR..."}</p>
                      <p className="font-extrabold text-3xl tabular-nums leading-none tracking-tighter text-gray-900">{analysisProgress}%</p>
                    </div>
                    
@@ -566,7 +568,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                    <div className="inline-block px-5 py-2.5 rounded-full bg-gray-50 border border-gray-200">
                      <p className="text-xs font-bold text-gray-600 flex items-center gap-2">
                        <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-gray-400" />
-                       {analysisProgress < 30 ? 'Mapeando superficie receptora...' : analysisProgress < 70 ? 'Calculando ratio de densidad donante...' : 'Generando presupuesto folicular FUE...'}
+                       {analysisProgress < 30 ? (isEng ? 'Mapping recipient area...' : 'Mapeando superficie receptora...') : analysisProgress < 70 ? (isEng ? 'Calculating donor density ratio...' : 'Calculando ratio de densidad donante...') : (isEng ? 'Generating FUE follicular estimate...' : 'Generando presupuesto folicular FUE...')}
                      </p>
                    </div>
                 </motion.div>
@@ -583,38 +585,38 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                           <Check size={24} className="text-green-600" />
                        </div>
                        <div>
-                         <h3 className="text-xl font-extrabold text-gray-900">Análisis Completado</h3>
+                         <h3 className="text-xl font-extrabold text-gray-900">{isEng ? "Analysis Completed" : "Análisis Completado"}</h3>
                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
-                           Confianza de la IA: <span className="text-green-600">96.4%</span>
+                           {isEng ? "AI confidence:" : "Confianza de la IA:"} <span className="text-green-600">96.4%</span>
                          </p>
                        </div>
                      </div>
 
                      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
                        <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 border border-gray-100">
-                         <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Escala Norwood</p>
+                         <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{isEng ? "Norwood Scale" : "Escala Norwood"}</p>
                          <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tighter">III</p>
-                         <p className="text-[10px] sm:text-[11px] font-bold mt-1 text-gray-600">Recesión Moderada</p>
+                         <p className="text-[10px] sm:text-[11px] font-bold mt-1 text-gray-600">{isEng ? "Moderate Recession" : "Recesión Moderada"}</p>
                        </div>
                        <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 border border-gray-100">
                          <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Grafts Est. (UFs)</p>
                          <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tighter">2.5<span className="text-lg">k</span></p>
-                         <p className="text-[10px] sm:text-[11px] font-bold mt-1 text-gray-500">A 3,200 Folículos</p>
+                         <p className="text-[10px] sm:text-[11px] font-bold mt-1 text-gray-500">{isEng ? "Up to 3,200 follicles" : "A 3,200 Folículos"}</p>
                        </div>
                      </div>
                      
                      <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 border border-gray-100">
-                        <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Técnica Recomendada</p>
+                        <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{isEng ? "Recommended Technique" : "Técnica Recomendada"}</p>
                         <p className="text-sm sm:text-base font-extrabold text-gray-900">FUE — Follicular Unit Extraction</p>
                         <div className="inline-block mt-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-gray-200 text-gray-700">
-                          Mejor Técnica Opciones
+                          {isEng ? "Best Option" : "Mejor Técnica Opciones"}
                         </div>
                      </div>
                   </div>
 
                   {/* Doctor Match Card */}
                   <div>
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">TU CIRUJANO O CIRUJANA RECOMENDADO</h4>
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{isEng ? "YOUR RECOMMENDED SURGEON" : "TU CIRUJANO O CIRUJANA RECOMENDADO"}</h4>
                     <div className="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm">
                        <div className="flex items-start gap-4 mb-4">
                          <div className="relative">
@@ -627,9 +629,9 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                          <div className="flex-1 pt-1">
                            <div className="flex items-center flex-wrap gap-2 mb-1">
                              <h4 className="font-extrabold text-gray-900 text-lg">{doctor}</h4>
-                             <span className="px-1.5 py-0.5 rounded text-[8px] font-black text-white uppercase bg-green-600 tracking-widest">Verificado</span>
+                             <span className="px-1.5 py-0.5 rounded text-[8px] font-black text-white uppercase bg-green-600 tracking-widest">{isEng ? "Verified" : "Verificado"}</span>
                            </div>
-                           <p className="text-[11px] font-medium text-gray-500 leading-tight">12+ años especializándose en diseños FUE ultra-densos. Especialista en primeras líneas.</p>
+                           <p className="text-[11px] font-medium text-gray-500 leading-tight">{isEng ? "12+ years specializing in ultra-dense FUE designs. Frontline specialist." : "12+ años especializándose en diseños FUE ultra-densos. Especialista en primeras líneas."}</p>
                          </div>
                        </div>
                        
@@ -640,12 +642,12 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
                          <span className="px-3 py-1 rounded-full bg-gray-100 shrink-0">BBAA</span>
                        </div>
 
-                       <button 
+                       <button
                          onClick={nextStep}
                          className="w-full py-4 rounded-xl flex items-center justify-center gap-2 font-extrabold text-white transition-transform active:scale-95 shadow-xl hover:shadow-2xl hover:opacity-90 leading-none text-sm sm:text-base"
                          style={{ backgroundColor: color, color: contrastText }}
                        >
-                         Reservar Valoración Clínica <ChevronRight size={18} strokeWidth={3} />
+                         {isEng ? "Book Clinical Assessment" : "Reservar Valoración Clínica"} <ChevronRight size={18} strokeWidth={3} />
                        </button>
                     </div>
                   </div>
@@ -656,7 +658,7 @@ export function AIAssistantWidgetCapilar({ color, isOpen, setIsOpen }: { color: 
               {step === 9 && <BookingCheckoutStep {...sharedProps} />}
 
               {/* STEP 10: SUCCESS CONFIRMATION */}
-              {step === 10 && <SuccessStep doctorName={doctor} onClose={() => setIsOpen(false)} />}
+              {step === 10 && <SuccessStep doctorName={doctor} onClose={() => setIsOpen(false)} lang={lang} />}
 
             </WidgetShell>
   );
