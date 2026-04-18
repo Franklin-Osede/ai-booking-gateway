@@ -17,6 +17,19 @@ type Clinic = {
   seoMetrics?: Record<string, unknown>;
 };
 
+const normalizeIndustry = (industry: string | undefined | null): string => {
+  if (!industry) return "Otros";
+  const lower = industry.toLowerCase();
+  
+  if (lower.includes("capilar") || lower.includes("hair") || lower.includes("peluqueria")) return "Clínica Capilar";
+  if (lower.includes("estética") || lower.includes("estetica")) return "Medicina Estética";
+  if (lower.includes("regenerativa") || lower.includes("stem") || lower.includes("umbilical") || lower.includes("anti-aging") || lower.includes("longevidad") || lower.includes("preventiva")) return "Medicina Regenerativa & Anti-Aging";
+  if (lower.includes("dental") || lower.includes("dentista")) return "Clínica Dental";
+  if (lower.includes("china") || lower.includes("acupuntura")) return "Medicina Alternativa";
+  
+  return "Clínica Médica General";
+};
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -118,7 +131,7 @@ export default function AdminDashboard() {
       .catch(() => setLoading(false));
   }, []);
 
-  const uniqueIndustries = Array.from(new Set(clinics.map(c => c.industry))).filter(Boolean);
+  const uniqueIndustries = Array.from(new Set(clinics.map(c => normalizeIndustry(c.industry)))).sort();
   const uniqueLocations = Array.from(new Set(clinics.map(c => c.location))).filter(Boolean) as string[];
 
   const filteredClinics = clinics.filter(clinic => {
@@ -127,7 +140,7 @@ export default function AdminDashboard() {
     const matchesSearch = clinic.name.toLowerCase().includes(s) || 
                           clinic.industry.toLowerCase().includes(s) ||
                           urlMatch;
-    const matchesIndustry = selectedIndustry === "All" || clinic.industry === selectedIndustry;
+    const matchesIndustry = selectedIndustry === "All" || normalizeIndustry(clinic.industry) === selectedIndustry;
     const matchesLocation = selectedLocation === "All" || (selectedLocation === "SinEspecificar" && !clinic.location) || clinic.location === selectedLocation;
     const matchesCountry = selectedCountry === "All" || (clinic.countryCode || 'ES') === selectedCountry;
     return matchesSearch && matchesIndustry && matchesLocation && matchesCountry;
@@ -216,9 +229,9 @@ export default function AdminDashboard() {
                <select 
                   value={selectedIndustry}
                   onChange={(e) => setSelectedIndustry(e.target.value)}
-                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap pr-8"
                >
-                  <option value="All">Todos los nichos / Categorías</option>
+                  <option value="All">Todos los nichos</option>
                   {uniqueIndustries.map(ind => (
                     <option key={ind} value={ind}>{ind}</option>
                   ))}
@@ -229,7 +242,7 @@ export default function AdminDashboard() {
                <select 
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
-                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap pr-8"
                >
                   <option value="All">Todas las Ubicaciones</option>
                   <option value="SinEspecificar">📍 Sin especificar</option>
@@ -243,7 +256,7 @@ export default function AdminDashboard() {
                <select 
                   value={selectedCountry}
                   onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-neutral-500/50 text-foreground text-sm font-bold cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap pr-8"
                >
                   <option value="All">🌍 Todos los Países</option>
                   <option value="ES">🇪🇸 España</option>
@@ -255,7 +268,7 @@ export default function AdminDashboard() {
                <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-yellow-500/50 text-yellow-500 text-sm font-bold cursor-pointer"
+                  className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-yellow-500/50 text-yellow-500 text-sm font-bold cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap pr-8"
                >
                   <option value="updated">⏱️ Recién Editadas</option>
                   <option value="created">🆕 Añadidas Recientemente</option>
@@ -304,7 +317,10 @@ export default function AdminDashboard() {
                                   </span>
                                 )}
                             </span>
-                            <span className="text-xs text-muted-foreground font-medium">{clinic.industry}</span>
+                            <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                              <span>{normalizeIndustry(clinic.industry)}</span>
+                              <span className="opacity-40 text-[10px]">({clinic.industry})</span>
+                            </div>
                          </div>
                        </td>
                        <td className="py-4 px-4">
