@@ -98,6 +98,7 @@ const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: b
 };
 
 export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "right", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
+  const isEng = (lang || '').toLowerCase().startsWith('en');
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -545,7 +546,10 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
              let isFemale = /^(Dra\.|Doctora|María|Ana|Laura|Sof[ií]a|Carmen|Luc[ií]a|Elena|Paula|Claudia|Blanca|Sara|Marta)/i.test(finalName);
              const nicheConfig = effectiveConfig.niche;
              const dynamicSpecialties = nicheConfig.fallbackSpecialties;
-             let assignedSpecialty = dynamicSpecialties[idx % dynamicSpecialties.length];
+             const engSpecialties = ["FUE Hair Surgeon", "DHI Specialist", "Medical Director", "Advanced Trichologist", "Lead Surgeon"];
+             let assignedSpecialty = isEng ? engSpecialties[idx % engSpecialties.length] : dynamicSpecialties[idx % dynamicSpecialties.length];
+             const engBio = "Lead specialist with extensive clinical experience, delivering 100% natural results.";
+             const finalBio = isEng ? engBio : nicheConfig.fallbackBio;
 
              // If the scraped "name" is actually a generic medical title...
              if (/^(Médico|Cirujan[oa]|Especialista|Tricólog[oa]|Director[a]?|Docente|Experto|Asesor)/i.test(finalName) && finalName.split(' ').length <= 4) {
@@ -575,9 +579,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
              }
 
              if (typeof d === 'string') {
-               return { name: finalName, specialty: assignedSpecialty, image: finalImg, bio: nicheConfig.fallbackBio };
+               return { name: finalName, specialty: assignedSpecialty, image: finalImg, bio: finalBio };
              } else {
-               return { ...d, name: finalName, specialty: d.specialty || assignedSpecialty, image: finalImg, bio: d.bio || nicheConfig.fallbackBio };
+               return { ...d, name: finalName, specialty: d.specialty || assignedSpecialty, image: finalImg, bio: d.bio || finalBio };
              }
            });
            
@@ -587,7 +591,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            return;
         }
 
-        let docNameExtracted = "equipo médico";
+        let docNameExtracted = isEng ? "medical team" : "equipo médico";
         if (userSelection && (userSelection.startsWith("Reservar") || userSelection.startsWith("Book"))) {
            docNameExtracted = userSelection.replace("Reservar con ", "");
            setSelectedDoctor(docNameExtracted);
@@ -688,7 +692,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                  <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: readableBrandText }} />
                </div>
                <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-gray-800 leading-snug text-center">
-                 Da el primer paso<br /> hacia <strong className="font-extrabold" style={{ color: readableBrandText }}>tu cambio</strong>
+                 {isEng ? "Take the first step" : "Da el primer paso"}<br /> {isEng ? "towards" : "hacia"} <strong className="font-extrabold" style={{ color: readableBrandText }}>{isEng ? "your change" : "tu cambio"}</strong>
                </span>
              </div>
              
@@ -696,7 +700,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[14px] sm:text-[15px]"
                style={{ backgroundColor: color, color: contrastText }}
              >
-               <Mic fill={contrastText} size={16} /> Tu Asistente {(effectiveConfig.niche && effectiveConfig.niche.title.includes('Especialistas')) ? 'Médico' : 'Virtual'}
+               <Mic fill={contrastText} size={16} /> {isEng ? "Your Assistant" : "Tu Asistente"} {(effectiveConfig.niche && effectiveConfig.niche.title.includes('Especialistas')) ? (isEng ? 'Medical' : 'Médico') : (isEng ? 'Virtual' : 'Virtual')}
              </button>
            </motion.div>
         )}
@@ -728,17 +732,17 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                              {isProcessing ? (
                                 <>
                                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                  Escribiendo...
+                                  {isEng ? "Thinking..." : "Pensando..."}
                                 </>
                              ) : isBotPlaying ? (
                                 <>
                                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                  Hablando...
+                                  {isEng ? "Speaking..." : "Hablando..."}
                                 </>
                              ) : (
                                 <>
                                   <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                  Cambiar Asistente <ChevronDown size={10} className="text-gray-400 group-hover:text-gray-600" />
+                                  {isEng ? "Change Assistant" : "Cambiar Asistente"} <ChevronDown size={10} className="text-gray-400 group-hover:text-gray-600" />
                                 </>
                              )}
                            </span>
@@ -934,12 +938,12 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                 onClick={() => toggleTranscript(msg.id)}
                                 className="text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1.5 transition-colors w-full"
                               >
-                                <Menu size={12}/> {msg.showTranscript ? "Ocultar transcripción" : "Ver transcripción"}
+                                <Menu size={12}/> {msg.showTranscript ? (isEng ? "Hide transcript" : "Ocultar transcripción") : (isEng ? "View transcript" : "Ver transcripción")}
                               </button>
 
                               {msg.isDoctorList && msg.doctorListData && (
                                  <div className="flex flex-col gap-2.5 w-full mt-3.5 pt-3 border-t border-gray-100/80">
-                                   <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1">Equipo Médico</span>
+                                   <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1">{isEng ? "Medical Team" : "Equipo Médico"}</span>
                                    {msg.doctorListData.map((doc, idx) => {
                                      const isExpanded = expandedDocIdx === idx;
                                      return (
@@ -958,7 +962,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                              </div>
                                              <div className="flex flex-col">
                                                <span className="text-[14px] font-bold text-gray-900 tracking-tight leading-none mb-1">{doc.name}</span>
-                                               <span className="text-[10px] font-semibold tracking-wide uppercase text-gray-500">{doc.specialty || "ESPECIALISTA TITULAR"}</span>
+                                               <span className="text-[10px] font-semibold tracking-wide uppercase text-gray-500">{doc.specialty || (isEng ? "LEAD SPECIALIST" : "ESPECIALISTA TITULAR")}</span>
                                              </div>
                                            </div>
                                            
@@ -983,7 +987,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                                   style={{ backgroundColor: color + "15", color: getDarkerColor(color) }}
                                                   onClick={(e) => { e.stopPropagation(); handleUserSelect(`Reservar con ${doc.name}`, 25); }}
                                                 >
-                                                  Reservar cita <ChevronRight size={14} strokeWidth={3} />
+                                                  {isEng ? "Book appointment" : "Reservar cita"} <ChevronRight size={14} strokeWidth={3} />
                                                 </button>
                                               </motion.div>
                                             )}

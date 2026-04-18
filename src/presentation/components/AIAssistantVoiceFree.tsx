@@ -107,6 +107,7 @@ const AudioProgress = ({ isPlaying, duration, color, audioRef }: { isPlaying?: b
 };
 
 export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "left", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
+  const isEng = (lang || '').toLowerCase().startsWith('en');
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   
@@ -602,7 +603,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                    </span>
                  ) : (
                    <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-gray-800 leading-snug text-center">
-                     Da el primer paso<br /> hacia <strong className="font-extrabold" style={{ color: readableBrandText }}>tu cambio</strong>
+                     {isEng ? "Take the first step" : "Da el primer paso"}<br /> {isEng ? "towards" : "hacia"} <strong className="font-extrabold" style={{ color: readableBrandText }}>{isEng ? "your change" : "tu cambio"}</strong>
                    </span>
                  );
                })()}
@@ -651,17 +652,17 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                              {isProcessing ? (
                                 <>
                                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                  Escribiendo...
+                                  {isEng ? "Thinking..." : "Pensando..."}
                                 </>
                              ) : isBotPlaying ? (
                                 <>
                                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                  Hablando...
+                                  {isEng ? "Speaking..." : "Hablando..."}
                                 </>
                              ) : (
                                 <>
                                   <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                  Cambiar Asistente <ChevronDown size={10} className="text-gray-400 group-hover:text-gray-600" />
+                                  {isEng ? "Change Assistant" : "Cambiar Asistente"} <ChevronDown size={10} className="text-gray-400 group-hover:text-gray-600" />
                                 </>
                              )}
                            </span>
@@ -766,7 +767,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                             onClick={() => toggleTranscript(msg.id)}
                             className="text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1.5 transition-colors w-full"
                           >
-                            <Menu size={12}/> {msg.showTranscript ? "Ocultar transcripción" : "Ver transcripción"}
+                            <Menu size={12}/> {msg.showTranscript ? (isEng ? "Hide transcript" : "Ocultar transcripción") : (isEng ? "View transcript" : "Ver transcripción")}
                           </button>
                         </div>
 

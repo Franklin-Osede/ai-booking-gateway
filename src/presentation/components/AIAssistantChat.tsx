@@ -7,6 +7,7 @@ import { Bot, X, Send, Sparkles, ChevronRight } from "lucide-react";
 import { resolveConfig } from "../config/resolveConfig";
 
 export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right", lang = "es" }: { color: string, niche?: string, pos?: string, lang?: string }) {
+  const isEng = (lang || '').toLowerCase().startsWith('en');
   const [isOpen, setIsOpen] = useState(false);
   const [detectedNiche, setDetectedNiche] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ id: string; text: string; sender: "bot" | "user"; isCalendar?: boolean; isSuccess?: boolean; isFinalCard?: boolean; isDoctorList?: boolean; doctorListData?: { name: string; image?: string; specialty?: string; bio?: string }[] }[]>([]);
@@ -71,7 +72,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
 
   let categories = config.categories.map((c: { name: string; icon: unknown; docs: (string | { name: string; image?: string })[] }) => ({
     ...c,
-    docs: ["Especialista Titular", "Profesional Principal", "Jefe de Equipo"] as (string | { name: string; image?: string })[]
+    docs: (isEng ? ["Lead Specialist", "Senior Professional", "Team Leader"] : ["Especialista Titular", "Profesional Principal", "Jefe de Equipo"]) as (string | { name: string; image?: string })[]
   }));
   if (scrapedData && scrapedData.categories && scrapedData.categories.length > 0) {
     categories = scrapedData.categories.map((scrapedCat, i) => {
@@ -79,7 +80,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
        return { 
           ...fallbackCat, 
           name: scrapedCat.name || fallbackCat.name, 
-          docs: scrapedCat.docs?.length ? scrapedCat.docs : ["Especialista Titular", "Profesional Principal", "Jefe de Equipo"] 
+          docs: scrapedCat.docs?.length ? scrapedCat.docs : (isEng ? ["Lead Specialist", "Senior Professional", "Team Leader"] : ["Especialista Titular", "Profesional Principal", "Jefe de Equipo"])
        };
     });
   }
@@ -165,9 +166,11 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
       const docsObj = category.docs ? category.docs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
          const nicheCfg = effectiveConfig.niche;
          const dynamicSpecialties = nicheCfg.fallbackSpecialties;
+         const engSpecialties = ["FUE Hair Surgeon", "DHI Specialist", "Medical Director", "Advanced Trichologist", "Lead Surgeon"];
+         const assignedSpecialty = isEng ? engSpecialties[idx % engSpecialties.length] : dynamicSpecialties[idx % dynamicSpecialties.length];
          
-         const assignedSpecialty = dynamicSpecialties[idx % dynamicSpecialties.length];
-         const fallbackBio = nicheCfg.fallbackBio;
+         const engBio = "Lead specialist with extensive clinical experience, delivering 100% natural results.";
+         const fallbackBio = isEng ? engBio : nicheCfg.fallbackBio;
             
          if (typeof d === 'string') return { name: d, specialty: assignedSpecialty, bio: fallbackBio };
          return { ...d, specialty: d.specialty || assignedSpecialty, bio: d.bio || fallbackBio };
@@ -200,7 +203,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
     }
     
     if (resolvedNextStepId === 3 || resolvedNextStepId === 10 || skipPhotosFallback) {
-      if (!skipPhotosFallback && userSelection && (userSelection.toLowerCase().includes("pensar") || userSelection.toLowerCase().includes("skip"))) {
+      if (!skipPhotosFallback && userSelection && (userSelection.toLowerCase().includes("pensar") || userSelection.toLowerCase() === "skip" || userSelection.toLowerCase() === "saltar")) {
          pushBotMessage(chatScripts.think_skip_message, 600, () => {
             setStepInfo({ options: [], stepId: 0 });
          });
@@ -338,7 +341,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                 <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: color }} />
               </div>
               <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-gray-800 leading-snug text-center">
-                Da el primer paso<br /> hacia <strong className="font-extrabold" style={{ color: color }}>tu cambio</strong>
+                {isEng ? "Take the first step" : "Da el primer paso"}<br /> {isEng ? "towards" : "hacia"} <strong className="font-extrabold" style={{ color: color }}>{isEng ? "your change" : "tu cambio"}</strong>
               </span>
             </div>
             
@@ -346,7 +349,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
               className="w-full py-2.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 sm:gap-3 font-semibold shadow-md active:scale-95 transition-transform text-[14px] sm:text-[15px]"
               style={primaryButtonStyle}
             >
-              <Bot fill={primaryButtonStyle.color} size={16} /> Tu Asistente Virtual
+              <Bot fill={primaryButtonStyle.color} size={16} /> {isEng ? "Your Virtual Assistant" : "Tu Asistente Virtual"}
             </button>
           </motion.div>
         )}
@@ -371,7 +374,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                   <h3 className="font-bold text-[14px] sm:text-[15px] leading-tight text-gray-900 whitespace-nowrap">Laura · Asesora Médica</h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <p className="text-[12px] text-green-600 font-medium tracking-tight">{isProcessing ? "Escribiendo..." : "En línea"}</p>
+                    <p className="text-[12px] text-green-600 font-medium tracking-tight">{isProcessing ? (isEng ? "Typing..." : "Escribiendo...") : (isEng ? "Online" : "En línea")}</p>
                   </div>
                 </div>
               </div>
@@ -492,7 +495,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                       </div>
                     ) : msg.isDoctorList && msg.doctorListData ? (
                        <div className="flex flex-col gap-2.5 w-[90%] mt-1.5 pt-2 mb-2">
-                         <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1">Equipo Médico</span>
+                         <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1">{isEng ? "Medical Team" : "Equipo Médico"}</span>
                          {msg.doctorListData.map((doc, idx) => {
                            const isExpanded = expandedDocIdx === idx;
                            return (
@@ -505,7 +508,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                                    </div>
                                    <div className="flex flex-col">
                                      <span className="text-[14px] font-bold text-gray-900 tracking-tight leading-none mb-1">{doc.name}</span>
-                                     <span className="text-[10px] font-semibold tracking-wide uppercase text-gray-400">{doc.specialty || "ESPECIALISTA TITULAR"}</span>
+                                     <span className="text-[10px] font-semibold tracking-wide uppercase text-gray-400">{doc.specialty || (isEng ? "LEAD SPECIALIST" : "ESPECIALISTA TITULAR")}</span>
                                    </div>
                                  </div>
                                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-400">
@@ -522,9 +525,9 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                                      <button 
                                        className="w-full text-[13px] py-2.5 rounded-[10px] font-bold transition-all shadow-sm flex items-center justify-center gap-1.5" 
                                        style={{ backgroundColor: color + "15", color: getDarkerColor(color) }}
-                                       onClick={(e) => { e.stopPropagation(); setStepInfo({ options: [], stepId: 0 }); handleUserSelect(`Reservar con ${doc.name}`, 25); }}
+                                       onClick={(e) => { e.stopPropagation(); setStepInfo({ options: [], stepId: 0 }); handleUserSelect(isEng ? `Book with ${doc.name}` : `Reservar con ${doc.name}`, 25); }}
                                      >
-                                       Reservar cita <ChevronRight size={14} strokeWidth={3} />
+                                       {isEng ? "Book appointment" : "Reservar cita"} <ChevronRight size={14} strokeWidth={3} />
                                      </button>
                                    </motion.div>
                                  )}
@@ -587,7 +590,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
             <div className="p-4 bg-white border-t border-gray-100 relative">
                {isProcessing && (
                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-3 py-1 rounded-full animate-pulse">
-                    Escribiendo...
+                    {isEng ? "Typing..." : "Escribiendo..."}
                   </div>
                )}
                <div className="flex gap-2 relative">
