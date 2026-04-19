@@ -20,6 +20,15 @@ export async function POST(req: Request) {
       counter++;
     }
 
+    const normalizeSiteUrl = (rawUrl?: string) => {
+      if (!rawUrl) return undefined;
+      const trimmed = rawUrl.trim();
+      if (!trimmed) return undefined;
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    };
+
+    const normalizedSiteUrl = normalizeSiteUrl(siteUrl);
+
     const clinic = await prisma.clinic.create({
       data: {
         name,
@@ -28,8 +37,8 @@ export async function POST(req: Request) {
         location: location || null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...({ countryCode: countryCode || 'ES' } as any),
-        websites: siteUrl ? { create: { url: siteUrl } } : undefined,
-        brandings: brandColor ? { create: { primaryColor: brandColor } } : undefined,
+        websites: normalizedSiteUrl ? { create: { url: normalizedSiteUrl, isActive: true } } : undefined,
+        brandings: brandColor ? { create: { primaryColor: brandColor, isActive: true } } : undefined,
         widgetConfigs: oldDemoLink ? { create: { demoLink: oldDemoLink } } : undefined
       }
     });
@@ -60,4 +69,3 @@ export async function GET() {
     return NextResponse.json({ success: false, error: String(error), stack: error instanceof Error ? error.stack : undefined }, { status: 500 });
   }
 }
-

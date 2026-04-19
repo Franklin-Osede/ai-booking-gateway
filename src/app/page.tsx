@@ -41,13 +41,29 @@ export default async function Home({
       const clinic = await prisma.clinic.findUnique({
         where: { id: clinicId },
         include: {
-          websites: { orderBy: { updatedAt: "desc" } },
-          brandings: { orderBy: { updatedAt: "desc" } },
+          websites: {
+            where: { isActive: true },
+            orderBy: { updatedAt: "desc" },
+            take: 1,
+          },
+          brandings: {
+            where: { isActive: true },
+            orderBy: { updatedAt: "desc" },
+            take: 1,
+          },
         }
       });
       if (clinic) {
-        siteUrl = normalizeSiteUrl(clinic.websites?.[0]?.url) || siteUrl;
-        brandColor = clinic.brandings?.[0]?.primaryColor || brandColor;
+        const activeWebsite = clinic.websites?.[0] || await prisma.website.findFirst({
+          where: { clinicId },
+          orderBy: { updatedAt: "desc" },
+        });
+        const activeBranding = clinic.brandings?.[0] || await prisma.branding.findFirst({
+          where: { clinicId },
+          orderBy: { updatedAt: "desc" },
+        });
+        siteUrl = normalizeSiteUrl(activeWebsite?.url) || siteUrl;
+        brandColor = activeBranding?.primaryColor || brandColor;
         niche = clinic.industry?.toLowerCase().includes("capilar") ? "hair_transplant" : "default";
       }
     } catch (e) {

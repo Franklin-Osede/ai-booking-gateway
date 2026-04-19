@@ -32,10 +32,10 @@ export async function GET() {
           industry: "Clínica Capilar",
           location: location || null,
           websites: {
-            create: { url: url }
+            create: { url: url, isActive: true }
           },
           brandings: {
-            create: { primaryColor: color }
+            create: { primaryColor: color, isActive: true }
           },
           widgetConfigs: {
             create: { demoLink: oldDemoLink }
