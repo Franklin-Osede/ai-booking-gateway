@@ -25,5 +25,10 @@ export function parseCanonicalLocale(input: string | undefined | null): AllowedL
   if (loc.startsWith('en-')) return 'en-GB';
   if (loc.startsWith('es-')) return 'es-ES';
 
+  // Textos y ubicaciones heurísticas centralizadas (para imports o basuras)
+  if (loc.match(/(uk|london|england|manchester|birmingham)/)) return 'en-GB';
+  if (loc.match(/(us|usa|florida|texas|york|california|miami)/)) return 'en-US';
+  if (loc.match(/(spain|españa|madrid|barcelona|sevilla|valencia|malaga)/)) return 'es-ES';
+
   return null;
 }

@@ -45,27 +45,29 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
     if (primaryColor) {
+      await prisma.branding.updateMany({ where: { clinicId: id }, data: { isActive: false } });
       const existingBranding = await prisma.branding.findFirst({
         where: { clinicId: id },
         orderBy: { updatedAt: "desc" },
       });
       if (existingBranding) {
-         await prisma.branding.update({ where: { id: existingBranding.id }, data: { primaryColor } });
+         await prisma.branding.update({ where: { id: existingBranding.id }, data: { primaryColor, isActive: true } });
       } else {
-         await prisma.branding.create({ data: { clinicId: id, primaryColor } });
+         await prisma.branding.create({ data: { clinicId: id, primaryColor, isActive: true } });
       }
     }
 
     if (siteUrl) {
       const normalizedSiteUrl = /^https?:\/\//i.test(siteUrl) ? siteUrl : `https://${siteUrl}`;
+      await prisma.website.updateMany({ where: { clinicId: id }, data: { isActive: false } });
       const existingWebsite = await prisma.website.findFirst({
         where: { clinicId: id },
         orderBy: { updatedAt: "desc" },
       });
       if (existingWebsite) {
-        await prisma.website.update({ where: { id: existingWebsite.id }, data: { url: normalizedSiteUrl } });
+        await prisma.website.update({ where: { id: existingWebsite.id }, data: { url: normalizedSiteUrl, isActive: true } });
       } else {
-        await prisma.website.create({ data: { clinicId: id, url: normalizedSiteUrl } });
+        await prisma.website.create({ data: { clinicId: id, url: normalizedSiteUrl, isActive: true } });
       }
     }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseCanonicalLocale } from "@/lib/utils/locale";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -32,10 +33,10 @@ export async function GET() {
           industry: "Clínica Capilar",
           location: location || null,
           websites: {
-            create: { url: url }
+            create: { url: url, isActive: true }
           },
           brandings: {
-            create: { primaryColor: color }
+            create: { primaryColor: color, isActive: true }
           },
           widgetConfigs: {
             create: { demoLink: oldDemoLink }
@@ -45,7 +46,7 @@ export async function GET() {
               publishedWebsiteUrl: url,
               publishedBrandColor: color || "#333333",
               publishedNiche: "Clínica Capilar",
-              publishedLocale: location && location.toLowerCase().match(/(uk|london|england)/) ? "en-GB" : (location && location.toLowerCase().match(/(us|usa|florida|texas|york|california|miami)/) ? "en-US" : "es-ES"),
+              publishedLocale: parseCanonicalLocale(location) || "es-ES",
               fallbackMode: "proxy",
               version: 1,
             }
