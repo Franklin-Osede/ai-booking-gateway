@@ -35,8 +35,21 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true);
-      if (typeof window !== 'undefined' && clinicUrl) {
-         localStorage.setItem('onboarding_site_url', clinicUrl);
+      if (typeof window !== 'undefined') {
+         if (clinicUrl && clinicUrl.trim() !== "") {
+             let cleanUrl = clinicUrl;
+             if (clinicUrl.includes('/api/v1/proxy?url=')) {
+                 const match = clinicUrl.match(/[?&]url=([^&]+)/);
+                 cleanUrl = match ? decodeURIComponent(match[1]) : clinicUrl;
+             }
+             if (cleanUrl) {
+                 localStorage.setItem('onboarding_site_url', cleanUrl);
+             } else {
+                 localStorage.removeItem('onboarding_site_url');
+             }
+         } else {
+             localStorage.removeItem('onboarding_site_url');
+         }
       }
     }, 0);
     return () => clearTimeout(timer);
