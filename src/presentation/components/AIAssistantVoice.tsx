@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Play, Menu, ChevronDown, Check } from "lucide-react";
@@ -8,6 +8,7 @@ import { resolveConfig } from "../config/resolveConfig";
 import { getVoices, VoiceProfile } from "../config/voiceConfig";
 import { VoiceIntent } from "../../domain/voice/VoiceIntent";
 import { VoicePromptService } from "../../domain/voice/VoicePromptService";
+import { useVoicePreloader } from "./hooks/useVoicePreloader";
 
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
@@ -121,56 +122,24 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     };
   }, []);
 
-  useEffect(() => {
-    // Pre-fetch greeting for instantaneous startup
-    const preloadGreeting = async () => {
-      const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-      const { niche: nicheCfg } = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
-      let currentBrand = nicheCfg.brandLabel || "la clínica";
-      try {
-         const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
-         const brandParam = new URLSearchParams(window.location.search).get('brand');
-         if (brandParam) {
-            currentBrand = brandParam;
-         } else if (storedSite) {
-            let actualSite = storedSite;
-            if (storedSite.includes('url=')) {
-               try { actualSite = decodeURIComponent(storedSite.split('url=')[1].split('&')[0]); } catch {}
-            }
-            let host = actualSite;
-            try { host = new URL(actualSite).hostname; } catch { host = actualSite.replace(/^https?:\/\//, '').split('/')[0]; }
-            let parsedName = host.replace('www.', '').split('.')[0];
-            parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
-            if (!parsedName) parsedName = "especializada";
-            currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
-         }
-      } catch {
-        // Ignore
-      }
+  const getGreetingText = useCallback((voice: VoiceProfile) => {
+    let voiceProvider = "elevenlabs";
+    try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
+    const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: brandName, locale: lang || 'es' }, voiceProvider);
+    let greeting = rawGreeting.replace(/Soy [a-zA-ZáéíóúÁÉÍÓÚñÑ]+/, `Soy ${voice.name}`);
+    if (voice.gender === 'M') {
+        greeting = greeting.replace(/asesora/gi, 'asesor');
+    }
+    return greeting;
+  }, [lang, brandName]);
 
-      let voiceProvider = "elevenlabs";
-      try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-      const greeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand, locale: lang || 'es' }, voiceProvider);
-      
-      try {
-        const res = await fetch('/api/v1/voice', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName || null, locale: lang || 'es' })
-        });
-        if (res.ok) {
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          blobTrackerRef.current.push(url);
-          preloadedGreetingRef.current = url;
-        }
-      } catch (e) {
-        console.error("Polly Preload Error:", e);
-      }
-    };
-    preloadGreeting();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { getPreloadedUrl } = useVoicePreloader({
+    lang: lang || 'es',
+    brandName,
+    niche: detectedNiche || niche || "hair_transplant",
+    getGreetingText,
+    enabled: true
+  });
   
   // Inline Calendar & Flow States
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
@@ -234,16 +203,12 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     const currentAvailVoices = getVoices(lang);
     const selectedVoice = currentAvailVoices.find(v => v.id === id) || currentAvailVoices[0];
 
-    const rawGreeting = VoicePromptService.getPrompt(VoiceIntent.GREETING, { brandName: currentBrand, locale: lang || 'es' }, voiceProvider);
-    let greeting = rawGreeting.replace(/Soy [a-zA-ZáéíóúÁÉÍÓÚñÑ]+/, `Soy ${name}`);
-    if (selectedVoice.gender === 'M') {
-        greeting = greeting.replace(/asesora/gi, 'asesor');
-    }
+    const greeting = getGreetingText(selectedVoice);
     
     setTimeout(() => {
        fetchAudio(greeting, "bot-res-" + Date.now(), () => {
          setStepInfo({ options: [confLocale.chat_scripts?.options_first_step[0] || "¿Cuánto cuesta?", "Quiero ver resultados", "Agendar cita"], stepId: 1 });
-       }, { overrideVoice: selectedVoice, intent: "GREETING" });
+       }, { overrideVoice: selectedVoice, intent: "GREETING", preloadedUrl: getPreloadedUrl(selectedVoice.id) });
     }, 100);
   };
 
@@ -343,8 +308,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       setSelectedDoctor("");
       blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
       blobTrackerRef.current = [];
-      if (preloadedGreetingRef.current) {
-        blobTrackerRef.current.push(preloadedGreetingRef.current);
+      const initUrl = getPreloadedUrl(activeVoiceId || "1");
+      if (initUrl) {
+        blobTrackerRef.current.push(initUrl);
       }
     } else {
       setIsOpen(true);
@@ -356,7 +322,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen, stepInfo, selectedDate, selectedTime]);
 
-  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraParams?: { isSuccess?: boolean; isFinalCard?: boolean; image?: string; isDoctorList?: boolean; doctorListData?: DoctorData[], overrideVoice?: VoiceProfile, intent?: string }) => {
+  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraParams?: { isSuccess?: boolean; isFinalCard?: boolean; image?: string; isDoctorList?: boolean; doctorListData?: DoctorData[], overrideVoice?: VoiceProfile, intent?: string, preloadedUrl?: string | null }) => {
     try {
       setIsProcessing(true);
       if (audioRef.current && !audioRef.current.paused) {
@@ -371,17 +337,21 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
 
       const voiceToUse = extraParams?.overrideVoice || activeVoice;
-      const res = await fetch('/api/v1/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, intent: extraParams?.intent || "OTHERS", provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender, niche: activeNiche, clinicId: brandName || null, locale: lang || 'es' })
-      });
+      let url = extraParams?.preloadedUrl;
       
-      if (!res.ok) throw new Error("Voice API Error");
-      
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      blobTrackerRef.current.push(url);
+      if (!url) {
+        const res = await fetch('/api/v1/voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, intent: extraParams?.intent || "OTHERS", provider: voiceProvider, voiceType: 'guided', elevenlabs_voice_id: voiceToUse.elevenLabsId, gender: voiceToUse.gender, niche: activeNiche, clinicId: brandName || null, locale: lang || 'es' })
+        });
+        
+        if (!res.ok) throw new Error("Voice API Error");
+        
+        const blob = await res.blob();
+        url = URL.createObjectURL(blob);
+        blobTrackerRef.current.push(url);
+      }
       const audio = new Audio(url);
       audioRef.current = audio;
       

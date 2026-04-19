@@ -1,12 +1,13 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles, Play, Menu, Camera, ChevronLeft, ChevronRight, CheckCircle2, ChevronDown, Check } from "lucide-react";
 import { getVoices, VoiceProfile } from "../config/voiceConfig";
 import { resolveConfig } from "../config/resolveConfig";
+import { useVoicePreloader } from "./hooks/useVoicePreloader";
 
 function getContrastColor(hexcolor: string) {
   if (!hexcolor || hexcolor.length < 6) return '#ffffff';
@@ -138,6 +139,23 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const availableVoicesForInit = getVoices(lang);
   const activeVoice: VoiceProfile = availableVoicesForInit.find(v => v.id === activeVoiceId) || availableVoicesForInit[3];
 
+  const getGreetingText = useCallback((voice: VoiceProfile) => {
+    const nicheCfg = effectiveConfig.niche;
+    const topic = nicheCfg.topicPrompt;
+    const isEng = (lang || '').toLowerCase().startsWith('en');
+    return isEng 
+      ? `Hello! Welcome to ${brandName}. I am ${voice.name}... Tell me in your own words. How can I help you... or ${topic}?`
+      : `¡Hola! Bienvenido a ${brandName}. Soy ${voice.name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
+  }, [lang, brandName, effectiveConfig.niche]);
+
+  const { getPreloadedUrl } = useVoicePreloader({
+    lang: lang || 'es',
+    brandName,
+    niche: effectiveConfig.niche.id || "hair_transplant",
+    getGreetingText,
+    enabled: true
+  });
+
   useEffect(() => {
     try {
       const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
@@ -171,7 +189,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
   const monthShort = monthNameStr.substring(0, 3);
 
-  const handleVoiceSelection = (id: string, name: string) => {
+  const handleVoiceSelection = (id: string) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -187,19 +205,14 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
     const currentAvailVoices = getVoices(lang);
     const selectedVoice = currentAvailVoices.find(v => v.id === id) || currentAvailVoices[3];
-    const nicheCfg = effectiveConfig.niche;
-    const topic = nicheCfg.topicPrompt;
-    
-    const isEng = (lang || '').toLowerCase().startsWith('en');
-    const newGreeting = isEng 
-      ? `Hello! Welcome to ${brandName}. I am ${name}... Tell me in your own words. How can I help you... or ${topic}?`
-      : `¡Hola! Bienvenido a ${brandName}. Soy ${name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
+
+    const newGreeting = getGreetingText(selectedVoice);
     setChatHistory([{ role: "assistant", content: newGreeting }]);
 
     setTimeout(() => {
       fetchAudio(newGreeting, "bot-res-" + Date.now(), () => {
          setStepInfo({ options: [], stepId: 1 });
-      }, { overrideVoice: selectedVoice });
+      }, { overrideVoice: selectedVoice, preloadedUrl: getPreloadedUrl(selectedVoice.id) });
     }, 100);
   };
 
@@ -330,8 +343,9 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       setChatHistory([]);
       blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
       blobTrackerRef.current = [];
-      if (preloadedGreetingRef.current) {
-        blobTrackerRef.current.push(preloadedGreetingRef.current); // keep preload alive
+      const initUrl = getPreloadedUrl(activeVoiceId || "1");
+      if (initUrl) {
+        blobTrackerRef.current.push(initUrl);
       }
     } else {
       setIsOpen(true);
@@ -343,7 +357,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen, stepInfo]);
 
-  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraProps?: Partial<Msg> & { overrideVoice?: VoiceProfile, intent?: string }) => {
+  const fetchAudio = async (text: string, msgId: string, onEnd: () => void, extraProps?: Partial<Msg> & { overrideVoice?: VoiceProfile, intent?: string, preloadedUrl?: string | null }) => {
     try {
       setIsProcessing(true);
       if (audioRef.current && !audioRef.current.paused) {
@@ -354,8 +368,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       setMessages(prev => [...prev.map(m => ({...m, playing: false})), { id: msgId, text: displayText, sender: "bot", playing: true, ...extraProps }]);
       
       let audioUrl = "";
-      if (msgId === "bot-0" && preloadedGreetingRef.current) {
-        audioUrl = preloadedGreetingRef.current;
+      if (extraProps?.preloadedUrl) {
+        audioUrl = extraProps.preloadedUrl;
       } else {
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
@@ -416,16 +430,11 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
 
     if (nextStepId === 0) {
       setTimeout(() => {
-        const nicheCfg = effectiveConfig.niche;
-        const topic = nicheCfg.topicPrompt;
-        const isEng = (lang || '').toLowerCase().startsWith('en');
-        const greeting = isEng 
-            ? `Hello! Welcome to ${brandName}. I am ${activeVoice.name}... Tell me in your own words. How can I help you... or ${topic}?`
-            : `¡Hola! Bienvenido a ${brandName}. Soy ${activeVoice.name}... Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
+        const greeting = getGreetingText(activeVoice);
         setChatHistory([{ role: "assistant", content: greeting }]);
         fetchAudio(greeting, "bot-0", () => {
           setStepInfo({ options: [], stepId: 1 });
-        });
+        }, { intent: "GREETING", preloadedUrl: getPreloadedUrl(activeVoice.id) });
       }, 200);
       return;
     }
