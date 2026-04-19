@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, Database, ArrowLeft, Calendar } from "lucide-react";
+import { Sparkles, Database, ArrowLeft, Calendar, ShieldAlert } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +20,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/calendar" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors">
             <Calendar size={18} />
             <span>Calendario</span>
+          </Link>
+          <Link href="/admin/sre" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 hover:text-rose-700 transition-colors">
+            <ShieldAlert size={18} />
+            <span className="font-semibold">SRE / Failures</span>
           </Link>
           
           <div className="px-4 py-2 mt-4 border-t border-border pt-6">

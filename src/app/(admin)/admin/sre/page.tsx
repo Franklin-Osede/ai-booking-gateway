@@ -24,7 +24,7 @@ export default async function SreDashboard() {
   };
 
   return (
-    <div className="p-8 w-full max-w-7xl mx-auto text-slate-800 bg-slate-50 min-h-screen">
+    <div className="w-full text-slate-800">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold flex items-center gap-3 text-slate-900 border-b pb-4">
           <ShieldAlert className="w-8 h-8 text-rose-500" />

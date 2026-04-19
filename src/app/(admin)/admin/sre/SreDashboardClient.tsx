@@ -67,7 +67,7 @@ export function SreDashboardClient({ configs }: { configs: ClinicRuntimeConfig[]
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Clínica Nodo</th>
               <th className="px-6 py-4">Contrato Locale</th>
-              <th className="px-6 py-4">Target DNS</th>
+              <th className="px-6 py-4">Rutas & Enlaces</th>
               <th className="px-6 py-4">Version / Updated</th>
               <th className="px-6 py-4 text-right">Acciones</th>
             </tr>
@@ -96,9 +96,14 @@ export function SreDashboardClient({ configs }: { configs: ClinicRuntimeConfig[]
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <a href={c.publishedWebsiteUrl} target="_blank" className="hover:text-blue-600 flex items-center gap-1 font-mono text-xs max-w-xs truncate" title={c.publishedWebsiteUrl}>
-                    {c.publishedWebsiteUrl} <ExternalLink className="w-3 h-3" />
-                  </a>
+                  <div className="flex flex-col gap-2">
+                    <a href={`/demo/${c.clinic.slug}`} target="_blank" className="hover:text-amber-600 flex items-center gap-1 font-mono text-sm font-semibold max-w-[200px] md:max-w-xs truncate" title="Probar Demo en AgentMinds">
+                      /demo/{c.clinic.slug} <ExternalLink className="w-4 h-4 shrink-0" />
+                    </a>
+                    <a href={c.publishedWebsiteUrl} target="_blank" className="text-slate-400 hover:text-blue-600 flex items-center gap-1 font-mono text-xs max-w-[200px] md:max-w-xs truncate" title={`Destino: ${c.publishedWebsiteUrl}`}>
+                      {c.publishedWebsiteUrl} <span className="text-[10px] uppercase font-bold">DNS</span>
+                    </a>
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <div>v{c.version}</div>
