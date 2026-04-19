@@ -1,4 +1,5 @@
 import { prisma } from '../src/lib/prisma';
+import { parseCanonicalLocale } from '../src/lib/utils/locale';
 
 async function main() {
   console.log("Iniciando backfill a ClinicRuntimeConfig...");
@@ -27,13 +28,16 @@ async function main() {
     }
 
     try {
+      const rawLocale = clinic.countryCode || "es-ES";
+      const canonicalLocale = parseCanonicalLocale(rawLocale) || "es-ES"; // Default de seguridad si es imparseable en legacy
+
       await prisma.clinicRuntimeConfig.upsert({
         where: { clinicId: clinic.id },
         update: {
           publishedWebsiteUrl: website.url,
           publishedBrandColor: branding?.primaryColor || "#333333",
           publishedNiche: clinic.industry,
-          publishedLocale: clinic.countryCode || "es-ES",
+          publishedLocale: canonicalLocale,
           fallbackMode: "proxy",
           version: 1,
           publishedAt: new Date(),
@@ -43,7 +47,7 @@ async function main() {
           publishedWebsiteUrl: website.url,
           publishedBrandColor: branding?.primaryColor || "#333333",
           publishedNiche: clinic.industry,
-          publishedLocale: clinic.countryCode || "es-ES",
+          publishedLocale: canonicalLocale,
           fallbackMode: "proxy",
           version: 1,
         }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseCanonicalLocale } from "@/lib/utils/locale";
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,13 @@ export async function POST(req: Request) {
 
     const normalizedSiteUrl = normalizeSiteUrl(siteUrl);
 
+    // Validación de Idioma Estricta (Contrato Canónico)
+    const rawLocale = countryCode || "es-ES";
+    const canonicalLocale = parseCanonicalLocale(rawLocale);
+    if (!canonicalLocale && normalizedSiteUrl) {
+      return NextResponse.json({ success: false, error: `Creación bloqueada: El idioma de la clínica ('${rawLocale}') no es un Locale válido (es-ES, en-GB, en-US).` }, { status: 400 });
+    }
+
     const clinic = await prisma.clinic.create({
       data: {
         name,
@@ -45,7 +53,7 @@ export async function POST(req: Request) {
             publishedWebsiteUrl: normalizedSiteUrl,
             publishedBrandColor: brandColor || "#333333",
             publishedNiche: industry || "Sector General",
-            publishedLocale: countryCode || "es-ES",
+            publishedLocale: canonicalLocale || "es-ES",
             fallbackMode: "proxy",
             version: 1
           }

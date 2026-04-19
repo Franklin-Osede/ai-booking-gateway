@@ -62,12 +62,7 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
         customSiteUrl = clinic.runtimeConfig.publishedWebsiteUrl || "";
         customColor = clinic.runtimeConfig.publishedBrandColor || customColor;
         customIndustry = clinic.runtimeConfig.publishedNiche || clinic.industry || customIndustry;
-        const rawLocale = (clinic.runtimeConfig.publishedLocale || "es").toLowerCase();
-        if (rawLocale === 'en' || rawLocale === 'gb' || rawLocale === 'uk' || rawLocale.startsWith('en-')) {
-            detectedLang = rawLocale === 'us' || rawLocale === 'en-us' ? 'en-US' : 'en-GB';
-        } else {
-            detectedLang = "es";
-        }
+        detectedLang = clinic.runtimeConfig.publishedLocale || "es-ES";
         
         if (clinic.runtimeConfig.fallbackMode === 'neutral') {
             customSiteUrl = ""; // empty url triggers neutral mode in DemoOverlay
@@ -81,20 +76,6 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
       if (clinic.videoUrl) customVideo = clinic.videoUrl;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((clinic as any).widgetPosition) customWidgetPosition = (clinic as any).widgetPosition;
-      
-      // Auto-detect GB/EN explicitly if they lack a published runtimeLocale OR if location is clearly UK
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const countryOrLocale = String((clinic as any).countryCode || '').toLowerCase();
-      if (!clinic.runtimeConfig && (countryOrLocale === 'en' || countryOrLocale.startsWith('en-'))) {
-          detectedLang = countryOrLocale === 'en-us' ? 'en-US' : 'en-GB';
-      } 
-      
-      if (clinic.location) {
-          const loc = clinic.location.toLowerCase();
-          if (loc.includes('london') || loc.includes('uk') || loc.includes('england') || loc.includes('manchester') || loc.includes('reino unido') || loc.includes('brit')) {
-            detectedLang = 'en-GB';
-          }
-      }
     } else {
       // Legacy Mock Databases fallback if clinic wasn't in DB at all
       const mockDatabase: Record<string, { url: string, color: string, industry?: string }> = {

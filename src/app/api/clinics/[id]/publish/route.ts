@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseCanonicalLocale } from "@/lib/utils/locale";
 
 export async function POST(req: Request, context: unknown) {
   try {
@@ -46,6 +47,14 @@ export async function POST(req: Request, context: unknown) {
       urlToPublish = `https://${urlToPublish}`;
     }
 
+    // Validación de Idioma Estricta (Contrato Canónico)
+    const rawLocale = clinic.countryCode || "es-ES";
+    const canonicalLocale = parseCanonicalLocale(rawLocale);
+    
+    if (!canonicalLocale) {
+       return NextResponse.json({ success: false, error: `Publicación bloqueada: El idioma de la clínica ('${rawLocale}') no es un Locale válido (es-ES, en-GB, en-US). Corrige el País/Idioma en la configuración.` }, { status: 400 });
+    }
+
     // Validación estricta GET (Fail-Closed)
     try {
       const fetchCheck = await fetch(urlToPublish, { 
@@ -89,7 +98,7 @@ export async function POST(req: Request, context: unknown) {
         publishedWebsiteUrl: urlToPublish,
         publishedBrandColor: activeBranding?.primaryColor || "#333333",
         publishedNiche: clinic.industry,
-        publishedLocale: clinic.countryCode || "es-ES",
+        publishedLocale: canonicalLocale,
         fallbackMode: "proxy",
         version: 1,
       },
@@ -97,7 +106,7 @@ export async function POST(req: Request, context: unknown) {
         publishedWebsiteUrl: urlToPublish,
         publishedBrandColor: activeBranding?.primaryColor || "#333333",
         publishedNiche: clinic.industry,
-        publishedLocale: clinic.countryCode || "es-ES",
+        publishedLocale: canonicalLocale,
         version: { increment: 1 },
         publishedAt: new Date()
       }
