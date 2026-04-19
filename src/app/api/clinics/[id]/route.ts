@@ -7,8 +7,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const clinic = await prisma.clinic.findUnique({
       where: { id },
       include: {
-        websites: true,
-        brandings: true,
+        websites: { orderBy: { updatedAt: "desc" } },
+        brandings: { orderBy: { updatedAt: "desc" } },
         widgetConfigs: true,
         outreachLogs: {
           orderBy: { createdAt: "desc" },
@@ -28,17 +28,33 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const { id } = await params;
     const body = await req.json();
-    const { name, industry, location, notes, primaryColor, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode } = body;
+    const { name, industry, location, notes, primaryColor, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode, siteUrl } = body;
 
     const updateData: Record<string, unknown> = { name, industry, location, notes, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode };
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
     if (primaryColor) {
-      const existingBranding = await prisma.branding.findFirst({ where: { clinicId: id } });
+      const existingBranding = await prisma.branding.findFirst({
+        where: { clinicId: id },
+        orderBy: { updatedAt: "desc" },
+      });
       if (existingBranding) {
          await prisma.branding.update({ where: { id: existingBranding.id }, data: { primaryColor } });
       } else {
          await prisma.branding.create({ data: { clinicId: id, primaryColor } });
+      }
+    }
+
+    if (siteUrl) {
+      const normalizedSiteUrl = /^https?:\/\//i.test(siteUrl) ? siteUrl : `https://${siteUrl}`;
+      const existingWebsite = await prisma.website.findFirst({
+        where: { clinicId: id },
+        orderBy: { updatedAt: "desc" },
+      });
+      if (existingWebsite) {
+        await prisma.website.update({ where: { id: existingWebsite.id }, data: { url: normalizedSiteUrl } });
+      } else {
+        await prisma.website.create({ data: { clinicId: id, url: normalizedSiteUrl } });
       }
     }
 
@@ -62,4 +78,3 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ success: false, error: "Failed to delete" }, { status: 500 });
   }
 }
-

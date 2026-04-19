@@ -6,17 +6,26 @@ export async function GET() {
     const logs: string[] = [];
     const log = (msg: string) => { console.log(msg); logs.push(msg); };
 
-    log("🛠 Iniciando parche de emergencia para wmglondon...");
-    const wmg = await prisma.clinic.findFirst({ where: { slug: "wmglondon" }, include: { websites: true } });
+    log("🛠 Iniciando purga global de Hostinger y .brs...");
+    const allClinics = await prisma.clinic.findMany({ include: { websites: true } });
     
-    if (wmg) {
-      for (const web of wmg.websites) {
+    let deletedCount = 0;
+    
+    for (const clinic of allClinics) {
+      for (const web of clinic.websites) {
         if (web.url.includes('hostinger') || web.url.includes('.brs')) {
-          log(`🗑 Eliminando basura: ${web.url}`);
+          log(`🗑 Eliminando basura: ${web.url} de la clínica ${clinic.slug || clinic.name}`);
           await prisma.website.delete({ where: { id: web.id } });
+          deletedCount++;
         }
       }
-      
+    }
+    
+    log(`✅ Se eliminaron ${deletedCount} URLs basura de Hostinger a nivel global.`);
+
+    log("🛠 Iniciando parche forzado para wmglondon...");
+    const wmg = allClinics.find(c => c.slug === "wmglondon");
+    if (wmg) {
       const rem = await prisma.website.findMany({ where: { clinicId: wmg.id } });
       if (!rem.some(w => w.url === "https://wmglondon.com")) {
         if (rem.length > 0) {
@@ -28,13 +37,11 @@ export async function GET() {
       } else {
         log(`✅ wmglondon.com ya existe y está limpio de duplicados basura de hostinger.`);
       }
-    } else {
-      log(`⚠️ Clínica wmglondon no encontrada en esta base de datos.`);
     }
 
-    log("✅ Migración completada exitosamente.");
+    log("✅ Purga y Migración completada exitosamente.");
 
-    return NextResponse.json({ success: true, logs });
+    return NextResponse.json({ success: true, deletedCount, logs });
   } catch(e: unknown) {
     const errorMsg = e instanceof Error ? e.message : String(e);
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });

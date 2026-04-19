@@ -37,8 +37,7 @@ import { prisma } from "@/lib/prisma";
 export default async function DemoPage({ params, searchParams }: DemoProps) {
   const { clinicSlug } = await params;
   const resolvedSearchParams = await searchParams;
-  
-  let customSiteUrl = "https://institutocapilar.es";
+  let customSiteUrl = "";
   let customColor = "#1a4b8c";
   let customIndustry = "Clínica Capilar";
   let detectedLang = "es";

@@ -28,15 +28,25 @@ export default async function Home({
   const pos = "left";
 
   const clinicId = params.c;
+  const normalizeSiteUrl = (rawUrl?: string | null) => {
+    if (!rawUrl) return undefined;
+    const trimmed = rawUrl.trim();
+    if (!trimmed) return undefined;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
 
   if (clinicId) {
     try {
       const clinic = await prisma.clinic.findUnique({
         where: { id: clinicId },
-        include: { websites: true, brandings: true }
+        include: {
+          websites: { orderBy: { updatedAt: "desc" } },
+          brandings: { orderBy: { updatedAt: "desc" } },
+        }
       });
       if (clinic) {
-        siteUrl = clinic.websites?.[0]?.url || siteUrl;
+        siteUrl = normalizeSiteUrl(clinic.websites?.[0]?.url) || siteUrl;
         brandColor = clinic.brandings?.[0]?.primaryColor || brandColor;
         niche = clinic.industry?.toLowerCase().includes("capilar") ? "hair_transplant" : "default";
       }

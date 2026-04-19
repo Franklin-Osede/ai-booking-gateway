@@ -22,6 +22,9 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [videoUrl, setVideoUrl] = useState("");
   const [savingVideo, setSavingVideo] = useState(false);
   const [hasSavedVideo, setHasSavedVideo] = useState(false);
+  const [siteUrl, setSiteUrl] = useState("");
+  const [savingSiteUrl, setSavingSiteUrl] = useState(false);
+  const [hasSavedSiteUrl, setHasSavedSiteUrl] = useState(false);
   const [widgetPosition, setWidgetPosition] = useState("right");
   const [savingPosition, setSavingPosition] = useState(false);
   const [hasSavedPosition, setHasSavedPosition] = useState(false);
@@ -49,6 +52,7 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
       .then(data => {
         if (data.success) {
           setClinic(data.data);
+          setSiteUrl(data.data.websites?.[0]?.url || "");
           if (data.data.videoUrl) setVideoUrl(data.data.videoUrl);
           if (data.data.seoMetrics) setSeoMetrics(data.data.seoMetrics);
           if (data.data.techMetrics) setTechMetrics(data.data.techMetrics);
@@ -104,6 +108,20 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
     setSavingVideo(false);
     setHasSavedVideo(true);
     setTimeout(() => setHasSavedVideo(false), 3000);
+    fetchClinic();
+  };
+
+  const handleSaveSiteUrl = async () => {
+    if (!siteUrl || savingSiteUrl) return;
+    setSavingSiteUrl(true);
+    await fetch(`/api/clinics/${unwrappedParams.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ siteUrl }),
+    });
+    setSavingSiteUrl(false);
+    setHasSavedSiteUrl(true);
+    setTimeout(() => setHasSavedSiteUrl(false), 3000);
     fetchClinic();
   };
 
@@ -597,29 +615,40 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
            <div>
              <h3 className="text-xl font-bold mb-3">Enlaces de la Clínica y Demo</h3>
              
-             {/* Original URL Display */}
-             {clinic.websites?.[0] && (
-               <div className="mb-4 bg-muted border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                 <div>
-                   <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">🔗 URL Original de la Clínica</p>
-                   <a 
-                     href={clinic.websites[0].url}
+             <div className="mb-4 bg-muted border border-border rounded-2xl p-4 space-y-3">
+               <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">🔗 URL Original de la Clínica</p>
+               <div className="flex flex-col sm:flex-row gap-3">
+                 <input
+                   type="url"
+                   value={siteUrl}
+                   onChange={(e) => setSiteUrl(e.target.value)}
+                   placeholder="https://wmglondon.com"
+                   className="flex-1 bg-card border border-border text-foreground p-3 rounded-xl outline-none focus:border-yellow-500/50 font-mono text-sm"
+                 />
+                 <button
+                   onClick={handleSaveSiteUrl}
+                   disabled={savingSiteUrl || hasSavedSiteUrl || !siteUrl}
+                   className={`px-5 py-2 text-sm font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2 border disabled:opacity-80 ${
+                     hasSavedSiteUrl
+                       ? "bg-emerald-600 text-foreground border-emerald-500"
+                       : "bg-muted text-foreground border-border hover:bg-muted hover:text-yellow-500"
+                   }`}
+                 >
+                   {hasSavedSiteUrl ? <Check size={16} /> : <Save size={16} />}
+                   {savingSiteUrl ? "Guardando..." : hasSavedSiteUrl ? "¡Guardado!" : "Guardar URL"}
+                 </button>
+                 {siteUrl && (
+                   <a
+                     href={siteUrl}
                      target="_blank"
                      rel="noreferrer"
-                     className="block text-foreground font-mono text-sm opacity-90 truncate hover:text-yellow-500 hover:underline mt-1"
+                     className="bg-muted text-foreground hover:bg-muted font-bold px-4 py-2 rounded-xl transition-colors text-sm flex items-center gap-2 justify-center shrink-0"
                    >
-                     {clinic.websites[0].url}
+                     Visitar Sitio <ExternalLink size={14}/>
                    </a>
-                 </div>
-                 <a 
-                   href={clinic.websites[0].url} 
-                   target="_blank" 
-                   className="bg-muted text-foreground hover:bg-muted font-bold px-4 py-2 rounded-xl transition-colors text-sm flex items-center gap-2 shrink-0"
-                 >
-                   Visitar Sitio <ExternalLink size={14}/>
-                 </a>
+                 )}
                </div>
-             )}
+             </div>
 
              <div className="flex items-center gap-4 bg-background border border-yellow-500/30 rounded-2xl p-4">
                 <div className="flex-1 overflow-hidden">

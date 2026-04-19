@@ -74,9 +74,14 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
         <ProductTour primaryColor={themeColor} lang={lang} />
       )}
 
-      {/* 3. The Full Screen Target Website (Plan B o Iframe) */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center">
-        {useImageMode && !useIframeFallback ? (
+      {/* 3. The Full Screen Target Website (Plan B o Iframe o Neutral) */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center bg-slate-100">
+        {!clinicUrl || clinicUrl.trim() === "" ? (
+            <div className="absolute inset-0 w-full h-full bg-linear-to-br from-[#f8fafc] to-[#e2e8f0] opacity-90 pattern-grid-lg flex flex-col items-center justify-center">
+               <span className="text-slate-400 font-semibold mb-2">Dominio Web en Configuración</span>
+               <p className="text-slate-300 text-sm max-w-sm text-center">La página web principal de la clínica no está disponible en este momento. Este es un entorno seguro para interactuar con los asistentes.</p>
+            </div>
+        ) : useImageMode && !useIframeFallback ? (
            <>
              {/* Loading State underneath the image */}
              <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full z-0 bg-gray-50">
@@ -103,6 +108,7 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
              src={clinicUrl} 
              className="w-full h-full border-none relative z-10"
              title="Clinic Website Demo"
+             sandbox="allow-scripts allow-same-origin allow-popups"
            />
         )}
       </div>
