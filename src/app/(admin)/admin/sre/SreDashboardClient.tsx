@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, RefreshCw, AlertTriangle, CheckCircle, Search } from "lucide-react";
+import { ExternalLink, RefreshCw, AlertTriangle, Search } from "lucide-react";
 
 type ClinicRuntimeConfig = {
   id: string;
@@ -13,7 +13,7 @@ type ClinicRuntimeConfig = {
   publishedLocale: string;
   fallbackMode: string;
   version: number;
-  updatedAt: Date;
+  publishedAt: Date;
 };
 
 export function SreDashboardClient({ configs }: { configs: ClinicRuntimeConfig[] }) {
@@ -38,7 +38,7 @@ export function SreDashboardClient({ configs }: { configs: ClinicRuntimeConfig[]
         alert("✅ Nodo recuperado y reconstruido con éxito.");
         window.location.reload();
       }
-    } catch(e) {
+    } catch {
       alert("Fallo de red al interactuar con el endpoint.");
     } finally {
       setLoadingIds(prev => ({ ...prev, [clinicId]: false }));
@@ -102,7 +102,7 @@ export function SreDashboardClient({ configs }: { configs: ClinicRuntimeConfig[]
                 </td>
                 <td className="px-6 py-4">
                   <div>v{c.version}</div>
-                  <div className="text-xs text-slate-400">{new Date(c.updatedAt).toLocaleString()}</div>
+                  <div className="text-xs text-slate-400">{new Date(c.publishedAt).toLocaleString()}</div>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button 

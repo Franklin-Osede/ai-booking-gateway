@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
-import { Copy, ShieldAlert, Cpu, CheckCircle } from "lucide-react";
+import { ShieldAlert, Cpu, CheckCircle } from "lucide-react";
 import { SreDashboardClient } from "./SreDashboardClient";
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +12,7 @@ export default async function SreDashboard() {
          select: { name: true, slug: true, location: true }
        }
     },
-    orderBy: { updatedAt: "desc" }
+    orderBy: { publishedAt: "desc" }
   });
 
   const total = configs.length;
