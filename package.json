@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "canary": "npx tsx scripts/canary.ts",
+    "canary": "tsx scripts/canary.ts",
     "build": "npm run canary && next build",
     "start": "next start",
     "lint": "eslint",
@@ -44,6 +44,7 @@
     "jsdom": "^29.0.0",
     "prisma": "^7.6.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^4.1.0"
   }
