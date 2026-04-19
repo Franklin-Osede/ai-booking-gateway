@@ -37,8 +37,8 @@ export async function POST(req: Request) {
         location: location || null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...({ countryCode: countryCode || 'ES' } as any),
-        websites: normalizedSiteUrl ? { create: { url: normalizedSiteUrl, isActive: true } } : undefined,
-        brandings: brandColor ? { create: { primaryColor: brandColor, isActive: true } } : undefined,
+        websites: normalizedSiteUrl ? { create: { url: normalizedSiteUrl } } : undefined,
+        brandings: brandColor ? { create: { primaryColor: brandColor } } : undefined,
         widgetConfigs: oldDemoLink ? { create: { demoLink: oldDemoLink } } : undefined
       }
     });

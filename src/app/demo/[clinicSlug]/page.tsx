@@ -61,31 +61,14 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
         ]
       },
       include: {
-        websites: {
-          where: { isActive: true },
-          orderBy: { updatedAt: "desc" },
-          take: 1,
-        },
-        brandings: {
-          where: { isActive: true },
-          orderBy: { updatedAt: "desc" },
-          take: 1,
-        },
+        websites: { orderBy: { updatedAt: "desc" } },
+        brandings: { orderBy: { updatedAt: "desc" } },
       }
     });
     
     if (clinic) {
-      const activeWebsite = clinic.websites?.[0] || await prisma.website.findFirst({
-        where: { clinicId: clinic.id },
-        orderBy: { updatedAt: "desc" },
-      });
-      const activeBranding = clinic.brandings?.[0] || await prisma.branding.findFirst({
-        where: { clinicId: clinic.id },
-        orderBy: { updatedAt: "desc" },
-      });
-
-      customSiteUrl = normalizeSiteUrl(activeWebsite?.url) || customSiteUrl;
-      customColor = activeBranding?.primaryColor || customColor;
+      customSiteUrl = normalizeSiteUrl(clinic.websites?.[0]?.url) || customSiteUrl;
+      customColor = clinic.brandings?.[0]?.primaryColor || customColor;
       customIndustry = clinic.industry || customIndustry;
       if (clinic.videoUrl) customVideo = clinic.videoUrl;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
