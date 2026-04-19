@@ -124,8 +124,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const [micTime, setMicTime] = useState(0);
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [selectedDoctor] = useState("Laura - Asesora");
-  const [selectedService] = useState("Valoración Capilar Gratuita");
+  const [selectedDoctor] = useState(lang === 'en' ? "Laura - Advisor" : "Laura - Asesora");
+  const [selectedService] = useState(lang === 'en' ? "Free Hair Assessment" : "Valoración Capilar Gratuita");
   const [brandName, setBrandName] = useState(effectiveConfig.niche.brandLabel || "la clínica");
   const times = ["09:00", "10:30", "12:00", "16:00", "17:30", "18:45"];
 
@@ -176,6 +176,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+    audioRef.current = null;
     setActiveVoiceId(id);
     setShowVoiceSelector(false);
     
@@ -189,7 +190,10 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     const nicheCfg = effectiveConfig.niche;
     const topic = nicheCfg.topicPrompt;
     
-    const newGreeting = `¡Hola! Bienvenido a ${brandName}. Soy ${name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
+    const isEng = (lang || '').toLowerCase().startsWith('en');
+    const newGreeting = isEng 
+      ? `Hello! Welcome to ${brandName}. I am ${name}... Tell me in your own words. How can I help you... or ${topic}?`
+      : `¡Hola! Bienvenido a ${brandName}. Soy ${name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
     setChatHistory([{ role: "assistant", content: newGreeting }]);
 
     setTimeout(() => {
@@ -345,6 +349,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       if (audioRef.current && !audioRef.current.paused) {
          audioRef.current.pause();
       }
+      audioRef.current = null;
       const displayText = text.replace(/<[^>]*>/g, '');
       setMessages(prev => [...prev.map(m => ({...m, playing: false})), { id: msgId, text: displayText, sender: "bot", playing: true, ...extraProps }]);
       

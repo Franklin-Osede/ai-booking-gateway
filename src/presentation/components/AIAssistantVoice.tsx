@@ -202,6 +202,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+    audioRef.current = null;
     setActiveVoiceId(id);
     setShowVoiceSelector(false);
     
@@ -361,6 +362,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       if (audioRef.current && !audioRef.current.paused) {
          audioRef.current.pause();
       }
+      audioRef.current = null;
       // Remove SSML tags for the visual chat bubble
       const displayText = text.replace(/<[^>]*>/g, '');
       setMessages(prev => [...prev.map(m => ({...m, playing: false})), { id: msgId, text: displayText, sender: "bot", playing: true, ...extraParams }]);
@@ -992,7 +994,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                                                 <button 
                                                   className="w-full text-[13px] py-2.5 rounded-[10px] font-bold transition-all shadow-sm hover:opacity-95 active:scale-[0.98] flex items-center justify-center gap-1.5" 
                                                   style={{ backgroundColor: color + "15", color: getDarkerColor(color) }}
-                                                  onClick={(e) => { e.stopPropagation(); handleUserSelect(`Reservar con ${doc.name}`, 25); }}
+                                                  onClick={(e) => { e.stopPropagation(); handleUserSelect(isEng ? `Book with ${doc.name}` : `Reservar con ${doc.name}`, 25); }}
                                                 >
                                                   {isEng ? "Book appointment" : "Reservar cita"} <ChevronRight size={14} strokeWidth={3} />
                                                 </button>
