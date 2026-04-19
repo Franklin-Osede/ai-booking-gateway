@@ -151,7 +151,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const { getPreloadedUrl } = useVoicePreloader({
     lang: lang || 'es',
     brandName,
-    niche: effectiveConfig.niche.id || "hair_transplant",
+    niche: (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant"),
     getGreetingText,
     enabled: true,
     voiceType: "free"
@@ -298,10 +298,6 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
       setChatHistory([]);
       blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
       blobTrackerRef.current = [];
-      const initUrl = getPreloadedUrl(activeVoiceId || "1");
-      if (initUrl) {
-        blobTrackerRef.current.push(initUrl);
-      }
     } else {
       setIsOpen(true);
       triggerFlowStep(0);
