@@ -68,8 +68,8 @@ async function runCanary() {
             signal: AbortSignal.timeout(8000),
             headers: { "User-Agent": "AgentMinds/Canary" }
         });
-        if (!check.ok && check.status >= 500) {
-            console.error(`❌ FATAL: ${config.clinic.name} (${config.publishedWebsiteUrl}) retornó ${check.status}.`);
+        if (!check.ok) {
+            console.error(`❌ FATAL: ${config.clinic.name} (${config.publishedWebsiteUrl}) retornó error HTTP ${check.status}.`);
             failures++;
             continue;
         }

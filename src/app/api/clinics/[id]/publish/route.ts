@@ -33,8 +33,8 @@ export async function POST(req: Request, context: unknown) {
       return NextResponse.json({ success: false, error: "Clínica no encontrada" }, { status: 404 });
     }
 
-    const activeWebsite = clinic.websites[0];
-    const activeBranding = clinic.brandings[0];
+    const activeWebsite = clinic.websites.find(w => w.isActive) || clinic.websites[0];
+    const activeBranding = clinic.brandings.find(b => b.isActive) || clinic.brandings[0];
 
     if (!activeWebsite || !activeWebsite.url) {
       return NextResponse.json({ success: false, error: "No hay dominio web configurado para publicar." }, { status: 400 });
