@@ -119,7 +119,9 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   // Por defecto usamos proxy para saltar las protecciones X-Frame-Options.
   // Solo desactivamos proxy si pasamos ?proxy=false
   const useProxy = resolvedSearchParams.proxy !== 'false';
-  const finalUrl = useProxy ? `/api/v1/proxy?url=${encodeURIComponent(customSiteUrl)}` : customSiteUrl;
+  const finalUrl = (!customSiteUrl || customSiteUrl.trim() === "") 
+     ? "" 
+     : (useProxy ? `/api/v1/proxy?url=${encodeURIComponent(customSiteUrl)}` : customSiteUrl);
 
   const forceImageMode = resolvedSearchParams.image === 'true';
   const forceLang = resolvedSearchParams.lang as string;
