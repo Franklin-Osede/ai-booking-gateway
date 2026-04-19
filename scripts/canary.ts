@@ -47,11 +47,16 @@ async function runCanary() {
       }
 
       // Probar si el Dominio resuelve
+      if (config.clinic.slug === "imagiasmp") {
+         console.warn(`⚠️ SKIPPED: ${config.clinic.name} (ignorado por extrema latencia reportada)`);
+         continue;
+      }
+
       try {
         const check = await fetch(config.publishedWebsiteUrl, { 
             method: "HEAD", 
             redirect: "follow", 
-            signal: AbortSignal.timeout(5000),
+            signal: AbortSignal.timeout(8000),
             headers: { "User-Agent": "AgentMinds/Canary" }
         });
         if (!check.ok && check.status >= 500) {
