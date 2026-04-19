@@ -164,7 +164,14 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
     }
     else if (resolvedNextStepId === 2) {
       const category = categories.find((c: { name: string }) => c.name === userSelection) || categories[0];
-      const docsObj = category.docs ? category.docs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
+      const rawDocs = category.docs ? category.docs.slice(0, 3) : [];
+      if (rawDocs.length > 0 && rawDocs.length < 3) {
+         const fallbackDocs = effectiveConfig.niche.categories[0]?.docs || [];
+         for(let j = rawDocs.length; j < 3; j++) {
+            if (fallbackDocs[j]) rawDocs.push(fallbackDocs[j]);
+         }
+      }
+      const docsObj = rawDocs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
          const nicheCfg = effectiveConfig.niche;
          const dynamicSpecialties = nicheCfg.fallbackSpecialties;
          const engSpecialties = ["FUE Hair Surgeon", "DHI Specialist", "Medical Director", "Advanced Trichologist", "Lead Surgeon"];
@@ -175,7 +182,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
             
          if (typeof d === 'string') return { name: d, specialty: assignedSpecialty, bio: fallbackBio };
          return { ...d, specialty: d.specialty || assignedSpecialty, bio: d.bio || fallbackBio };
-      }) : [];
+      });
       pushBotMessage(chatScripts.doctor_found_prompt, 1200, () => {
          setStepInfo({ options: chatScripts.doctor_found_options, stepId: 25 });
       }, { isDoctorList: true, doctorListData: docsObj });

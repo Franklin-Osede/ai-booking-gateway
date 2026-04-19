@@ -538,7 +538,13 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         if (userSelection === "Ver Especialistas" || userSelection === "Ver otros Especialistas" || userSelection === "View Specialists" || userSelection === "View other Specialists") {
            const othersMsg = VoicePromptService.getPrompt(VoiceIntent.OTHERS, { locale: lang || 'es' }, voiceProvider);
            const category = categories[0];
-           const rawDocs = category.docs.slice(0, 3);
+           const rawDocs = category.docs ? category.docs.slice(0, 3) : [];
+           if (rawDocs.length > 0 && rawDocs.length < 3) {
+              const fallbackDocs = effectiveConfig.niche.categories[0]?.docs || [];
+              for(let j = rawDocs.length; j < 3; j++) {
+                 if (fallbackDocs[j]) rawDocs.push(fallbackDocs[j]);
+              }
+           }
            const seenImages = new Set<string>();
            const docPayload = rawDocs.map((d: string | { name: string; image?: string; specialty?: string; bio?: string }, idx: number) => {
              const baseName = typeof d === 'string' ? d : d.name;
