@@ -44,14 +44,6 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   let customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
   let customWidgetPosition = "right";
 
-  const normalizeSiteUrl = (rawUrl?: string | null) => {
-    if (!rawUrl) return null;
-    const trimmed = rawUrl.trim();
-    if (!trimmed) return null;
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    return `https://${trimmed}`;
-  };
-
   try {
     const clinic = await prisma.clinic.findFirst({
       where: {
@@ -61,31 +53,45 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
         ]
       },
       include: {
-        websites: { orderBy: { updatedAt: "desc" } },
-        brandings: { orderBy: { updatedAt: "desc" } },
+        runtimeConfig: true
       }
     });
     
     if (clinic) {
-      customSiteUrl = normalizeSiteUrl(clinic.websites?.[0]?.url) || customSiteUrl;
-      customColor = clinic.brandings?.[0]?.primaryColor || customColor;
-      customIndustry = clinic.industry || customIndustry;
+      if (clinic.runtimeConfig) {
+        customSiteUrl = clinic.runtimeConfig.publishedWebsiteUrl || "";
+        customColor = clinic.runtimeConfig.publishedBrandColor || customColor;
+        customIndustry = clinic.runtimeConfig.publishedNiche || clinic.industry || customIndustry;
+        detectedLang = clinic.runtimeConfig.publishedLocale || "es";
+        
+        if (clinic.runtimeConfig.fallbackMode === 'neutral') {
+            customSiteUrl = ""; // empty url triggers neutral mode in DemoOverlay
+        }
+      } else {
+        // Fallback for clinics that haven't published yet
+        console.warn(`[Demo Hub] Warning: Clinic ${clinicSlug} has no runtimeConfig. Triggering neutral fallback.`);
+        customSiteUrl = "";
+      }
+
       if (clinic.videoUrl) customVideo = clinic.videoUrl;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((clinic as any).widgetPosition) customWidgetPosition = (clinic as any).widgetPosition;
       
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const countryOrLocale = String((clinic as any).countryCode || '').toLowerCase();
-      if (countryOrLocale === 'en' || countryOrLocale.startsWith('en-')) {
-         detectedLang = countryOrLocale === 'en-us' ? 'en-US' : 'en-GB';
-      } else if (clinic.location) {
-         const loc = clinic.location.toLowerCase();
-         if (loc.includes('london') || loc.includes('uk') || loc.includes('england') || loc.includes('manchester') || loc.includes('reino unido') || loc.includes('brit')) {
-            detectedLang = 'en-GB';
-         }
+      // Auto-detect GB/EN explicitly if they lack a published runtimeLocale
+      if (!clinic.runtimeConfig) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const countryOrLocale = String((clinic as any).countryCode || '').toLowerCase();
+          if (countryOrLocale === 'en' || countryOrLocale.startsWith('en-')) {
+             detectedLang = countryOrLocale === 'en-us' ? 'en-US' : 'en-GB';
+          } else if (clinic.location) {
+             const loc = clinic.location.toLowerCase();
+             if (loc.includes('london') || loc.includes('uk') || loc.includes('england') || loc.includes('manchester') || loc.includes('reino unido') || loc.includes('brit')) {
+                detectedLang = 'en-GB';
+             }
+          }
       }
     } else {
+      // Legacy Mock Databases fallback if clinic wasn't in DB at all
       const mockDatabase: Record<string, { url: string, color: string, industry?: string }> = {
         "instituto-capilar": { url: "https://institutocapilar.es", color: "#1a4b8c", industry: "Clínica Capilar" },
         "clinica-arbelaez": { url: "https://www.clinicaarbelaez.com/", color: "#ededed", industry: "Clínica Capilar" },

@@ -33,6 +33,11 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
   const [savingLanguage, setSavingLanguage] = useState(false);
   const [hasSavedLanguage, setHasSavedLanguage] = useState(false);
 
+  // Publish Demo Snapshot State
+  const [publishingDemo, setPublishingDemo] = useState(false);
+  const [hasPublishedDemo, setHasPublishedDemo] = useState(false);
+  const [publishError, setPublishError] = useState("");
+
   const [seoMetrics, setSeoMetrics] = useState({ summary: "", traffic: "", cost: "", topPages: "", competitors: "", socialTraffic: "", insights: "" });
   const [savingMetrics, setSavingMetrics] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
@@ -123,6 +128,28 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
     setHasSavedSiteUrl(true);
     setTimeout(() => setHasSavedSiteUrl(false), 3000);
     fetchClinic();
+  };
+
+  const handlePublishDemo = async () => {
+    if (publishingDemo) return;
+    setPublishingDemo(true);
+    setPublishError("");
+    try {
+      const res = await fetch(`/api/clinics/${unwrappedParams.id}/publish`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setPublishError(data.error || "Error desconocido al publicar.");
+      } else {
+        setHasPublishedDemo(true);
+        setTimeout(() => setHasPublishedDemo(false), 3000);
+      }
+    } catch {
+      setPublishError("Fallo de red al intentar publicar.");
+    } finally {
+      setPublishingDemo(false);
+    }
   };
 
   const handleSavePosition = async () => {
@@ -693,6 +720,32 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
              </div>
 
              <p className="text-muted-foreground text-xs py-2 mt-2">Este enlace Premium carga el menú &quot;Demo Hub&quot; para elegir entre Modos de IA.</p>
+             
+             {/* Boton de Publicar Snapshot */}
+             <div className="bg-linear-to-r from-emerald-950/20 to-transparent border border-emerald-500/30 rounded-2xl p-6 relative overflow-hidden mt-6">
+               <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+                 <Activity size={100} />
+               </div>
+               <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h4 className="text-lg font-bold text-emerald-500 flex items-center gap-2">
+                      <Save size={18}/> Actualizar Demo en Producción
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-lg">
+                      Guarda y publica instantáneamente todos tus cambios (Color, Dominio, Idioma) en el entorno público inmutable. 
+                      Si falla el dominio, se degradará al Modo Seguro.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handlePublishDemo}
+                    disabled={publishingDemo}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-foreground font-bold px-6 py-3 rounded-xl transition-all shadow-lg flex items-center gap-2 shrink-0"
+                  >
+                    {publishingDemo ? "Publicando..." : (hasPublishedDemo ? "¡Publicado!" : "Publicar Versión Demo")}
+                  </button>
+               </div>
+               {publishError && <p className="text-red-500 text-sm font-semibold mt-4 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{publishError}</p>}
+             </div>
            </div>
 
            <div>

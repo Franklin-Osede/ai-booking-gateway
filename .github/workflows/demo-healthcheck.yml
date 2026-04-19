@@ -1,0 +1,26 @@
+name: 24/7 Demo Hub Healthchecker
+
+on:
+  schedule:
+    # Runs every 5 minutes
+    - cron: '*/5 * * * *'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  ping-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit Ping Endpoint
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X GET -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" https://demos.agentminds.io/api/cron/syn-monitor)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          STATUS=$(echo "$RESPONSE" | tail -n 1)
+          
+          echo "Status: $STATUS"
+          echo "Body: $BODY"
+          
+          if [ "$STATUS" -ne 200 ]; then
+            echo "Healtcheck endpoint failed or is unauthorized."
+            exit 1
+          fi

@@ -39,7 +39,17 @@ export async function GET() {
           },
           widgetConfigs: {
             create: { demoLink: oldDemoLink }
-          }
+          },
+          runtimeConfig: url ? {
+            create: {
+              publishedWebsiteUrl: url,
+              publishedBrandColor: color || "#333333",
+              publishedNiche: "Clínica Capilar",
+              publishedLocale: "es-ES",
+              fallbackMode: "proxy",
+              version: 1,
+            }
+          } : undefined
         }
       });
       importedCount++;

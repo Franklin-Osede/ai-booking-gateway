@@ -39,7 +39,17 @@ export async function POST(req: Request) {
         ...({ countryCode: countryCode || 'ES' } as any),
         websites: normalizedSiteUrl ? { create: { url: normalizedSiteUrl } } : undefined,
         brandings: brandColor ? { create: { primaryColor: brandColor } } : undefined,
-        widgetConfigs: oldDemoLink ? { create: { demoLink: oldDemoLink } } : undefined
+        widgetConfigs: oldDemoLink ? { create: { demoLink: oldDemoLink } } : undefined,
+        runtimeConfig: normalizedSiteUrl ? {
+          create: {
+            publishedWebsiteUrl: normalizedSiteUrl,
+            publishedBrandColor: brandColor || "#333333",
+            publishedNiche: industry || "Sector General",
+            publishedLocale: countryCode || "es-ES",
+            fallbackMode: "proxy",
+            version: 1
+          }
+        } : undefined
       }
     });
     return NextResponse.json({ success: true, data: clinic });

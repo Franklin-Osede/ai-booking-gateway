@@ -27,6 +27,7 @@ model Clinic {
   widgetConfigs  WidgetConfig[]
   outreachLogs   OutreachLog[]
   events         ClinicEvent[]
+  runtimeConfig  ClinicRuntimeConfig?
 
   @@index([name])
   @@index([slug])
@@ -124,4 +125,20 @@ model ClinicEvent {
 
   @@index([clinicId])
   @@index([eventDate])
+}
+
+model ClinicRuntimeConfig {
+  id                  String   @id @default(uuid())
+  clinicId            String   @unique
+  publishedWebsiteUrl String
+  publishedBrandColor String?
+  publishedNiche      String?
+  publishedLocale     String?  @default("es-ES")
+  fallbackMode        String   @default("proxy")
+  version             Int      @default(1)
+  publishedAt         DateTime @default(now())
+
+  clinic              Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
 }

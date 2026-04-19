@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "next build",
+    "canary": "npx tsx scripts/canary.ts",
+    "build": "npm run canary && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate"
