@@ -480,7 +480,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
            const byeMsg = VoicePromptService.getPrompt(VoiceIntent.BYE, { locale: lang || 'es' }, voiceProvider);
            fetchAudio(byeMsg, "bot-bye", () => {
              setStepInfo({ options: [], stepId: 0 });
-           }, { intent: "GREETING" });
+           }, { intent: "BYE" });
            return;
         }
 
