@@ -166,7 +166,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const currentMonthText = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1) + " " + dispYear;
   const monthShort = monthNameStr.substring(0, 3);
 
-  const handleVoiceSelection = (id: string, name: string) => {
+  const handleVoiceSelection = (id: string) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -180,26 +180,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
     setStepInfo({ options: [], stepId: 0 });
 
     const activeNiche = (niche && niche !== 'default') ? niche : (detectedNiche || "hair_transplant");
-    const { niche: nicheCfg, locale: confLocale } = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
-    let currentBrand = nicheCfg.brandLabel || "la clínica";
-    try {
-      const brandParam = new URLSearchParams(window.location.search).get('brand');
-      const storedSite = localStorage.getItem('onboarding_site_url');
-      if (brandParam) {
-        currentBrand = brandParam;
-      } else if (storedSite) {
-        let actualSite = storedSite;
-        if (storedSite.includes('url=')) {
-           try { actualSite = decodeURIComponent(storedSite.split('url=')[1].split('&')[0]); } catch {}
-        }
-        let host = actualSite;
-        try { host = new URL(actualSite).hostname; } catch { host = actualSite.replace(/^https?:\/\//, '').split('/')[0]; }
-        currentBrand = "la clínica " + host.replace('www.', '').split('.')[0];
-      }
-    } catch {}
-        
-    let voiceProvider = "elevenlabs";
-    try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
+    const { locale: confLocale } = resolveConfig({ niche: activeNiche, locale: lang || 'es' });
     const currentAvailVoices = getVoices(lang);
     const selectedVoice = currentAvailVoices.find(v => v.id === id) || currentAvailVoices[0];
 
@@ -749,7 +730,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                           {getVoices(lang).slice(0, 3).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
-                               onClick={() => handleVoiceSelection(v.id, v.name)}
+                               onClick={() => handleVoiceSelection(v.id)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0">
@@ -767,7 +748,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
                           {getVoices(lang).slice(6, 9).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
-                               onClick={() => handleVoiceSelection(v.id, v.name)}
+                               onClick={() => handleVoiceSelection(v.id)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0 opacity-90">
