@@ -1,4 +1,5 @@
 import { prisma } from "../src/lib/prisma";
+import { parseCanonicalLocale } from "../src/lib/utils/locale";
 
 const VIP_SLUGS = [
   "wmglondon",
@@ -52,15 +53,46 @@ async function runCanary() {
          continue;
       }
 
+      // Validate Locale Canonical Strictness
+      const canonical = parseCanonicalLocale(config.publishedLocale);
+      if (!canonical) {
+          console.error(`❌ FATAL: ${config.clinic.name} usa un Locale no canónico ('${config.publishedLocale}'). Rompe contrato.`);
+          failures++;
+          continue;
+      }
+
       try {
         const check = await fetch(config.publishedWebsiteUrl, { 
-            method: "HEAD", 
+            method: "GET", 
             redirect: "follow", 
             signal: AbortSignal.timeout(8000),
             headers: { "User-Agent": "AgentMinds/Canary" }
         });
         if (!check.ok && check.status >= 500) {
             console.error(`❌ FATAL: ${config.clinic.name} (${config.publishedWebsiteUrl}) retornó ${check.status}.`);
+            failures++;
+            continue;
+        }
+        
+        const htmlBody = await check.text();
+        const parkingSignatures = [
+          "domain is registered at hostinger", 
+          "godaddy.com/forsale",
+          "buy this domain",
+          "domain is parked",
+          "this site is parked"
+        ];
+        
+        const lowerHtml = htmlBody.toLowerCase();
+        let isParked = false;
+        for (const sig of parkingSignatures) {
+          if (lowerHtml.includes(sig)) {
+             isParked = true; break;
+          }
+        }
+        
+        if (isParked) {
+            console.error(`❌ FATAL: ${config.clinic.name} (${config.publishedWebsiteUrl}) es un Parked Domain.`);
             failures++;
             continue;
         }

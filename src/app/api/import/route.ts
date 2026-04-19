@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseCanonicalLocale } from "@/lib/utils/locale";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -45,7 +46,7 @@ export async function GET() {
               publishedWebsiteUrl: url,
               publishedBrandColor: color || "#333333",
               publishedNiche: "Clínica Capilar",
-              publishedLocale: "es-ES",
+              publishedLocale: parseCanonicalLocale(location) || "es-ES",
               fallbackMode: "proxy",
               version: 1,
             }

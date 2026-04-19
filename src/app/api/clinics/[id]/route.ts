@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseCanonicalLocale } from "@/lib/utils/locale";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -31,7 +32,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     const { name, industry, location, notes, primaryColor, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode, siteUrl } = body;
 
-    const updateData: Record<string, unknown> = { name, industry, location, notes, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode };
+    let finalCountryCode = countryCode;
+    if (countryCode) {
+       const canonical = parseCanonicalLocale(countryCode);
+       if (!canonical) {
+          return NextResponse.json({ success: false, error: `Edición bloqueada: El idioma('${countryCode}') no es un Locale válido (es-ES, en-GB, en-US).` }, { status: 400 });
+       }
+       finalCountryCode = canonical;
+    }
+
+    const updateData: Record<string, unknown> = { name, industry, location, notes, videoUrl, seoMetrics, techMetrics, widgetPosition, countryCode: finalCountryCode };
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
     if (primaryColor) {

@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: DemoProps): Promise<Metadata>
 }
 
 import { prisma } from "@/lib/prisma";
+import { parseCanonicalLocale } from "@/lib/utils/locale";
 
 export default async function DemoPage({ params, searchParams }: DemoProps) {
   const { clinicSlug } = await params;
@@ -117,7 +118,14 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
 
   const forceImageMode = resolvedSearchParams.image === 'true';
   const forceLang = resolvedSearchParams.lang as string;
-  if (forceLang) detectedLang = forceLang;
+  if (forceLang) {
+      const canonicalForce = parseCanonicalLocale(forceLang);
+      if (canonicalForce) {
+          detectedLang = canonicalForce;
+      } else {
+          console.warn(`⚠️ ALERTA SRE: Intento de forzar idioma inválido por query (?lang=${forceLang}). Ignorado.`);
+      }
+  }
 
   console.log("=== DEBUG [page.tsx] ===");
   console.log("clinicSlug:", clinicSlug);
