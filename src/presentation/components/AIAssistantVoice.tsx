@@ -105,9 +105,9 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [stepInfo, setStepInfo] = useState<{ options: string[]; stepId: number }>({ options: [], stepId: 0 });
+  const [brandName, setBrandName] = useState("nuestra clínica");
   const endRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const preloadedGreetingRef = useRef<string | null>(null);
   const blobTrackerRef = useRef<string[]>([]);
 
   const [activeVoiceId, setActiveVoiceId] = useState("f_laura");
@@ -115,7 +115,8 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const availableVoicesForInit = getVoices(lang);
   const activeVoice: VoiceProfile = availableVoicesForInit.find(v => v.id === activeVoiceId) || availableVoicesForInit[0];
 
-  // Clean up all localized blobs on unmount
+  // Clean up all localized dynamically fetched blobs on unmount.
+  // Note: preloaded URLs are managed by the useVoicePreloader hook's clearCache.
   useEffect(() => {
     return () => {
       blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
@@ -147,7 +148,6 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedDoctor, setSelectedDoctor] = useState<string>("");
   const [expandedDocIdx, setExpandedDocIdx] = useState<number | null>(null);
-  const [brandName, setBrandName] = useState("nuestra clínica");
   const times = ["09:00", "10:30", "12:00", "16:00", "17:30", "18:45"];
 
   const [today, setToday] = useState<Date | null>(null);
@@ -308,10 +308,6 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
       setSelectedDoctor("");
       blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
       blobTrackerRef.current = [];
-      const initUrl = getPreloadedUrl(activeVoiceId || "1");
-      if (initUrl) {
-        blobTrackerRef.current.push(initUrl);
-      }
     } else {
       setIsOpen(true);
       triggerFlowStep(0);
@@ -423,7 +419,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         fetchAudio(greeting, "bot-0", () => {
           const initialChips = categories.slice(0, 3).map((c: { name: string }) => c.name);
           setStepInfo({ options: initialChips, stepId: 1 });
-        }, { intent: "GREETING" });
+        }, { intent: "GREETING", preloadedUrl: getPreloadedUrl(activeVoice.id) });
       } 
       else if (nextStepId === 1) {
         let voiceProvider = "elevenlabs";

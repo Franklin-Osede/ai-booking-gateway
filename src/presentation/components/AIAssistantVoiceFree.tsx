@@ -153,7 +153,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     brandName,
     niche: effectiveConfig.niche.id || "hair_transplant",
     getGreetingText,
-    enabled: true
+    enabled: true,
+    voiceType: "free"
   });
 
   useEffect(() => {
@@ -230,59 +231,13 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
   const endRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const preloadedGreetingRef = useRef<string | null>(null);
   const blobTrackerRef = useRef<string[]>([]);
   
-  // Clean up all localized blobs on unmount
+  // Clean up all localized dynamically fetched blobs on unmount
   useEffect(() => {
     return () => {
       blobTrackerRef.current.forEach(url => URL.revokeObjectURL(url));
     };
-  }, []);
-
-  useEffect(() => {
-    // Pre-fetch greeting for instantaneous startup
-    const preloadGreeting = async () => {
-      let currentBrand = effectiveConfig.niche.brandLabel || "la clínica";
-      try {
-         const storedSite = new URLSearchParams(window.location.search).get('site') || localStorage.getItem('onboarding_site_url');
-         const brandParam = new URLSearchParams(window.location.search).get('brand');
-         if (brandParam) {
-            currentBrand = brandParam;
-         } else if (storedSite) {
-            let parsedName = new URL(storedSite).hostname.replace('www.', '').split('.')[0];
-            parsedName = parsedName.replace(/^cl[ií]nica/i, '').replace(/-?cl[ií]nica-?/i, '');
-            if (!parsedName) parsedName = "especializada";
-            currentBrand = "la clínica " + parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
-         }
-      } catch {
-        // Ignore
-      }
-
-      const nicheCfg = effectiveConfig.niche;
-      const topic = nicheCfg.topicPrompt;
-      
-      const greeting = `¡Hola! Bienvenido a ${currentBrand}. Soy ${activeVoice.name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
-      try {
-        let voiceProvider = "elevenlabs";
-        try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}
-        const res = await fetch('/api/v1/voice', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: greeting, intent: "GREETING", provider: voiceProvider, voiceType: 'free', elevenlabs_voice_id: activeVoice.elevenLabsId, gender: activeVoice.gender, niche: activeNiche, clinicId: brandName, locale: lang || 'es' })
-        });
-        if (res.ok) {
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          blobTrackerRef.current.push(url);
-          preloadedGreetingRef.current = url;
-        }
-      } catch (e) {
-        console.error("Polly Preload Error:", e);
-      }
-    };
-    preloadGreeting();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -708,7 +663,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                           {getVoices(lang).slice(3, 6).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
-                               onClick={() => handleVoiceSelection(v.id, v.name)}
+                               onClick={() => handleVoiceSelection(v.id)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0">
@@ -726,7 +681,7 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
                           {getVoices(lang).slice(9, 12).map((v: VoiceProfile) => (
                              <div 
                                key={v.id}
-                               onClick={() => handleVoiceSelection(v.id, v.name)}
+                               onClick={() => handleVoiceSelection(v.id)}
                                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${activeVoiceId === v.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                              >
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative shrink-0 opacity-90">

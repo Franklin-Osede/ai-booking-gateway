@@ -8,6 +8,7 @@ interface PreloaderParams {
   clinicId?: string | null;
   getGreetingText: (voice: VoiceProfile) => string;
   enabled?: boolean;
+  voiceType?: "guided" | "free";
 }
 
 export function useVoicePreloader({
@@ -16,7 +17,8 @@ export function useVoicePreloader({
   niche,
   clinicId = null,
   getGreetingText,
-  enabled = true
+  enabled = true,
+  voiceType = "guided"
 }: PreloaderParams) {
   // Cache of fully loaded Blob URLs by cache key (locale_voiceId)
   const preloadedUrls = useRef<Record<string, string>>({});
@@ -67,7 +69,7 @@ export function useVoicePreloader({
           body: JSON.stringify({ 
             text, 
             provider: voiceProvider, 
-            voiceType: 'guided', 
+            voiceType: voiceType, 
             elevenlabs_voice_id: voice.elevenLabsId, 
             gender: voice.gender, 
             niche: niche, 
@@ -108,7 +110,7 @@ export function useVoicePreloader({
       // Memory cleanup for object URLs
       clearCache();
     };
-  }, [lang, brandName, niche, clinicId, enabled, getGreetingText, clearCache]);
+  }, [lang, brandName, niche, clinicId, enabled, getGreetingText, voiceType, clearCache]);
 
   const getPreloadedUrl = useCallback((voiceId: string) => {
     const key = `${lang}_${voiceId}`;
