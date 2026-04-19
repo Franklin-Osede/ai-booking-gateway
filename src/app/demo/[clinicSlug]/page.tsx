@@ -45,6 +45,14 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
   let customVideo = typeof resolvedSearchParams.video === 'string' ? resolvedSearchParams.video : undefined;
   let customWidgetPosition = "right";
 
+  const normalizeSiteUrl = (rawUrl?: string | null) => {
+    if (!rawUrl) return null;
+    const trimmed = rawUrl.trim();
+    if (!trimmed) return null;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
   try {
     const clinic = await prisma.clinic.findFirst({
       where: {
@@ -53,11 +61,14 @@ export default async function DemoPage({ params, searchParams }: DemoProps) {
           ...(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(clinicSlug) ? [{ id: clinicSlug }] : [])
         ]
       },
-      include: { websites: true, brandings: true }
+      include: {
+        websites: { orderBy: { updatedAt: "desc" } },
+        brandings: { orderBy: { updatedAt: "desc" } },
+      }
     });
     
     if (clinic) {
-      customSiteUrl = clinic.websites?.[0]?.url || customSiteUrl;
+      customSiteUrl = normalizeSiteUrl(clinic.websites?.[0]?.url) || customSiteUrl;
       customColor = clinic.brandings?.[0]?.primaryColor || customColor;
       customIndustry = clinic.industry || customIndustry;
       if (clinic.videoUrl) customVideo = clinic.videoUrl;
