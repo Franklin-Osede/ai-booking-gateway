@@ -35,7 +35,8 @@ export async function GET() {
     log("✅ Migración completada exitosamente.");
 
     return NextResponse.json({ success: true, logs });
-  } catch(e: any) {
-    return NextResponse.json({ success: false, error: e.message || String(e) }, { status: 500 });
+  } catch(e: unknown) {
+    const errorMsg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }
 }
