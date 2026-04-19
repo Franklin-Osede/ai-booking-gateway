@@ -33,11 +33,15 @@ export async function POST(req: Request, context: unknown) {
       return NextResponse.json({ success: false, error: "Clínica no encontrada" }, { status: 404 });
     }
 
-    const activeWebsite = clinic.websites.find(w => w.isActive) || clinic.websites[0];
-    const activeBranding = clinic.brandings.find(b => b.isActive) || clinic.brandings[0];
+    const activeWebsite = clinic.websites.find(w => w.isActive);
+    const activeBranding = clinic.brandings.find(b => b.isActive);
 
     if (!activeWebsite || !activeWebsite.url) {
-      return NextResponse.json({ success: false, error: "No hay dominio web configurado para publicar." }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Publicación bloqueada: No hay ningún dominio marcado como activo (isActive: true)." }, { status: 400 });
+    }
+    
+    if (!activeBranding) {
+      return NextResponse.json({ success: false, error: "Publicación bloqueada: No hay branding activo configurado." }, { status: 400 });
     }
 
     let urlToPublish = activeWebsite.url;
@@ -64,7 +68,7 @@ export async function POST(req: Request, context: unknown) {
         signal: AbortSignal.timeout(8000) 
       });
       
-      if (!fetchCheck.ok && fetchCheck.status !== 403 && fetchCheck.status !== 401) {
+      if (!fetchCheck.ok) {
          return NextResponse.json({ success: false, error: `Publicación bloqueada: La URL devolvió HTTP ${fetchCheck.status}.` }, { status: 400 });
       }
 

@@ -45,7 +45,7 @@ export async function GET() {
               publishedWebsiteUrl: url,
               publishedBrandColor: color || "#333333",
               publishedNiche: "Clínica Capilar",
-              publishedLocale: location && location.toLowerCase().match(/(uk|london|england)/) ? "en-GB" : "es-ES",
+              publishedLocale: location && location.toLowerCase().match(/(uk|london|england)/) ? "en-GB" : (location && location.toLowerCase().match(/(us|usa|florida|texas|york|california|miami)/) ? "en-US" : "es-ES"),
               fallbackMode: "proxy",
               version: 1,
             }
