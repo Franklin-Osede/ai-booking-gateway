@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin, FileSpreadsheet, Trash2, Brain } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { parseExcelBuffer, ParsedClinic } from "@/lib/excel-parser";
 
 type Clinic = {
@@ -37,8 +37,9 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState<string>("All");
   const [selectedLocation, setSelectedLocation] = useState<string>("All");
-  const [selectedCountry, setSelectedCountry] = useState<string>("All");
-  const [sortBy, setSortBy] = useState<string>("updated");
+  const [selectedCountry, setSelectedCountry] = useState<string>("ES");
+  const [sortBy, setSortBy] = useState<string>("accessed");
+  const [recentIds, setRecentIds] = useState<string[]>([]);
 
   // Bulk Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,6 +122,21 @@ export default function AdminDashboard() {
   };
 
 
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const syncRecents = () => {
+      try {
+        const recentsStr = localStorage.getItem('recent_clinics_v1') || '[]';
+        setRecentIds(JSON.parse(recentsStr));
+      } catch (e) { console.error(e) }
+    };
+    
+    syncRecents();
+    window.addEventListener('focus', syncRecents);
+    return () => window.removeEventListener('focus', syncRecents);
+  }, [pathname]);
+
   useEffect(() => {
     fetch("/api/clinics")
       .then((res) => res.json())
@@ -154,7 +170,14 @@ export default function AdminDashboard() {
   });
 
   const sortedClinics = [...filteredClinics].sort((a, b) => {
-    if (sortBy === "updated") {
+    if (sortBy === "accessed") {
+      const indexA = recentIds.indexOf(a.id);
+      const indexB = recentIds.indexOf(b.id);
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+    } else if (sortBy === "updated") {
       return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
     } else if (sortBy === "created") {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -277,6 +300,7 @@ export default function AdminDashboard() {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="w-full bg-muted border border-border rounded-xl py-2.5 px-4 outline-none focus:border-yellow-500/50 text-yellow-500 text-sm font-bold cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap pr-8"
                >
+                  <option value="accessed">👀 Vistas Recientemente</option>
                   <option value="updated">⏱️ Recién Editadas</option>
                   <option value="created">🆕 Añadidas Recientemente</option>
                   <option value="name">🔤 Alfabético (A-Z)</option>

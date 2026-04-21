@@ -18,13 +18,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       },
     });
 
-    // Añadirlo automáticamente al Calendario como ClinicEvent
-    await prisma.clinicEvent.create({
+    // Añadirlo automáticamente al nuevo Calendario
+    await prisma.followUpTask.create({
       data: {
         clinicId: id,
-        eventDate: contactDate ? new Date(contactDate) : new Date(),
-        feedback: `Estado: ${status}. ${nextStep || ''}`,
-        nextAction: "Revisar"
+        dueDate: contactDate ? new Date(contactDate) : new Date(),
+        type: channel?.toUpperCase() === "EMAIL" ? "EMAIL" : channel?.toUpperCase() === "WHATSAPP" ? "WHATSAPP" : "CALL",
+        status: status === "Agendado" || status === "Pendiente" ? "PENDING" : "COMPLETED",
+        attemptNum: 1
       }
     });
 

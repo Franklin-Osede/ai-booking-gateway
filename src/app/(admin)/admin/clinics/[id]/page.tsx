@@ -77,6 +77,17 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
 
   useEffect(() => {
     fetchClinic();
+    
+    if (unwrappedParams.id) {
+       try {
+         const recentsStr = localStorage.getItem('recent_clinics_v1') || '[]';
+         let recents = JSON.parse(recentsStr);
+         recents = recents.filter((id: string) => id !== unwrappedParams.id);
+         recents.unshift(unwrappedParams.id);
+         if (recents.length > 50) recents = recents.slice(0, 50);
+         localStorage.setItem('recent_clinics_v1', JSON.stringify(recents));
+       } catch (e) { console.error(e) }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unwrappedParams.id]);
 
