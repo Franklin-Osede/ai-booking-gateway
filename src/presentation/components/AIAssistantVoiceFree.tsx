@@ -144,8 +144,8 @@ export function AIAssistantVoiceFree({ color, niche = "hair_transplant", pos = "
     const topic = nicheCfg.topicPrompt;
     const isEng = (lang || '').toLowerCase().startsWith('en');
     return isEng 
-      ? `Hello! Welcome to ${brandName}. I am ${voice.name}... Tell me in your own words. How can I help you... or ${topic}?`
-      : `¡Hola! Bienvenido a ${brandName}. Soy ${voice.name}. Cuéntame con tus palabras. ¿En qué te puedo ayudar... o ${topic}?`;
+      ? `Hello! Welcome to ${brandName}. I am ${voice.name}. Tell me in your own words, ${topic}?`
+      : `¡Hola! Bienvenido a ${brandName}. Soy ${voice.name}. Cuéntame con tus palabras, ¿${topic}?`;
   }, [lang, brandName, effectiveConfig.niche]);
 
   const { getPreloadedUrl } = useVoicePreloader({

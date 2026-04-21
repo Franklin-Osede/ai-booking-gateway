@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Plus, Search, Building2, ChevronRight, X, Copy, ExternalLink, CheckCircle, MapPin, FileSpreadsheet, Trash2, Brain } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { parseExcelBuffer, ParsedClinic } from "@/lib/excel-parser";
 
 type Clinic = {
@@ -333,13 +334,17 @@ export default function AdminDashboard() {
                      <tr 
                        key={clinic.id} 
                        onClick={() => router.push(`/admin/clinics/${clinic.id}`)}
+                       onDoubleClick={() => window.open(`/admin/clinics/${clinic.id}`, '_blank')}
+                       onAuxClick={(e) => { 
+                         if (e.button === 1) window.open(`/admin/clinics/${clinic.id}`, '_blank'); 
+                       }}
                        className="border-b border-border/40 hover:bg-card cursor-pointer transition-colors group"
                      >
                        <td className="py-4 px-4 font-bold flex items-center gap-4">
                          <div className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground shrink-0 group-hover:bg-foreground group-hover:text-background transition-colors">
                            <Building2 size={18} />
                          </div>
-                         <div>
+                         <Link href={`/admin/clinics/${clinic.id}`} onClick={(e) => e.stopPropagation()} className="hover:opacity-80 transition-opacity">
                             <span className="text-foreground capitalize text-base flex flex-wrap items-center gap-2 font-bold tracking-tight">
                                 {clinic.name}
                                 {clinic.seoMetrics && (
@@ -348,11 +353,11 @@ export default function AdminDashboard() {
                                   </span>
                                 )}
                             </span>
-                            <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                            <div className="text-xs text-muted-foreground font-medium flex items-center gap-1 mt-0.5">
                               <span>{normalizeIndustry(clinic.industry)}</span>
                               <span className="opacity-40 text-[10px]">({clinic.industry})</span>
                             </div>
-                         </div>
+                         </Link>
                        </td>
                        <td className="py-4 px-4">
                           {clinic.location ? (

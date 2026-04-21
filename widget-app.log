@@ -1,0 +1,441 @@
+
+> widget-inyector@0.1.0 dev
+> next dev --turbo -p 3005
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:3005
+- Network:       http://192.168.1.128:3005
+- Environments: .env.local, .env
+✓ Ready in 405ms
+
+ GET / 200 in 534ms (next.js: 262ms, application-code: 273ms)
+ GET /admin 200 in 64ms (next.js: 34ms, application-code: 31ms)
+ GET /api/clinics 200 in 1184ms (next.js: 65ms, application-code: 1118ms)
+ GET /api/clinics 200 in 258ms (next.js: 2ms, application-code: 256ms)
+ GET /admin/calendar 200 in 51ms (next.js: 32ms, application-code: 19ms)
+ GET /api/followup/tasks?start=2026-03-31T22:00:00.000Z&end=2026-04-30T21:59:59.999Z 200 in 472ms (next.js: 32ms, application-code: 441ms)
+ GET /api/followup/tasks?start=2026-03-31T22:00:00.000Z&end=2026-04-30T21:59:59.999Z 200 in 334ms (next.js: 4ms, application-code: 330ms)
+ GET /api/clinics 200 in 1212ms (next.js: 2ms, application-code: 1209ms)
+ GET /api/clinics 200 in 1202ms (next.js: 3ms, application-code: 1199ms)
+ GET /api/clinics/6909cd33-4f24-45ae-abf6-7ff5af442045/timeline 200 in 729ms (next.js: 603ms, application-code: 127ms)
+ GET /api/clinics/439b1754-3627-47d0-8761-d38c21e7a396/timeline 200 in 353ms (next.js: 7ms, application-code: 346ms)
+ DELETE /api/followup/logs/ab3df89c-b743-4d87-9234-ad8c70ac12ce 200 in 631ms (next.js: 562ms, application-code: 69ms)
+ GET /admin 200 in 23ms (next.js: 4ms, application-code: 19ms)
+ GET /api/clinics 200 in 656ms (next.js: 2ms, application-code: 653ms)
+ GET /api/clinics 200 in 266ms (next.js: 2ms, application-code: 264ms)
+ GET /admin/clinics/439b1754-3627-47d0-8761-d38c21e7a396 200 in 333ms (next.js: 314ms, application-code: 19ms)
+ GET /api/clinics/439b1754-3627-47d0-8761-d38c21e7a396 200 in 881ms (next.js: 552ms, application-code: 329ms)
+ GET /api/clinics/439b1754-3627-47d0-8761-d38c21e7a396 200 in 113ms (next.js: 7ms, application-code: 106ms)
+ GET /admin 200 in 29ms (next.js: 6ms, application-code: 23ms)
+ GET /api/clinics 200 in 819ms (next.js: 13ms, application-code: 805ms)
+ GET /api/clinics 200 in 218ms (next.js: 3ms, application-code: 216ms)
+✓ Compiled in 2.9s
+ GET /admin/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 38ms (next.js: 13ms, application-code: 24ms)
+ GET /api/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 622ms (next.js: 7ms, application-code: 615ms)
+ GET /api/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 140ms (next.js: 1830µs, application-code: 138ms)
+ GET /api/clinics 200 in 435ms (next.js: 3ms, application-code: 432ms)
+ GET /api/clinics 200 in 272ms (next.js: 1781µs, application-code: 271ms)
+ GET /admin/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 27ms (next.js: 6ms, application-code: 21ms)
+ GET /api/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 113ms (next.js: 7ms, application-code: 107ms)
+ GET /api/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 110ms (next.js: 2ms, application-code: 108ms)
+ GET /api/clinics 200 in 422ms (next.js: 2ms, application-code: 420ms)
+ GET /api/clinics 200 in 268ms (next.js: 2ms, application-code: 266ms)
+ GET /admin/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 203ms (next.js: 5ms, application-code: 198ms)
+ GET /api/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 114ms (next.js: 6ms, application-code: 108ms)
+ GET /admin/clinics/075d21c2-c772-4772-81f3-ac8b21d83aad 200 in 29ms (next.js: 10ms, application-code: 19ms)
+ GET /api/clinics/075d21c2-c772-4772-81f3-ac8b21d83aad 200 in 543ms (next.js: 4ms, application-code: 539ms)
+ GET /api/clinics/075d21c2-c772-4772-81f3-ac8b21d83aad 200 in 120ms (next.js: 3ms, application-code: 117ms)
+ GET /api/clinics 200 in 457ms (next.js: 1543µs, application-code: 456ms)
+ GET /api/clinics 200 in 269ms (next.js: 2ms, application-code: 266ms)
+ GET /admin/clinics/075d21c2-c772-4772-81f3-ac8b21d83aad 200 in 61ms (next.js: 5ms, application-code: 56ms)
+ GET /api/clinics/075d21c2-c772-4772-81f3-ac8b21d83aad 200 in 122ms (next.js: 4ms, application-code: 118ms)
+⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3005". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+=== DEBUG [page.tsx] ===
+clinicSlug: clinicaciro
+customIndustry FINALLY: Dentistas
+detectedLang: es-ES
+=====================
+=== DEBUG [DemoOverlay.tsx] ===
+niche string received: Dentistas
+===============================
+ GET /demo/clinicaciro 200 in 617ms (next.js: 398ms, application-code: 219ms)
+ GET /api/v1/proxy?url=https%3A%2F%2Fclinicaciro.es%2F 200 in 141ms (next.js: 43ms, application-code: 98ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784177583 200 in 332ms (next.js: 199ms, application-code: 133ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784177584 200 in 366ms (next.js: 184ms, application-code: 182ms)
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 3.4s (next.js: 1188ms, application-code: 2.2s)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 3.5s (next.js: 1192ms, application-code: 2.3s)
+ POST /api/v1/voice 200 in 1519ms (next.js: 3ms, application-code: 1516ms)
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ POST /api/v1/voice 200 in 3.3s (next.js: 986ms, application-code: 2.4s)
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 1056ms (next.js: 1325µs, application-code: 1055ms)
+ POST /api/v1/voice 200 in 1091ms (next.js: 1589µs, application-code: 1089ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 1411ms (next.js: 3ms, application-code: 1409ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ POST /api/v1/voice 200 in 1122ms (next.js: 1813µs, application-code: 1120ms)
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ POST /api/v1/voice 200 in 1341ms (next.js: 1727µs, application-code: 1340ms)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ POST /api/v1/voice 200 in 2.6s (next.js: 3ms, application-code: 2.6s)
+ElevenLabs response status: 200 for voiceId: ePRCLu5JYbpX8LKCF2Wl
+ POST /api/v1/voice 200 in 2.3s (next.js: 3ms, application-code: 2.3s)
+ElevenLabs response status: 200 for voiceId: w8u1dIxiWVelUtUQg1MB
+ElevenLabs response status: 200 for voiceId: t9LRTh3y1ioN00e9wsNh
+ POST /api/v1/voice 200 in 1022ms (next.js: 3ms, application-code: 1019ms)
+ POST /api/v1/voice 200 in 3.0s (next.js: 3ms, application-code: 3.0s)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 987ms (next.js: 4ms, application-code: 983ms)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 1707ms (next.js: 6ms, application-code: 1700ms)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 1778ms (next.js: 4ms, application-code: 1774ms)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 995ms (next.js: 4ms, application-code: 992ms)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 774ms (next.js: 4ms, application-code: 771ms)
+ POST /api/v1/voice 200 in 19ms (next.js: 13ms, application-code: 6ms)
+ POST /api/v1/voice 200 in 20ms (next.js: 5ms, application-code: 15ms)
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784399178 200 in 205ms (next.js: 71ms, application-code: 134ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784399179 200 in 151ms (next.js: 1893µs, application-code: 149ms)
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 887ms (next.js: 9ms, application-code: 879ms)
+ POST /api/v1/voice 200 in 919ms (next.js: 9ms, application-code: 910ms)
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ POST /api/v1/voice 200 in 979ms (next.js: 6ms, application-code: 973ms)
+ POST /api/v1/voice 200 in 357ms (next.js: 3ms, application-code: 354ms)
+ POST /api/v1/voice 200 in 261ms (next.js: 1380µs, application-code: 259ms)
+ POST /api/v1/voice 200 in 331ms (next.js: 1579µs, application-code: 330ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 17ms (next.js: 10ms, application-code: 7ms)
+ POST /api/v1/voice 200 in 18ms (next.js: 4ms, application-code: 14ms)
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784401360 200 in 123ms (next.js: 64ms, application-code: 59ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784401361 200 in 70ms (next.js: 1900µs, application-code: 69ms)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ POST /api/v1/voice 200 in 1094ms (next.js: 4ms, application-code: 1090ms)
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ POST /api/v1/voice 200 in 1133ms (next.js: 3ms, application-code: 1130ms)
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ POST /api/v1/voice 200 in 1183ms (next.js: 3ms, application-code: 1180ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 1115ms (next.js: 1738µs, application-code: 1114ms)
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ POST /api/v1/voice 200 in 1178ms (next.js: 1554µs, application-code: 1176ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 1271ms (next.js: 2ms, application-code: 1269ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ POST /api/v1/voice 200 in 1089ms (next.js: 1925µs, application-code: 1087ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 1441ms (next.js: 2ms, application-code: 1438ms)
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ POST /api/v1/voice 200 in 1088ms (next.js: 3ms, application-code: 1086ms)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ POST /api/v1/voice 200 in 987ms (next.js: 2ms, application-code: 985ms)
+ElevenLabs response status: 200 for voiceId: w8u1dIxiWVelUtUQg1MB
+ POST /api/v1/voice 200 in 1106ms (next.js: 5ms, application-code: 1101ms)
+ElevenLabs response status: 200 for voiceId: ePRCLu5JYbpX8LKCF2Wl
+ POST /api/v1/voice 200 in 1049ms (next.js: 1866µs, application-code: 1047ms)
+ElevenLabs response status: 200 for voiceId: t9LRTh3y1ioN00e9wsNh
+ POST /api/v1/voice 200 in 1128ms (next.js: 1860µs, application-code: 1126ms)
+✓ Compiled in 1231ms
+✓ Compiled in 77ms
+ POST /api/v1/voice 200 in 46ms (next.js: 36ms, application-code: 9ms)
+ POST /api/v1/voice 200 in 48ms (next.js: 29ms, application-code: 19ms)
+ POST /api/v1/voice 200 in 52ms (next.js: 14ms, application-code: 37ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784559280 200 in 189ms (next.js: 8ms, application-code: 182ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784559282 200 in 209ms (next.js: 5ms, application-code: 204ms)
+ElevenLabs response status: 429 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs error: {"detail":{"type":"rate_limit_error","code":"concurrent_limit_exceeded","message":"Too many concurrent requests. Your current subscription is associated with a maximum of 5 concurrent requests (running in parallel). This is done such that a single user does not overwhelm our systems and affect other users negatively. Please upgrade your subscription or contact sales if you want to increase this limit.","status":"too_many_concurrent_requests","request_id":"87834bb90fe1f38a32c620ec19bf6d8f","docs_url":"https://elevenlabs.io/docs/eleven-api/resources/errors#rate-limiting-and-concurrency"}}
+ElevenLabs response status: 429 for voiceId: ERYLdjEaddaiN9sDjaMX
+ElevenLabs error: {"detail":{"type":"rate_limit_error","code":"concurrent_limit_exceeded","message":"Too many concurrent requests. Your current subscription is associated with a maximum of 5 concurrent requests (running in parallel). This is done such that a single user does not overwhelm our systems and affect other users negatively. Please upgrade your subscription or contact sales if you want to increase this limit.","status":"too_many_concurrent_requests","request_id":"cfe92f3907f9d61832c620ec19bf6630","docs_url":"https://elevenlabs.io/docs/eleven-api/resources/errors#rate-limiting-and-concurrency"}}
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ POST /api/v1/voice 200 in 1842ms (next.js: 15ms, application-code: 1827ms)
+ POST /api/v1/voice 200 in 1859ms (next.js: 11ms, application-code: 1848ms)
+ POST /api/v1/voice 200 in 1894ms (next.js: 14ms, application-code: 1880ms)
+ POST /api/v1/voice 200 in 1012ms (next.js: 4ms, application-code: 1008ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ POST /api/v1/voice 200 in 1101ms (next.js: 4ms, application-code: 1097ms)
+ POST /api/v1/voice 200 in 1082ms (next.js: 1604µs, application-code: 1080ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 1204ms (next.js: 1316µs, application-code: 1202ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ POST /api/v1/voice 200 in 1032ms (next.js: 2ms, application-code: 1029ms)
+ POST /api/v1/voice 200 in 1043ms (next.js: 1410µs, application-code: 1041ms)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ POST /api/v1/voice 200 in 1020ms (next.js: 3ms, application-code: 1018ms)
+ElevenLabs response status: 200 for voiceId: ePRCLu5JYbpX8LKCF2Wl
+ POST /api/v1/voice 200 in 1012ms (next.js: 1745µs, application-code: 1010ms)
+ElevenLabs response status: 200 for voiceId: w8u1dIxiWVelUtUQg1MB
+ POST /api/v1/voice 200 in 1055ms (next.js: 3ms, application-code: 1052ms)
+ElevenLabs response status: 200 for voiceId: t9LRTh3y1ioN00e9wsNh
+ POST /api/v1/voice 200 in 974ms (next.js: 2ms, application-code: 972ms)
+✓ Compiled in 940ms
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ POST /api/v1/voice 200 in 1058ms (next.js: 9ms, application-code: 1049ms)
+ POST /api/v1/voice 200 in 1086ms (next.js: 21ms, application-code: 1065ms)
+ POST /api/v1/voice 200 in 1102ms (next.js: 34ms, application-code: 1068ms)
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ POST /api/v1/voice 200 in 954ms (next.js: 1335µs, application-code: 953ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 1029ms (next.js: 3ms, application-code: 1027ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 1288ms (next.js: 1386µs, application-code: 1287ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ POST /api/v1/voice 200 in 955ms (next.js: 1620µs, application-code: 953ms)
+ POST /api/v1/voice 200 in 927ms (next.js: 5ms, application-code: 922ms)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ POST /api/v1/voice 200 in 928ms (next.js: 1853µs, application-code: 927ms)
+ElevenLabs response status: 200 for voiceId: ePRCLu5JYbpX8LKCF2Wl
+ POST /api/v1/voice 200 in 916ms (next.js: 1568µs, application-code: 914ms)
+ElevenLabs response status: 200 for voiceId: t9LRTh3y1ioN00e9wsNh
+ POST /api/v1/voice 200 in 901ms (next.js: 2ms, application-code: 899ms)
+ElevenLabs response status: 200 for voiceId: w8u1dIxiWVelUtUQg1MB
+ POST /api/v1/voice 200 in 1447ms (next.js: 1697µs, application-code: 1445ms)
+✓ Compiled in 49ms
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ POST /api/v1/voice 200 in 1029ms (next.js: 31ms, application-code: 998ms)
+ POST /api/v1/voice 200 in 1009ms (next.js: 12ms, application-code: 997ms)
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ POST /api/v1/voice 200 in 1082ms (next.js: 3ms, application-code: 1079ms)
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 982ms (next.js: 1457µs, application-code: 981ms)
+ POST /api/v1/voice 200 in 982ms (next.js: 1252µs, application-code: 980ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 1029ms (next.js: 1371µs, application-code: 1027ms)
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ POST /api/v1/voice 200 in 879ms (next.js: 1239µs, application-code: 878ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ POST /api/v1/voice 200 in 935ms (next.js: 12ms, application-code: 923ms)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ POST /api/v1/voice 200 in 945ms (next.js: 1756µs, application-code: 943ms)
+ElevenLabs response status: 200 for voiceId: ePRCLu5JYbpX8LKCF2Wl
+ElevenLabs response status: 200 for voiceId: w8u1dIxiWVelUtUQg1MB
+ POST /api/v1/voice 200 in 911ms (next.js: 1520µs, application-code: 909ms)
+ POST /api/v1/voice 200 in 954ms (next.js: 1392µs, application-code: 953ms)
+ElevenLabs response status: 200 for voiceId: t9LRTh3y1ioN00e9wsNh
+ POST /api/v1/voice 200 in 1449ms (next.js: 2ms, application-code: 1446ms)
+Polly API Error: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at POST (src/app/api/v1/voice/route.ts:101:171)
+   99 | ...
+  100 | ...
+> 101 | ...cId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic f...
+      |                                               ^
+  102 | ...
+  103 | ...
+  104 | ...
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784702577 200 in 116ms (next.js: 3ms, application-code: 112ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicaciro.es%2F&t=1776784702578 200 in 137ms (next.js: 1968µs, application-code: 135ms)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ POST /api/v1/voice 200 in 1092ms (next.js: 4ms, application-code: 1088ms)
+ POST /api/v1/voice 200 in 1102ms (next.js: 4ms, application-code: 1098ms)
+ POST /api/v1/voice 200 in 1116ms (next.js: 5ms, application-code: 1111ms)
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ POST /api/v1/voice 200 in 877ms (next.js: 1451µs, application-code: 875ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 960ms (next.js: 3ms, application-code: 957ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 976ms (next.js: 1808µs, application-code: 974ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 1322ms (next.js: 3ms, application-code: 1319ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ POST /api/v1/voice 200 in 898ms (next.js: 2ms, application-code: 896ms)
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ POST /api/v1/voice 200 in 885ms (next.js: 1300µs, application-code: 884ms)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ POST /api/v1/voice 200 in 909ms (next.js: 1378µs, application-code: 907ms)
+ElevenLabs response status: 200 for voiceId: w8u1dIxiWVelUtUQg1MB
+ElevenLabs response status: 200 for voiceId: ePRCLu5JYbpX8LKCF2Wl
+ POST /api/v1/voice 200 in 956ms (next.js: 2ms, application-code: 954ms)
+ POST /api/v1/voice 200 in 912ms (next.js: 1654µs, application-code: 910ms)
+ElevenLabs response status: 200 for voiceId: t9LRTh3y1ioN00e9wsNh
+ POST /api/v1/voice 200 in 872ms (next.js: 1515µs, application-code: 871ms)
+ GET /admin/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 40ms (next.js: 16ms, application-code: 24ms)
+ GET /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 613ms (next.js: 7ms, application-code: 606ms)
+ GET /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 113ms (next.js: 3ms, application-code: 110ms)
+ PUT /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 351ms (next.js: 8ms, application-code: 344ms)
+ GET /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 335ms (next.js: 1735µs, application-code: 333ms)
+ GET /admin 200 in 162ms (next.js: 21ms, application-code: 141ms)
+ GET /api/clinics 200 in 1204ms (next.js: 3ms, application-code: 1202ms)
+ GET /admin/clinics/511e4b90-19c4-4500-87b9-76dbbf849940 200 in 29ms (next.js: 9ms, application-code: 20ms)
+ GET /api/clinics/511e4b90-19c4-4500-87b9-76dbbf849940 200 in 313ms (next.js: 5ms, application-code: 308ms)
+ GET /api/clinics/511e4b90-19c4-4500-87b9-76dbbf849940 200 in 106ms (next.js: 1365µs, application-code: 105ms)
+=== DEBUG [page.tsx] ===
+clinicSlug: cl-nica-doctoraelmira
+customIndustry FINALLY: Clínica Médica
+detectedLang: es-ES
+=====================
+=== DEBUG [DemoOverlay.tsx] ===
+niche string received: Clínica Médica
+===============================
+ GET /demo/cl-nica-doctoraelmira 200 in 198ms (next.js: 10ms, application-code: 187ms)
+ GET /api/v1/proxy?url=https%3A%2F%2Fclinicadoctoraelmira.com%2F 200 in 3.5s (next.js: 6ms, application-code: 3.4s)
+ POST /api/v1/voice 200 in 22ms (next.js: 19ms, application-code: 4ms)
+ POST /api/v1/voice 200 in 24ms (next.js: 11ms, application-code: 12ms)
+ POST /api/v1/voice 200 in 25ms (next.js: 5ms, application-code: 20ms)
+ElevenLabs response status: 429 for voiceId: h2cd3gvcqTp3m65Dysk7
+ElevenLabs error: {"detail":{"type":"rate_limit_error","code":"concurrent_limit_exceeded","message":"Too many concurrent requests. Your current subscription is associated with a maximum of 5 concurrent requests (running in parallel). This is done such that a single user does not overwhelm our systems and affect other users negatively. Please upgrade your subscription or contact sales if you want to increase this limit.","status":"too_many_concurrent_requests","request_id":"53b1313d0ceef32459351e75aa075a4f","docs_url":"https://elevenlabs.io/docs/eleven-api/resources/errors#rate-limiting-and-concurrency"}}
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 1357ms (next.js: 6ms, application-code: 1351ms)
+ POST /api/v1/voice 200 in 1375ms (next.js: 9ms, application-code: 1366ms)
+ POST /api/v1/voice 200 in 1418ms (next.js: 5ms, application-code: 1412ms)
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ POST /api/v1/voice 200 in 828ms (next.js: 1159µs, application-code: 827ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 1082ms (next.js: 1354µs, application-code: 1081ms)
+ POST /api/v1/voice 200 in 1030ms (next.js: 997µs, application-code: 1029ms)
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicadoctoraelmira.com%2F&t=1776787311468 200 in 3.0s (next.js: 8ms, application-code: 3.0s)
+ POST /api/v1/voice 200 in 567ms (next.js: 2ms, application-code: 565ms)
+ POST /api/v1/voice 200 in 812ms (next.js: 1870µs, application-code: 810ms)
+ POST /api/v1/voice 200 in 550ms (next.js: 1947µs, application-code: 548ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ GET /api/v1/scrape-team?url=https%3A%2F%2Fclinicadoctoraelmira.com%2F&t=1776787311469 200 in 3.1s (next.js: 2ms, application-code: 3.1s)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ElevenLabs response status: 200 for voiceId: h2cd3gvcqTp3m65Dysk7
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 855ms (next.js: 1908µs, application-code: 854ms)
+ElevenLabs response status: 200 for voiceId: yiWEefwu5z3DQCM79clN
+ POST /api/v1/voice 200 in 888ms (next.js: 5ms, application-code: 884ms)
+ POST /api/v1/voice 200 in 912ms (next.js: 2ms, application-code: 909ms)
+ElevenLabs response status: 200 for voiceId: dNjJKg63Fr5AXwIdkATa
+ POST /api/v1/voice 200 in 884ms (next.js: 3ms, application-code: 881ms)
+ElevenLabs response status: 200 for voiceId: 1eHrpOW5l98cxiSRjbzJ
+ POST /api/v1/voice 200 in 868ms (next.js: 6ms, application-code: 862ms)
+ElevenLabs response status: 200 for voiceId: ERYLdjEaddaiN9sDjaMX
+ POST /api/v1/voice 200 in 910ms (next.js: 5ms, application-code: 905ms)
+ElevenLabs response status: 200 for voiceId: gJlzF5JxsCvM5hQAoRyD
+ POST /api/v1/voice 200 in 957ms (next.js: 4ms, application-code: 953ms)
+ElevenLabs response status: 200 for voiceId: eEyWolF7iBpMA65GbtAm
+ POST /api/v1/voice 200 in 808ms (next.js: 1645µs, application-code: 807ms)
+ElevenLabs response status: 200 for voiceId: 5IDdqnXnlsZ1FCxoOFYg
+ POST /api/v1/voice 200 in 824ms (next.js: 1678µs, application-code: 822ms)
+ElevenLabs response status: 200 for voiceId: 851ejYcv2BoNPjrkw93G
+ POST /api/v1/voice 200 in 931ms (next.js: 3ms, application-code: 929ms)
+ElevenLabs response status: 200 for voiceId: ePRCLu5JYbpX8LKCF2Wl
+ POST /api/v1/voice 200 in 833ms (next.js: 1363µs, application-code: 832ms)
+ElevenLabs response status: 200 for voiceId: w8u1dIxiWVelUtUQg1MB
+ POST /api/v1/voice 200 in 879ms (next.js: 3ms, application-code: 876ms)
+ElevenLabs response status: 200 for voiceId: t9LRTh3y1ioN00e9wsNh
+ POST /api/v1/voice 200 in 823ms (next.js: 3ms, application-code: 820ms)
+ GET /admin 200 in 78ms (next.js: 5ms, application-code: 73ms)
+ GET /api/clinics 200 in 841ms (next.js: 3ms, application-code: 839ms)
+ GET /admin/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 29ms (next.js: 10ms, application-code: 19ms)
+ GET /api/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 295ms (next.js: 4ms, application-code: 291ms)
+ GET /api/clinics/bb0c06d7-3d29-4113-a3dc-4852351254a4 200 in 105ms (next.js: 1283µs, application-code: 103ms)
+=== DEBUG [page.tsx] ===
+clinicSlug: gandiadentalcare
+customIndustry FINALLY: Dentistas
+detectedLang: es-ES
+=====================
+=== DEBUG [DemoOverlay.tsx] ===
+niche string received: Dentistas
+===============================
+ GET /demo/gandiadentalcare 200 in 437ms (next.js: 6ms, application-code: 432ms)
+ GET /api/v1/proxy?url=https%3A%2F%2Fgandiadentalcare.com 200 in 347ms (next.js: 5ms, application-code: 342ms)
+ POST /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff/outreach 201 in 1058ms (next.js: 647ms, application-code: 412ms)
+ GET /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 360ms (next.js: 5ms, application-code: 356ms)
+ GET /admin/calendar 200 in 38ms (next.js: 8ms, application-code: 30ms)
+ GET /api/followup/tasks?start=2026-03-31T22:00:00.000Z&end=2026-04-30T21:59:59.999Z 200 in 176ms (next.js: 3ms, application-code: 173ms)
+ GET /api/followup/tasks?start=2026-03-31T22:00:00.000Z&end=2026-04-30T21:59:59.999Z 200 in 163ms (next.js: 1734µs, application-code: 161ms)
+ GET /api/clinics 200 in 456ms (next.js: 4ms, application-code: 453ms)
+ GET /api/clinics 200 in 377ms (next.js: 4ms, application-code: 373ms)

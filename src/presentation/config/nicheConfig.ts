@@ -107,7 +107,7 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
     fallbackSpecialties: ["Ortodoncista Experta", "Implantólogo Titular", "Directora Médica", "Especialista Odontopediatría", "Cirujano Dental"],
     fallbackBio: "Especialista titular con amplia experiencia en diseños de sonrisa y casos clínicos complejos.",
     brandLabel: "la Clínica Dental",
-    topicPrompt: "qué tratamiento buscas... o qué te preocupa de tus dientes",
+    topicPrompt: "qué tratamiento buscas o qué te preocupa de tus dientes",
     chatObjection: {
       keywords: ["precio", "caro", "barato", "coste", "presupuesto", "financiacion", "financiación"],
       responseBot: "Es comprensible fijarse en el coste. Nosotros no somos una franquicia 'low-cost': priorizamos la salud a largo plazo usando los mejores materiales (implantes titanio, escáner 3D). Además ofrecemos planes de pago y financiación al 100%.",
@@ -210,7 +210,7 @@ export const NICHE_CONFIGS: Record<string, NicheConfig> = {
     fallbackSpecialties: ["Asesor Comercial", "Jefe de Ventas", "Director de Concesionario", "Especialista de Marca"],
     fallbackBio: "Apasionado del motor con gran experiencia guiando a clientes hacia su vehículo ideal.",
     brandLabel: "el Concesionario",
-    topicPrompt: "qué modelo buscas... o en qué te puedo asesorar",
+    topicPrompt: "qué modelo buscas o en qué te puedo asesorar",
     chatObjection: {
       keywords: ["precio", "caro", "barato", "coste", "descuento", "oferta", "financiación"],
       responseBot: "Te entendemos. Analizamos continuamente el mercado para ofrecer vehículos garantizados y financiaciones exclusivas al 100%. La tranquilidad en la carretera es nuestra prioridad.",
