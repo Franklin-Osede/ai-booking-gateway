@@ -6,28 +6,57 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ActivityType {
+  CALL
+  WHATSAPP
+  EMAIL
+  NOTE
+  SYSTEM
+}
+
+enum ActivityResult {
+  ANSWERED
+  NO_ANSWER
+  LEFT_MESSAGE
+  COMPLETED
+}
+
+enum TaskType {
+  CALL
+  WHATSAPP
+  EMAIL
+  MEETING
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
 model Clinic {
-  id        String   @id @default(uuid())
-  slug      String?  @unique
-  name      String
-  industry  String
-  location  String?
-  countryCode String?
-  videoUrl  String?
-  seoMetrics Json?
-  techMetrics Json?
+  id             String  @id @default(uuid())
+  slug           String? @unique
+  name           String
+  industry       String
+  location       String?
+  countryCode    String?
+  videoUrl       String?
+  seoMetrics     Json?
+  techMetrics    Json?
   widgetPosition String? @default("right")
 
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  websites       Website[]
-  brandings      Branding[]
-  widgetConfigs  WidgetConfig[]
-  outreachLogs   OutreachLog[]
-  events         ClinicEvent[]
-  runtimeConfig  ClinicRuntimeConfig?
+  websites      Website[]
+  brandings     Branding[]
+  widgetConfigs WidgetConfig[]
+  outreachLogs  OutreachLog[]
+  events        ClinicEvent[]
+  runtimeConfig ClinicRuntimeConfig?
+  followUpTasks FollowUpTask[]
 
   @@index([name])
   @@index([slug])
@@ -35,77 +64,84 @@ model Clinic {
 }
 
 model Website {
-  id              String    @id @default(uuid())
-  clinicId        String
-  url             String
-  isActive        Boolean   @default(false)
-  screenshotUrl   String?
-  lastScrapedAt   DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id            String    @id @default(uuid())
+  clinicId      String
+  url           String
+  isActive      Boolean   @default(false)
+  screenshotUrl String?
+  lastScrapedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  clinic          Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
   @@index([clinicId])
   @@index([clinicId, isActive])
 }
 
 model Branding {
-  id              String   @id @default(uuid())
-  clinicId        String
-  primaryColor    String
-  isActive        Boolean  @default(false)
-  secondaryColor  String?
-  buttonStyle     String?
-  logoUrl         String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  clinicId       String
+  primaryColor   String
+  isActive       Boolean  @default(false)
+  secondaryColor String?
+  buttonStyle    String?
+  logoUrl        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  clinic          Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
   @@index([clinicId])
   @@index([clinicId, isActive])
 }
 
 model WidgetConfig {
-  id                String   @id @default(uuid())
-  clinicId          String
-  demoLink          String?
-  selectedProducts  Json?
-  formType          String?
-  voiceAgent        String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String   @id @default(uuid())
+  clinicId         String
+  demoLink         String?
+  selectedProducts Json?
+  formType         String?
+  voiceAgent       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
   @@index([clinicId])
 }
 
 model OutreachLog {
-  id                String   @id @default(uuid())
-  clinicId          String
-  status            String
-  channel           String?
-  nextStep          String?
-  owner             String?
-  lastContactedAt   DateTime?
-  createdAt         DateTime @default(now())
+  id              String    @id @default(uuid())
+  clinicId        String
+  status          String?
+  channel         String?
+  nextStep        String?
+  owner           String?
+  lastContactedAt DateTime?
 
-  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  // Nuevos campos para ActivityLog
+  type       ActivityType?
+  result     ActivityResult?
+  attemptNum Int             @default(1)
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
   @@index([clinicId])
 }
 
 model PronunciationProfile {
-  id         String   @id @default(uuid())
-  scopeType  String   // "niche" or "clinic"
-  scopeId    String   // e.g. "hair_transplant" or "clinic_123"
-  locale     String   @default("es-ES")
-  version    Int      @default(1)
-  rules      Json     @default("[]")
-  updatedAt  DateTime @updatedAt
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  scopeType String // "niche" or "clinic"
+  scopeId   String // e.g. "hair_transplant" or "clinic_123"
+  locale    String   @default("es-ES")
+  version   Int      @default(1)
+  rules     Json     @default("[]")
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 
   @@unique([scopeType, scopeId, locale])
   @@index([scopeId, locale])
@@ -121,7 +157,7 @@ model ClinicEvent {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  clinic       Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
   @@index([clinicId])
   @@index([eventDate])
@@ -138,7 +174,24 @@ model ClinicRuntimeConfig {
   version             Int      @default(1)
   publishedAt         DateTime @default(now())
 
-  clinic              Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
   @@index([clinicId])
+}
+
+model FollowUpTask {
+  id         String     @id @default(uuid())
+  clinicId   String
+  dueDate    DateTime
+  type       TaskType
+  status     TaskStatus @default(PENDING)
+  attemptNum Int        @default(1)
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
+  @@index([dueDate])
 }

@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       data: {
         clinicId: id,
         eventDate: contactDate ? new Date(contactDate) : new Date(),
-        feedback: `[Log Guardado] Estado: ${status}. ${nextStep || ''}`,
+        feedback: `Estado: ${status}. ${nextStep || ''}`,
         nextAction: "Revisar"
       }
     });

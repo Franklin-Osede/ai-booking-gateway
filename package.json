@@ -8,7 +8,7 @@
     "sre:backfill-active": "npx dotenv-cli -e .env -e .env.local -- node scripts/backfill-active-state.js",
     "sre:backfill-runtime": "npx dotenv-cli -e .env -e .env.local -- tsx scripts/backfill-runtime-config.ts",
     "sre:check": "npm ci && npx prisma generate && npx prisma migrate deploy && npm run canary && npm run build",
-    "build": "npm run canary && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate"
