@@ -158,6 +158,13 @@ export default function CalendarPage() {
 
   // derived data
   const dayTasks = tasks.filter(t => isSameDay(new Date(t.dueDate), selectedDate));
+  
+  const groupedDayTasks = Object.values(dayTasks.reduce((acc, t) => {
+    if (!acc[t.clinicId] || t.attemptNum > acc[t.clinicId].attemptNum) {
+      acc[t.clinicId] = t;
+    }
+    return acc;
+  }, {} as Record<string, typeof dayTasks[0]>));
 
   return (
     <div className="space-y-6 flex flex-col h-full">
@@ -243,21 +250,36 @@ export default function CalendarPage() {
                </h3>
 
                <div className="flex-1 overflow-y-auto space-y-3 mb-6">
-                 {dayTasks.length === 0 ? (
+                 {groupedDayTasks.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                       <CalendarIcon size={48} className="mx-auto mb-4 opacity-20" />
                       <p className="text-sm">No hay seguimientos hoy.</p>
                     </div>
                  ) : (
-                    dayTasks.map(t => (
+                    groupedDayTasks.map(t => (
                       <div 
                         key={t.id} 
                         onClick={() => setSelectedTask(t)}
                         className={`border cursor-pointer p-4 rounded-xl relative transition-all flex flex-col gap-2 ${t.status === 'COMPLETED' ? 'bg-card border-border hover:border-green-500' : 'bg-card border-border hover:border-yellow-500'}`}
                       >
                          <div className="flex justify-between items-start">
-                           <p className="font-bold text-sm text-foreground">{t.clinic?.name || "Clínica"}</p>
-                           <span className="text-[10px] uppercase font-bold text-muted-foreground px-2 py-0.5 rounded-full">{t.type}</span>
+                           <p className="font-bold text-sm text-foreground truncate pr-2">{t.clinic?.name || "Clínica"}</p>
+                           <div className="flex items-center gap-2 shrink-0">
+                             <span className="text-[10px] uppercase font-bold text-muted-foreground px-2 py-0.5 rounded-full">{t.type}</span>
+                             <button 
+                               onClick={async (e) => { 
+                                 e.stopPropagation(); 
+                                 if (confirm("¿Eliminar TODAS las tareas y el historial de esta clínica para el día seleccionado?")) {
+                                   await fetch(`/api/followup/tasks/by-date?clinicId=${t.clinicId}&date=${selectedDate.toISOString()}`, { method: 'DELETE' });
+                                   fetchTasks();
+                                 }
+                               }} 
+                               className="text-red-500/50 hover:text-red-500 transition-colors bg-red-500/10 hover:bg-red-500/20 rounded p-1" 
+                               title="Eliminar tareas del día"
+                             >
+                               <Trash2 size={14} />
+                             </button>
+                           </div>
                          </div>
                          <div className="flex justify-between items-end">
                            <p className={`text-xs ${t.status === 'COMPLETED' ? 'text-emerald-500 font-bold' : 'text-muted-foreground'}`}>
