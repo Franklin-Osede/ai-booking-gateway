@@ -315,9 +315,9 @@ export const ES_DICTIONARY: Record<string, NicheConfig> = {
     voice_scripts: {
       ask_service_intro: "En nuestra clínica priorizamos resultados elegantes y muy naturales.",
       ask_service_options: {
-         "Armonización Facial": "Un rejuvenecimiento facial integral recupera tus volúmenes perdidos. ¿Sientes que necesitas más soporte en pómulos y ojeras, o prefieres definir la línea de la mandíbula?",
-         "Inyectables y Calidad": "Nuestra toxina botulínica y biostimuladores consiguen una piel de porcelana. ¿A simple vista, te preocupan más las arrugas al gesticular, o prefieres hidratar tus labios?",
-         "Láser Médico": "Contamos con tecnología puntera como Morpheus 8 y luz pulsada. ¿Buscas eliminar manchas y rojeces, o tratar marcas de acné profundas?"
+         "Armonización Facial": "Un rejuvenecimiento facial integral recupera tus volúmenes perdidos... ¿Sientes que necesitas más soporte en pómulos y ojeras, o prefieres definir la línea de la mandíbula?",
+         "Inyectables y Calidad": "Nuestra toxina botulínica y biostimuladores consiguen una piel de porcelana... ¿A simple vista, te preocupan más las arrugas al gesticular, o prefieres hidratar tus labios?",
+         "Láser Médico": "Contamos con tecnología puntera como Morpheus 8 y luz pulsada... ¿Buscas eliminar manchas y rojeces, o tratar marcas de acné profundas?"
       },
       deep_dive_chips: {
          "Armonización Facial": ["Ojeras y Pómulos", "Línea Mandibular", "Ver Especialistas"],
