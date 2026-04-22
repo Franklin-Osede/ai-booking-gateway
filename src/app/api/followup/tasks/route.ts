@@ -26,9 +26,11 @@ export async function GET(request: Request) {
             industry: true, 
             id: true,
             slug: true,
-            siteUrl: true,
             seoMetrics: true,
             techMetrics: true,
+            runtimeConfig: {
+              select: { publishedWebsiteUrl: true }
+            },
             createdAt: true,
             outreachLogs: { orderBy: { createdAt: 'desc' }, take: 1, select: { createdAt: true } }
           }

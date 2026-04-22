@@ -11,7 +11,7 @@ interface ClinicStub {
   createdAt?: string; 
   outreachLogs?: {createdAt: string}[];
   slug?: string;
-  siteUrl?: string;
+  runtimeConfig?: { publishedWebsiteUrl: string };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   seoMetrics?: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -350,8 +350,8 @@ export default function CalendarPage() {
                  <div className="flex justify-between items-start mb-2">
                    <h3 className="text-lg font-bold text-foreground line-clamp-1">{selectedTask.clinic?.name}</h3>
                    <div className="flex gap-2">
-                     {selectedTask.clinic?.siteUrl && (
-                        <a href={selectedTask.clinic.siteUrl} target="_blank" rel="noreferrer" className="text-[10px] bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 px-2 py-1 rounded font-bold transition-colors">Web</a>
+                     {selectedTask.clinic?.runtimeConfig?.publishedWebsiteUrl && (
+                        <a href={selectedTask.clinic.runtimeConfig.publishedWebsiteUrl} target="_blank" rel="noreferrer" className="text-[10px] bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 px-2 py-1 rounded font-bold transition-colors">Web</a>
                      )}
                      <a href={`/demo/${selectedTask.clinic?.slug || selectedTask.clinic?.id}`} target="_blank" rel="noreferrer" className="text-[10px] bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 px-2 py-1 rounded font-bold transition-colors">Ver Demo</a>
                    </div>
