@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, differenceInCalendarDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon, ChevronLeft, ChevronRight, ArrowLeft, PhoneCall, PhoneForwarded, MessageCircle, Trash2 } from "lucide-react";
+import { CalendarIcon, ChevronLeft, ChevronRight, ArrowLeft, PhoneCall, PhoneForwarded, MessageCircle, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 
 interface ClinicStub { 
   id: string; 
@@ -28,45 +28,34 @@ export default function CalendarPage() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [notes, setNotes] = useState("");
 
-  // Add Form State
-  const [clinics, setClinics] = useState<ClinicStub[]>([]);
-  const [searchClinic, setSearchClinic] = useState("");
-  const [isClinicDropdownOpen, setIsClinicDropdownOpen] = useState(false);
-  const [newEventClinicId, setNewEventClinicId] = useState("");
-  const [newEventFeedback, setNewEventFeedback] = useState("");
-  const [newEventAction, setNewEventAction] = useState("");
-  const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
+  const [recentLogs, setRecentLogs] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [expandedLogDays, setExpandedLogDays] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetch("/api/clinics").then(r => r.json()).then(d => setClinics(d?.data || []));
-  }, []);
+    if (recentLogs.length > 0 && Object.keys(expandedLogDays).length === 0) {
+      const firstDay = format(new Date(recentLogs[0].createdAt), "d 'de' MMMM", { locale: es });
+      setExpandedLogDays({ [firstDay]: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recentLogs]);
 
-  const handleAddEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newEventClinicId) return alert("Selecciona una clínica");
-    setIsSubmittingEvent(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const groupedRecentLogs: { day: string, logs: any[] }[] = Object.values(recentLogs.reduce((acc, log) => {
+    const day = format(new Date(log.createdAt), "d 'de' MMMM", { locale: es });
+    if (!acc[day]) acc[day] = { day, logs: [] };
+    acc[day].logs.push(log);
+    return acc;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }, {} as Record<string, { day: string, logs: any[] }>));
+
+  const fetchRecentLogs = async () => {
     try {
-      const res = await fetch("/api/followup/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clinicId: newEventClinicId,
-          dueDate: selectedDate.toISOString(),
-          feedback: newEventFeedback,
-          nextAction: newEventAction
-        })
-      });
+      const res = await fetch('/api/followup/recent-logs');
       if (res.ok) {
-        setNewEventFeedback("");
-        setNewEventAction("");
-        setNewEventClinicId("");
-        setSearchClinic("");
-        fetchTasks();
+        setRecentLogs(await res.json());
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e);
-    } finally {
-      setIsSubmittingEvent(false);
     }
   };
 
@@ -87,6 +76,7 @@ export default function CalendarPage() {
 
   useEffect(() => {
     fetchTasks();
+    fetchRecentLogs();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMonth]);
 
@@ -129,8 +119,9 @@ export default function CalendarPage() {
         setNotes("");
         // Refresh Timeline
         await fetchTimeline(selectedTask.clinicId);
-        // Refresh Calendar Tasks
+        // Refresh Calendar Tasks & Global Logs
         await fetchTasks();
+        await fetchRecentLogs();
         // optionally return to day view
         setSelectedTask(null);
       }
@@ -150,6 +141,7 @@ export default function CalendarPage() {
           ...prev,
           timeline: prev.timeline.filter(l => l.id !== logId)
         }));
+        await fetchRecentLogs();
       }
     } catch(e) {
       console.error(e);
@@ -237,7 +229,66 @@ export default function CalendarPage() {
                );
             })}
           </div>
+
+          {/* Registro de Actividad Global (Hueco Debajo) */}
+          <div className="mt-8 pt-6 border-t border-border">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <span className="bg-yellow-500 w-2 h-2 rounded-full"></span>
+              Historial de Contactos Recientes
+            </h3>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              {groupedRecentLogs.length === 0 ? (
+                <p className="text-xs text-muted-foreground col-span-full">Aún no hay contactos recientes.</p>
+              ) : (
+                groupedRecentLogs.map((group) => (
+                  <div key={group.day} className="bg-card border border-border rounded-xl overflow-hidden">
+                    <button 
+                      onClick={() => setExpandedLogDays(prev => ({ ...prev, [group.day]: !prev[group.day] }))}
+                      className="w-full bg-muted/50 p-4 flex justify-between items-center hover:bg-muted transition-colors"
+                    >
+                      <span className="font-bold text-sm text-foreground">{group.day}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full">{group.logs.length} contactos</span>
+                        {expandedLogDays[group.day] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
+                    </button>
+                    
+                    {expandedLogDays[group.day] && (
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 border-t border-border">
+                        {group.logs.map((log) => {
+                          let badgeColor = "bg-neutral-500/20 text-neutral-400";
+                          if (log.result === "ANSWERED") badgeColor = "bg-green-500/20 text-green-500";
+                          if (log.result === "NO_ANSWER") badgeColor = "bg-red-500/20 text-red-500";
+                          if (log.result === "LEFT_MESSAGE") badgeColor = "bg-blue-500/20 text-blue-500";
+                          
+                          return (
+                            <div key={log.id} className="bg-background/50 border border-border/60 p-3 rounded-xl flex flex-col gap-2 hover:border-yellow-500 hover:shadow-md transition-all group">
+                              <div className="flex justify-between items-start gap-2">
+                                <span className="font-bold text-sm text-foreground truncate">{log.clinic?.name || "Clínica"}</span>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase whitespace-nowrap shrink-0 ${badgeColor}`}>
+                                  {log.result || log.status}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-end mt-auto pt-1">
+                                <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-medium">
+                                  {log.type || "REGISTRO"} - Contacto #{log.attemptNum}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground font-medium">
+                                  {format(new Date(log.createdAt), "dd MMM HH:mm", {locale: es})}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
+
 
         {/* Lado derecho: Timeline o Tareas del Día */}
         <div className="w-full md:w-1/3 p-6 bg-muted flex flex-col">
@@ -295,70 +346,6 @@ export default function CalendarPage() {
                       </div>
                     ))
                  )}
-               </div>
-
-               {/* Formulario Añadir */}
-               <div className="bg-card border border-border p-5 rounded-xl mt-auto">
-                  <h4 className="font-bold text-sm mb-4 border-b border-border pb-2">Registrar Nuevo Seguimiento</h4>
-                  <form onSubmit={handleAddEvent} className="space-y-3 flex flex-col">
-                    <div className="relative z-50">
-                      <input
-                        type="text"
-                        value={searchClinic}
-                        onChange={(e) => {
-                          setSearchClinic(e.target.value);
-                          setIsClinicDropdownOpen(true);
-                          if (newEventClinicId) setNewEventClinicId(""); 
-                        }}
-                        onFocus={() => setIsClinicDropdownOpen(true)}
-                        placeholder="Buscar clínica..."
-                        className="w-full bg-muted border border-border rounded-lg p-2.5 text-sm text-foreground outline-none focus:border-yellow-500 transition-colors"
-                      />
-                      {isClinicDropdownOpen && searchClinic.length > 0 && (
-                        <div className="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto bg-card border border-border rounded-lg shadow-2xl">
-                          {clinics.filter(c => c.name.toLowerCase().includes(searchClinic.toLowerCase())).length === 0 ? (
-                            <div className="p-3 text-sm text-muted-foreground text-center">No hay coincidencias</div>
-                          ) : (
-                            clinics.filter(c => c.name.toLowerCase().includes(searchClinic.toLowerCase())).map(c => (
-                              <div 
-                                key={c.id} 
-                                onClick={() => {
-                                  setNewEventClinicId(c.id);
-                                  setSearchClinic(c.name);
-                                  setIsClinicDropdownOpen(false);
-                                }}
-                                className={`p-3 text-sm cursor-pointer hover:bg-muted transition-colors ${newEventClinicId === c.id ? 'bg-muted text-yellow-500 font-bold' : 'text-muted-foreground'}`}
-                              >
-                                {c.name}
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      )}
-                      {isClinicDropdownOpen && <div className="fixed inset-0 z-0" onClick={() => setIsClinicDropdownOpen(false)} />}
-                    </div>
-
-                    <textarea 
-                      value={newEventFeedback}
-                      onChange={e => setNewEventFeedback(e.target.value)}
-                      placeholder="Notas pasadas de la clínica (opcional)..."
-                      className="w-full bg-muted border border-border rounded-lg p-2.5 text-sm text-foreground outline-none resize-none min-h-[60px] relative z-10"
-                    />
-                    <input 
-                      type="text"
-                      value={newEventAction}
-                      onChange={e => setNewEventAction(e.target.value)}
-                      placeholder="Siguiente paso (ej. Llamar el martes)"
-                      className="w-full bg-muted border border-border rounded-lg p-2.5 text-sm text-foreground outline-none relative z-10"
-                    />
-                    <button 
-                      type="submit" 
-                      disabled={isSubmittingEvent || !newEventClinicId}
-                      className="w-full bg-foreground text-background font-bold py-3 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 mt-2 relative z-10"
-                    >
-                      {isSubmittingEvent ? "Programando..." : "Programar Seguimiento"}
-                    </button>
-                  </form>
                </div>
             </>
           ) : (
