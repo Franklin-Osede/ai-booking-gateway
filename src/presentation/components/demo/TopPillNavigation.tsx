@@ -57,8 +57,8 @@ export function TopPillNavigation({ onOpenPitch, onModeChange, primaryColor = "#
         style={{ backgroundColor: primaryColor, color: contrastColor }}
       >
         <Calendar size={16} /> 
-        <span className="hidden sm:inline">{isEng ? "Discovery Call" : "Agendar Discovery"}</span>
-        <span className="sm:hidden">{isEng ? "Book" : "Agendar"}</span>
+        <span className="hidden sm:block">{isEng ? "Discovery Call" : "Agendar Discovery"}</span>
+        <span className="block sm:hidden">{isEng ? "Book" : "Agendar"}</span>
       </button>
     </div>
   );
