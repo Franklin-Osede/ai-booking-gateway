@@ -5,7 +5,18 @@ import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterv
 import { es } from "date-fns/locale";
 import { CalendarIcon, ChevronLeft, ChevronRight, ArrowLeft, PhoneCall, PhoneForwarded, MessageCircle, Trash2 } from "lucide-react";
 
-interface ClinicStub { id: string; name: string; createdAt?: string; outreachLogs?: {createdAt: string}[]; }
+interface ClinicStub { 
+  id: string; 
+  name: string; 
+  createdAt?: string; 
+  outreachLogs?: {createdAt: string}[];
+  slug?: string;
+  siteUrl?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  seoMetrics?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  techMetrics?: any;
+}
 interface TaskItem { id: string; clinicId: string; dueDate: string; createdAt: string; type: string; status: string; attemptNum: number; clinic?: ClinicStub; }
 interface TimelineLog { id: string; createdAt: string; result?: string; status?: string; type?: string; attemptNum?: number; metadata?: { notes?: string }; channel?: string; nextStep?: string; }
 
@@ -336,7 +347,31 @@ export default function CalendarPage() {
                </button>
                
                <div className="bg-card border border-border p-4 rounded-xl mb-4">
-                 <h3 className="text-lg font-bold text-foreground line-clamp-1">{selectedTask.clinic?.name}</h3>
+                 <div className="flex justify-between items-start mb-2">
+                   <h3 className="text-lg font-bold text-foreground line-clamp-1">{selectedTask.clinic?.name}</h3>
+                   <div className="flex gap-2">
+                     {selectedTask.clinic?.siteUrl && (
+                        <a href={selectedTask.clinic.siteUrl} target="_blank" rel="noreferrer" className="text-[10px] bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 px-2 py-1 rounded font-bold transition-colors">Web</a>
+                     )}
+                     <a href={`/demo/${selectedTask.clinic?.slug || selectedTask.clinic?.id}`} target="_blank" rel="noreferrer" className="text-[10px] bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 px-2 py-1 rounded font-bold transition-colors">Ver Demo</a>
+                   </div>
+                 </div>
+                 
+                 {(selectedTask.clinic?.seoMetrics || selectedTask.clinic?.techMetrics) && (
+                   <div className="grid grid-cols-2 gap-2 mb-3 bg-muted p-2 rounded-lg">
+                     {selectedTask.clinic?.seoMetrics && (
+                       <div className="text-xs">
+                         <span className="font-semibold text-foreground">SEO:</span> {typeof selectedTask.clinic.seoMetrics === 'string' ? selectedTask.clinic.seoMetrics : JSON.stringify(selectedTask.clinic.seoMetrics)}
+                       </div>
+                     )}
+                     {selectedTask.clinic?.techMetrics && (
+                       <div className="text-xs">
+                         <span className="font-semibold text-foreground">Tech:</span> {typeof selectedTask.clinic.techMetrics === 'string' ? selectedTask.clinic.techMetrics : JSON.stringify(selectedTask.clinic.techMetrics)}
+                       </div>
+                     )}
+                   </div>
+                 )}
+
                  <div className="text-xs text-muted-foreground mt-1 flex gap-2">
                    <span className="bg-muted px-2 py-1 rounded">Intento actual: #{selectedTask.attemptNum}</span>
                    {(() => {

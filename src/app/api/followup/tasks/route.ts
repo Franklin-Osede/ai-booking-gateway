@@ -25,6 +25,10 @@ export async function GET(request: Request) {
             name: true, 
             industry: true, 
             id: true,
+            slug: true,
+            siteUrl: true,
+            seoMetrics: true,
+            techMetrics: true,
             createdAt: true,
             outreachLogs: { orderBy: { createdAt: 'desc' }, take: 1, select: { createdAt: true } }
           }
