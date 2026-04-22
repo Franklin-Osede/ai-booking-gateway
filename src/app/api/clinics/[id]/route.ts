@@ -45,14 +45,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
     if (primaryColor) {
-      await prisma.branding.updateMany({ where: { clinicId: id }, data: { isActive: false } });
-      const existingBranding = await prisma.branding.findFirst({
-        where: { clinicId: id },
-        orderBy: { updatedAt: "desc" },
+      const activeBranding = await prisma.branding.findFirst({
+        where: { clinicId: id, isActive: true },
       });
-      if (existingBranding) {
-         await prisma.branding.update({ where: { id: existingBranding.id }, data: { primaryColor, isActive: true } });
+      if (activeBranding) {
+         await prisma.branding.update({ where: { id: activeBranding.id }, data: { primaryColor } });
       } else {
+         await prisma.branding.updateMany({ where: { clinicId: id }, data: { isActive: false } });
          await prisma.branding.create({ data: { clinicId: id, primaryColor, isActive: true } });
       }
     }

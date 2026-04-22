@@ -100,7 +100,7 @@ const polly = new PollyClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, intent, voiceId = "Lucia", elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F", clinicId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic female es-ES voice
+    const { text, intent, elevenlabs_voice_id, provider = "polly", voiceType = "guided", gender = "F", clinicId, niche, locale = "es-ES" } = await req.json(); // Lucia is the premium realistic female es-ES voice
 
     if (!text) {
        return NextResponse.json({ error: "Missing text payload" }, { status: 400 });

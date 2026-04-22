@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseCanonicalLocale } from "@/lib/utils/locale";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: Request, context: unknown) {
   try {
@@ -115,6 +116,9 @@ export async function POST(req: Request, context: unknown) {
         publishedAt: new Date()
       }
     });
+
+    revalidatePath(`/${clinic.slug || clinic.id}`);
+    revalidatePath(`/demo/${clinic.slug || clinic.id}`);
 
     return NextResponse.json({ success: true, data: config });
   } catch (error) {

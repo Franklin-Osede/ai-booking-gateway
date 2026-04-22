@@ -766,9 +766,9 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                   <div className="flex items-center gap-4">
                     <div 
                       className="w-12 h-12 rounded-xl shadow-inner border border-border cursor-pointer hover:scale-105 hover:ring-2 hover:ring-yellow-500/50 transition-all" 
-                      style={{ backgroundColor: clinic.brandings?.[0]?.primaryColor || "#333" }}
+                      style={{ backgroundColor: clinic.brandings?.find((b: any) => b.isActive)?.primaryColor || clinic.brandings?.[0]?.primaryColor || "#333" }}
                       onClick={() => {
-                        const dbColor = clinic.brandings?.[0]?.primaryColor || "#000000";
+                        const dbColor = clinic.brandings?.find((b: any) => b.isActive)?.primaryColor || clinic.brandings?.[0]?.primaryColor || "#000000";
                         const match = dbColor.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
                         setTempColor(match ? match[0] : dbColor);
                         setEditingColor(true);
@@ -777,12 +777,12 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                     />
                     <div>
                        <p className="text-muted-foreground text-sm">Color Principal</p>
-                       <code className="text-foreground font-mono">{clinic.brandings?.[0]?.primaryColor || "N/A"}</code>
+                       <code className="text-foreground font-mono">{clinic.brandings?.find((b: any) => b.isActive)?.primaryColor || clinic.brandings?.[0]?.primaryColor || "N/A"}</code>
                     </div>
                   </div>
                   <button 
                     onClick={() => {
-                      const dbColor = clinic.brandings?.[0]?.primaryColor || "#000000";
+                      const dbColor = clinic.brandings?.find((b: any) => b.isActive)?.primaryColor || clinic.brandings?.[0]?.primaryColor || "#000000";
                       const match = dbColor.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
                       setTempColor(match ? match[0] : dbColor);
                       setEditingColor(true);
@@ -826,8 +826,10 @@ export default function ClinicDetail({ params }: { params: Promise<{ id: string 
                               type="text" 
                               value={tempColor} 
                               onChange={(e) => {
-                                const match = e.target.value.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
-                                setTempColor(match ? match[0] : e.target.value);
+                                let val = e.target.value;
+                                if (/^[a-fA-F0-9]{3,6}$/.test(val)) val = '#' + val;
+                                const match = val.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
+                                setTempColor(match ? match[0] : val);
                               }} 
                               className="bg-transparent text-foreground font-mono outline-none w-32 sm:w-64 pl-1 truncate" 
                             />
