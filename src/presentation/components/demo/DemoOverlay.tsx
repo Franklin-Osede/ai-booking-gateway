@@ -84,7 +84,7 @@ export function DemoOverlay({ clinicUrl, themeColor = "#1a4b8c", useImageMode = 
 
       {/* 2.5. Product Tour (Only show when hub is active so elements exist) */}
       {mounted && activeMode === "hub" && (
-        <ProductTour primaryColor={themeColor} lang={lang} />
+        <ProductTour primaryColor={themeColor} lang={lang} hasVideo={!!videoPitchUrl} />
       )}
 
       {/* 3. The Full Screen Target Website (Plan B o Iframe o Neutral) */}

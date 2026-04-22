@@ -7,24 +7,29 @@ import { X, ChevronRight, Check } from "lucide-react";
 interface ProductTourProps {
   primaryColor?: string;
   lang?: string;
+  hasVideo?: boolean;
 }
 
-export function ProductTour({ primaryColor = "#1a4b8c", lang }: ProductTourProps) {
+export function ProductTour({ primaryColor = "#1a4b8c", lang, hasVideo = true }: ProductTourProps) {
   const [step, setStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [targetRect, setTargetRect] = useState<{ top: number; left: number; width: number; height: number; } | null>(null);
 
   const isEng = (lang || '').toLowerCase().startsWith('en');
 
-  const steps = [
+  let steps = [
     { targetId: 'center', title: isEng ? 'Integral Automation' : 'Automatización Integral', text: isEng ? 'Filters contacts 24/7, extracts critical data and organizes them in your schedule before they saturate the reception.' : 'Filtra contactos 24/7, extrae datos críticos y los organiza en tu agenda antes de que saturen recepción.' },
     { targetId: 'tour-mod-triage', title: isEng ? 'Predictive Triage' : 'Triaje Predictivo', text: isEng ? 'Classify emergencies and pathologies interactively. Filter out curiosity seekers so your team handles profitable cases.' : 'Clasifica urgencias y patologías de forma interactiva. Descarta curiosos para que el equipo atienda casos rentables.' },
     { targetId: 'tour-mod-voice', title: isEng ? 'Guided Voice Interview' : 'Entrevista por Voz Guiada', text: isEng ? 'Lead the user step by step conversationally to collect their clinical data before referring them to the team.' : 'Conduce al usuario paso a paso de forma conversacional para recopilar sus datos clínicos antes de derivarlo al equipo.' },
     { targetId: 'tour-mod-voice-free', title: isEng ? 'Digital Agent' : 'Agente Telefónico Digital', text: isEng ? 'Like having an agent answering calls 24/7. Listens, understands and responds with absolute coherence.' : 'Como tener un agente respondiendo llamadas 24/7. Escucha, comprende y responde con total coherencia.' },
     { targetId: 'tour-mod-text', title: isEng ? 'Text Assistant' : 'Asistente Textual', text: isEng ? 'Dynamic digital profiling. The engine chats with the visitor to validate their profile before capturing them.' : 'Un perfilado digital dinámico. El motor dialoga por chat con la visita para validar su perfil antes de capturarlo.' },
     { targetId: 'tour-video-intro', title: isEng ? 'Video Demonstration' : 'Videodemostración', text: isEng ? 'I will personally explain how each assistant works and show you its invisible link to your usual agenda.' : 'Te explico personalmente cómo funciona cada asistente y te enseño su vinculación invisible con tu agenda habitual.' },
-    { targetId: 'tour-agendar', title: isEng ? 'Technical Audit' : 'Auditoría Técnica', text: isEng ? 'Discover in 15 min how to integrate and adapt this ecosystem to the specific specialties of your own center.' : 'Descubre en 15 min cómo integrar y adaptar este ecosistema a las especialidades concretas de tu propio centro.' }
+    { targetId: 'tour-agendar', title: 'Discovery Call', text: isEng ? 'Discover in 15 min how to integrate and adapt this ecosystem to the specific specialties of your own center.' : 'Descubre en 15 min cómo integrar y adaptar este ecosistema a las especialidades concretas de tu propio centro.' }
   ];
+
+  if (!hasVideo) {
+    steps = steps.filter(s => s.targetId !== 'tour-video-intro');
+  }
 
   useEffect(() => {
     // Check if tour was already seen
