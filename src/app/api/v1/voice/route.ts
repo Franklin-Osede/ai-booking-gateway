@@ -45,8 +45,8 @@ async function applyTTSDictionary(text: string, clinicId?: string, niche: string
           { match: "\\bLifting\\b", replace: "Lífting", priority: -1 },
           { match: "\\bPeeling\\b", replace: "Píling", priority: -1 },
           { match: "\\bAnti-aging\\b", replace: "anti éiying", priority: -1 },
-          { match: "\\bDr\\.", replace: "Doctor", priority: -1 },
-          { match: "\\bDra\\.", replace: "Doctora", priority: -1 }
+          { match: "Dr\\.", replace: "Doctor ", priority: -1 },
+          { match: "Dra\\.", replace: "Doctora ", priority: -1 }
         );
       }
 

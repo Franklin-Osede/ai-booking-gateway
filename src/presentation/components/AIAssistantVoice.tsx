@@ -462,7 +462,7 @@ export function AIAssistantVoice({ color, niche = "hair_transplant", pos = "righ
         }
         
         const photoUrl = match ? match.img : (fallbackImages[activeNiche] || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2000&auto=format&fit=crop');
-        const pitchText = match ? match.text : (isEng ? `In our clinic we guarantee excellent results thanks to cutting-edge technology and our top-tier specialists.` : `En nuestra clínica garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas de primer nivel.`);
+        const pitchText = match ? match.text : (isEng ? `In our clinic we guarantee excellent results thanks to cutting-edge technology and our top-tier specialists.` : `En nuestra clínica garantizamos resultados excelentes gracias a tecnología punta y nuestros especialistas altamente cualificados.`);
         
         let voiceProvider = "elevenlabs";
         try { voiceProvider = new URLSearchParams(window.location.search).get('voice') || "elevenlabs"; } catch {}

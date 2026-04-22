@@ -439,3 +439,13 @@ niche string received: Dentistas
  GET /api/followup/tasks?start=2026-03-31T22:00:00.000Z&end=2026-04-30T21:59:59.999Z 200 in 163ms (next.js: 1734µs, application-code: 161ms)
  GET /api/clinics 200 in 456ms (next.js: 4ms, application-code: 453ms)
  GET /api/clinics 200 in 377ms (next.js: 4ms, application-code: 373ms)
+ GET /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff/timeline 200 in 408ms (next.js: 15ms, application-code: 392ms)
+✓ Compiled in 360ms
+✓ Compiled in 68ms
+ GET /admin 200 in 41ms (next.js: 12ms, application-code: 28ms)
+ GET /api/clinics 200 in 989ms (next.js: 3ms, application-code: 986ms)
+ GET /api/clinics 200 in 265ms (next.js: 1702µs, application-code: 264ms)
+ GET /admin/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 31ms (next.js: 12ms, application-code: 19ms)
+ GET /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 308ms (next.js: 4ms, application-code: 304ms)
+ GET /api/clinics/c864d0d5-0cee-40ec-81ec-0d1fc484afff 200 in 113ms (next.js: 1202µs, application-code: 112ms)
+[?25h

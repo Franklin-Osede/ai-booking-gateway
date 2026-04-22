@@ -33,6 +33,11 @@ export async function POST(req: Request) {
       specifics = isEnglish
         ? "Treatments: stem cells, exosomes, anti-aging. Promise realistic outcomes, never claim cures for cancer/chronic diseases without medical evaluation. Guide users to a consultation."
         : "Tratamientos: Células madre, exosomas, antienvejecimiento. Promete resultados realistas, nunca decir que cura el cáncer o enfermedades crónicas sin estudio médico previo. Llevar a consulta valorativa.";
+    } else if (niche === 'aesthetic') {
+      contextStr = isEnglish ? "aesthetic medicine clinic" : "clínica de medicina estética";
+      specifics = isEnglish
+        ? "Treatments: botox, hyaluronic acid, facial harmonization, Morpheus8, laser. Promise elegant and extremely natural results. Avoid discussing severe plastic surgeries. If the user doubts due to price, emphasize the maximum quality of the products used (Swiss/American labs). If the user shows fear of needles or pain, reassure them with the comfort protocol (premium anesthetic cream and microcannulas) which makes the treatment almost painless and free of bruising. IMPORTANT: Do not rush to book an appointment. First, briefly list your treatment areas (e.g., Injectables for wrinkles, Harmonization for volumes, Laser) and ask the user which specific area they want to improve."
+        : "Tratamientos: Botox, ácido hialurónico, armonización facial, láser, Morpheus8. Promete resultados elegantes y extremadamente naturales. Evita hablar de cirugías plásticas mayores. Si duda por el precio, enfatiza la máxima calidad (laboratorios suizos y americanos). Si hay miedo al dolor, menciona el protocolo de confort (crema anestésica y microcánulas). IMPORTANTE: No ofrezcas agendar cita rápido. Primero, enumera muy brevemente tus áreas de tratamiento (Ej: Inyectables para arrugas, armonización para volúmenes, o láser) y pregúntale qué zona específica le gustaría mejorar.";
     }
 
     const brand = brandName || (isEnglish ? "our clinic" : "nuestra clínica");
@@ -123,8 +128,8 @@ Regla de Interfaz Mágica: si acepta ver calendario/agendar, incluye exactamente
       for (const [pattern, replacement] of Object.entries(phoneticDict)) {
         textToSpeak = textToSpeak.replace(new RegExp(pattern, "gi"), replacement);
       }
-      textToSpeak = textToSpeak.replace(/\bDr\./gi, "Doctor");
-      textToSpeak = textToSpeak.replace(/\bDra\./gi, "Doctora");
+      textToSpeak = textToSpeak.replace(/Dr\./gi, "Doctor ");
+      textToSpeak = textToSpeak.replace(/Dra\./gi, "Doctora ");
     }
 
     return NextResponse.json({

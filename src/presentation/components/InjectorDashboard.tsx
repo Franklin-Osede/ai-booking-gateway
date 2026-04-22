@@ -113,6 +113,7 @@ export function InjectorDashboard() {
                 className="w-full bg-neutral-800 border-none rounded-2xl p-4 outline-none focus:ring-2 focus:ring-yellow-500/50 text-white text-lg cursor-pointer appearance-none px-5"
               >
                 <option value="hair_transplant">Clínica Capilar (Especialistas)</option>
+                <option value="aesthetic">Medicina Estética / Armonización</option>
                 <option value="regenerative">Medicina Regenerativa / Stem Cells</option>
                 <option value="medical">Clínica Médica / Especialista</option>
                 <option value="dental">Clínica Dental</option>
@@ -132,9 +133,9 @@ export function InjectorDashboard() {
                {[
                  { id: "voice", title: "Agente de Voz", desc: "Flujo guiado con opciones (Chips)" },
                  { id: "voice-free", title: "Agente de Consulta (Libre)", desc: "Conversación abierta al micrófono" },
-                 { id: "capilar", title: "Formulario Capilar IA", desc: "Triage Clínico + Escáner (10 Pasos)" },
+                 { id: "capilar", title: "Formulario Triage IA", desc: "Triage Clínico Visual Multi-Paso" },
                  { id: "dual-voice", title: "Demo Doble Voz", desc: "Muestra Libre (Izq) y Guiada (Der)" },
-                 { id: "form", title: "Formulario Consulta", desc: "Flujo Visual Multi-Paso" },
+                 { id: "form", title: "Formulario Calendario", desc: "Flujo Visual Clásico" },
                  { id: "chat", title: "Chat de IA", desc: "Agente Conversacional Texto" },
                  { id: "phone", title: "Llamada Simulada ⭐️", desc: "UI App Teléfono (Estilo iOS)" },
                  { id: "both", title: "Ambos 🚀", desc: "Formulario + Agente Voz" },

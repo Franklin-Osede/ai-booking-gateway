@@ -48,7 +48,7 @@ export default async function Home({
       if (clinic) {
         siteUrl = normalizeSiteUrl(clinic.websites?.[0]?.url) || siteUrl;
         brandColor = clinic.brandings?.[0]?.primaryColor || brandColor;
-        niche = clinic.industry?.toLowerCase().includes("capilar") ? "hair_transplant" : "default";
+        niche = clinic.industry || niche;
       }
     } catch (e) {
       console.error("Failed to fetch clinic by ID", e);

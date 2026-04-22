@@ -7,7 +7,7 @@ import { CalendarIcon, ChevronLeft, ChevronRight, ArrowLeft, PhoneCall, PhoneFor
 
 interface ClinicStub { id: string; name: string; createdAt?: string; outreachLogs?: {createdAt: string}[]; }
 interface TaskItem { id: string; clinicId: string; dueDate: string; createdAt: string; type: string; status: string; attemptNum: number; clinic?: ClinicStub; }
-interface TimelineLog { id: string; createdAt: string; result?: string; status?: string; type?: string; attemptNum?: number; metadata?: { notes?: string }; channel?: string; }
+interface TimelineLog { id: string; createdAt: string; result?: string; status?: string; type?: string; attemptNum?: number; metadata?: { notes?: string }; channel?: string; nextStep?: string; }
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -374,17 +374,28 @@ export default function CalendarPage() {
                        <div className="bg-card p-3 rounded-lg border border-border text-sm">
                          <div className="flex gap-2 mb-1">
                            <span className={`text-[11px] px-2 py-0.5 rounded font-bold ${badgeColor}`}>{log.result || log.status}</span>
-                           <span className="text-[11px] px-2 py-0.5 bg-muted rounded font-bold">{log.type || "LEGACY"}</span>
+                           <span className="text-[11px] px-2 py-0.5 bg-muted rounded font-bold">{log.type || "REGISTRO PREVIO"}</span>
                            {log.attemptNum && <span className="text-[11px] px-2 py-0.5 bg-muted rounded">Intento #{log.attemptNum}</span>}
                          </div>
                          {log.metadata?.notes && (
-                           <p className="text-sm text-foreground/90 mt-2 italic leading-relaxed">
+                           <p className="text-base text-foreground/90 mt-2 italic leading-relaxed font-medium">
                              {'"'}{log.metadata.notes.replace(/^\[Log Guardado\]\s*/i, '')}{'"'}
                            </p>
                          )}
                          {/* Legacy feedback fallback */}
-                         {!log.metadata?.notes && log.channel && (
-                            <p className="text-sm text-foreground/90 mt-2 leading-relaxed">{log.channel} - {log.status}</p>
+                         {!log.metadata?.notes && (
+                            <div className="mt-2 space-y-1">
+                               {(log.channel || log.status) && (
+                                  <p className="text-base text-foreground/90 leading-relaxed font-medium">
+                                    <span className="capitalize">{log.channel || "Contacto"}</span>{log.status ? ` - ${log.status}` : ''}
+                                  </p>
+                               )}
+                               {log.nextStep && (
+                                  <p className="text-sm text-muted-foreground mt-1.5">
+                                    <span className="font-semibold">Próximo paso:</span> {log.nextStep}
+                                  </p>
+                               )}
+                            </div>
                          )}
                        </div>
                      </div>

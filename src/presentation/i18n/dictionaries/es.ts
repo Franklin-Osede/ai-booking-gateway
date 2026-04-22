@@ -315,9 +315,9 @@ export const ES_DICTIONARY: Record<string, NicheConfig> = {
     voice_scripts: {
       ask_service_intro: "En nuestra clínica priorizamos resultados elegantes y muy naturales.",
       ask_service_options: {
-         "Armonización Facial": "Un rejuvenecimiento facial integral recupera tus volúmenes perdidos... ¿Sientes que necesitas más soporte en pómulos y ojeras, o prefieres definir la línea de la mandíbula?",
-         "Inyectables y Calidad": "Nuestra toxina botulínica y biostimuladores consiguen una piel de porcelana... ¿A simple vista, te preocupan más las arrugas al gesticular, o prefieres hidratar tus labios?",
-         "Láser Médico": "Contamos con tecnología puntera como Morpheus 8 y luz pulsada... ¿Buscas eliminar manchas y rojeces, o tratar marcas de acné profundas?"
+         "Armonización Facial": "Un rejuvenecimiento facial integral recupera tus volúmenes perdidos. ¿Sientes que necesitas más soporte en pómulos y ojeras, o prefieres definir la línea de la mandíbula?",
+         "Inyectables y Calidad": "Nuestra toxina botulínica y biostimuladores consiguen una piel de porcelana. ¿A simple vista, te preocupan más las arrugas al gesticular, o prefieres hidratar tus labios?",
+         "Láser Médico": "Contamos con tecnología puntera como Morpheus 8 y luz pulsada. ¿Buscas eliminar manchas y rojeces, o tratar marcas de acné profundas?"
       },
       deep_dive_chips: {
          "Armonización Facial": ["Ojeras y Pómulos", "Línea Mandibular", "Ver Especialistas"],
@@ -325,14 +325,14 @@ export const ES_DICTIONARY: Record<string, NicheConfig> = {
          "Láser Médico": ["Manchas y Rojeces", "Marcas Módulo Acné", "Ver Especialistas"]
       },
       deep_dive_scripts: {
-         "Ojeras y Pómulos": "Excelente. Rellenaremos de forma muy sutil con ácido hialurónico el 'valle de lágrimas'... eliminando por completo ese aspecto de cara cansada.",
-         "Línea Mandibular": "Perfecto. Con Radiesse o inductores de colágeno, marcaremos ese óvalo facial y tensaremos sutilmente el cuello... aportando mucha juventud.",
-         "Arrugas de Expresión": "Totalmente de acuerdo. Con unas unidades de toxina en la frente o patas de gallo... despejaremos la mirada manteniéndola súper expresiva.",
+         "Ojeras y Pómulos": "Excelente. Rellenaremos de forma muy sutil con ácido hialurónico el 'valle de lágrimas', eliminando por completo ese aspecto de cara cansada.",
+         "Línea Mandibular": "Perfecto. Con Radiesse o inductores de colágeno, marcaremos ese óvalo facial y tensaremos sutilmente el cuello, aportando mucha juventud.",
+         "Arrugas de Expresión": "Totalmente de acuerdo. Con unas unidades de toxina en la frente o patas de gallo despejaremos la mirada manteniéndola súper expresiva.",
          "Volumen en Labios": "Genial. Emplearemos ácido hialurónico ultra-elástico para darte un volumen jugoso o simplemente hidratar, siempre con un diseño Russian Lips si lo deseas.",
-         "Manchas y Rojeces": "Comprendo. Utilizaremos Láser CO2 combinado con luz pulsada intensa, para unificar todo tu tono y barrer el melasma o daño solar.",
-         "Marcas Módulo Acné": "Estupendo. Radiofrecuencia fraccionada como Morpheus 8 romperá el tejido cicatrizal... generando una piel completamente lisa y sin poros."
+         "Manchas y Rojeces": "Comprendo. Utilizaremos Láser CO2 combinado con luz pulsada intensa para unificar todo tu tono y barrer el melasma o daño solar.",
+         "Marcas Módulo Acné": "Estupendo. Radiofrecuencia fraccionada como Morpheus 8 romperá el tejido cicatrizal, generando una piel completamente lisa y sin poros."
       },
-      ask_service_fallback: "TEXT_INTRO ¿Te gustaría agendar una primera visita de evaluación médica... o prefieres detalles sobre los precios?",
+      ask_service_fallback: "TEXT_INTRO ¿Te gustaría agendar una primera visita de evaluación médica o prefieres detalles sobre los precios?",
       confirm_booking: "¡Sensacional! Tus cita para valoración con DR_NAME para el dıa SELECTED_DATE a las SPOKEN_TIME ha quedado confirmada al cien por cien."
     }
   },

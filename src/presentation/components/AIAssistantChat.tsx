@@ -15,10 +15,12 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
   const endRef = useRef<HTMLDivElement>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const isProcessingRef = useRef(false);
   const [expandedDocIdx, setExpandedDocIdx] = useState<number | null>(null);
   const [stepInfo, setStepInfo] = useState<{ options: string[]; stepId: number; type?: string }>({ options: [], stepId: 0 });
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedDoctor, setSelectedDoctor] = useState<string>("");
   const [brandName, setBrandName] = useState("nuestra clínica");
@@ -102,26 +104,31 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
     }
   };
 
+  const setProcessing = (val: boolean) => {
+    isProcessingRef.current = val;
+    setIsProcessing(val);
+  };
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen, stepInfo, selectedDate, selectedTime]);
 
   const pushBotMessage = (text: string, delay: number, nextFn: () => void, extraProps?: Record<string, unknown>) => {
-    setIsProcessing(true);
+    setProcessing(true);
     setTimeout(() => {
-      setMessages(prev => [...prev, { id: "bot-" + Date.now(), text, sender: "bot", ...extraProps }]);
-      setIsProcessing(false);
+      setMessages(prev => [...prev, { id: "bot-" + Date.now() + "-" + Math.random(), text, sender: "bot", ...extraProps }]);
+      setProcessing(false);
       nextFn();
     }, delay);
   };
 
-  const triggerFlowStep = (nextStepId: number, userSelection?: string) => {
+  const triggerFlowStep = (nextStepId: number, userSelection?: string, skipUserMessage: boolean = false) => {
     let resolvedNextStepId = nextStepId;
 
     const chatScripts = effectiveConfig.locale.chat_scripts;
     
-    if (userSelection) {
-       setMessages(prev => [...prev, { id: "user-" + Date.now(), text: userSelection, sender: "user" }]);
+    if (userSelection && !skipUserMessage) {
+       setMessages(prev => [...prev, { id: "user-" + Date.now() + "-" + Math.random(), text: userSelection, sender: "user" }]);
        
        const lowerSel = userSelection.toLowerCase();
        // Branch 1: User chose "consulta rápida"
@@ -138,8 +145,10 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
           if (lowerSel.includes("sí") || lowerSel.includes("yes")) {
              resolvedNextStepId = 2; // Jump to Doctor selection
           } else {
-             pushBotMessage(chatScripts.quick_consult_no_thanks, 1000, () => {
-                setStepInfo({ options: [chatScripts.options_first_step[0]], stepId: 100 });
+             const infoPrompt = isEng ? "Of course. What area would you like to receive information about?" : "Por supuesto. ¿Sobre qué área te gustaría recibir más información?";
+             pushBotMessage(infoPrompt, 1000, () => {
+                const chips = categories.filter((c: { name: string }) => c.name).map((c: { name: string }) => c.name);
+                setStepInfo({ options: chips, stepId: 11 });
              });
              return;
           }
@@ -161,6 +170,58 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
          const chips = categories.filter((c: { name: string }) => c.name).map((c: { name: string }) => c.name);
          setStepInfo({ options: chips, stepId: 2 });
       });
+    }
+    else if (resolvedNextStepId === 11) {
+       setSelectedCategory(userSelection || "");
+       const nicheCfg = effectiveConfig.niche;
+       let infoMsg = isEng ? "This is one of our flagship treatments with excellent results." : "Este es uno de nuestros tratamientos estrella con excelentes resultados.";
+       if (nicheCfg.voice_scripts && nicheCfg.voice_scripts.ask_service_options) {
+          infoMsg = nicheCfg.voice_scripts.ask_service_options[userSelection || ""] || infoMsg;
+       }
+       
+       if (nicheCfg.voice_scripts?.deep_dive_chips?.[userSelection || ""]) {
+          pushBotMessage(infoMsg, 1200, () => {
+             setStepInfo({ options: nicheCfg.voice_scripts!.deep_dive_chips![userSelection || ""], stepId: 115 });
+          });
+       } else {
+          const qIndex = infoMsg.lastIndexOf("¿");
+          if (qIndex > 0) {
+             infoMsg = infoMsg.substring(0, qIndex).trim();
+             if (infoMsg.endsWith("...")) infoMsg = infoMsg.substring(0, infoMsg.length - 3).trim() + ".";
+          }
+          pushBotMessage(infoMsg, 1200, () => {
+             pushBotMessage(isEng ? "Would you like to book a free consultation for an expert assessment?" : "¿Te gustaría agendar una primera consulta gratuita para que un especialista valore tu caso?", 1500, () => {
+                setStepInfo({ options: isEng ? ["Yes, book appointment", "No, thanks"] : ["Sí, agendar cita", "No, gracias"], stepId: 12 });
+             });
+          });
+       }
+    }
+    else if (resolvedNextStepId === 115) {
+       const nicheCfg = effectiveConfig.niche;
+       let diveMsg = "Entendido. Cada caso es único y lo valoraremos en detalle.";
+       if (nicheCfg.voice_scripts?.deep_dive_scripts?.[userSelection || ""]) {
+          diveMsg = nicheCfg.voice_scripts.deep_dive_scripts[userSelection || ""];
+       }
+       
+       if (userSelection?.toLowerCase().includes("especialista") || userSelection?.toLowerCase().includes("estilista") || userSelection?.toLowerCase().includes("asesor")) {
+          triggerFlowStep(2, selectedCategory, true);
+          return;
+       }
+       
+       pushBotMessage(diveMsg, 1200, () => {
+          pushBotMessage(isEng ? "Would you like to book a free consultation for an expert assessment?" : "¿Te gustaría agendar una primera consulta gratuita para que un especialista valore tu caso?", 1500, () => {
+             setStepInfo({ options: isEng ? ["Yes, book appointment", "No, thanks"] : ["Sí, agendar cita", "No, gracias"], stepId: 12 });
+          });
+       });
+    }
+    else if (resolvedNextStepId === 12) {
+       if (userSelection?.toLowerCase().includes("sí") || userSelection?.toLowerCase().includes("yes")) {
+          triggerFlowStep(25, chatScripts.doctor_found_options[0], true);
+       } else {
+          pushBotMessage(chatScripts.think_skip_message, 1000, () => {
+             setStepInfo({ options: [chatScripts.options_first_step[0]], stepId: 100 });
+          });
+       }
     }
     else if (resolvedNextStepId === 2) {
       const category = categories.find((c: { name: string }) => c.name === userSelection) || categories[0];
@@ -238,7 +299,7 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
   };
 
   const handleUserSelect = (text: string, currentStep: number) => {
-    if (isProcessing) return;
+    if (isProcessingRef.current) return;
     if (text === "📸 Subir fotos") {
        document.getElementById('hidden-photo-input-chat')?.click();
        return;
@@ -248,6 +309,9 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
     else if (currentStep === 25) triggerFlowStep(25, text);
     else if (currentStep === 3) triggerFlowStep(3, text);
     else if (currentStep === 10) triggerFlowStep(10, text);
+    else if (currentStep === 11) triggerFlowStep(11, text);
+    else if (currentStep === 115) triggerFlowStep(115, text);
+    else if (currentStep === 12) triggerFlowStep(12, text);
     else if (currentStep === 100) triggerFlowStep(1, text);
   };
 
@@ -259,15 +323,18 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
   };
 
   const handleSend = () => {
-    if (!input.trim() || isProcessing) return;
+    if (!input.trim() || isProcessingRef.current) return;
     const txt = input.trim();
     setInput("");
     
-    if ((stepInfo.stepId >= 1 && stepInfo.stepId <= 3) || stepInfo.stepId === 10 || stepInfo.stepId === 100) {
+    if ((stepInfo.stepId >= 1 && stepInfo.stepId <= 3) || stepInfo.stepId === 10 || stepInfo.stepId === 100 || stepInfo.stepId === 11 || stepInfo.stepId === 115 || stepInfo.stepId === 12) {
        if (stepInfo.stepId === 1) triggerFlowStep(1, txt);
        else if (stepInfo.stepId === 2) triggerFlowStep(2, txt);
        else if (stepInfo.stepId === 3) triggerFlowStep(3, txt);
        else if (stepInfo.stepId === 10) triggerFlowStep(10, txt);
+       else if (stepInfo.stepId === 11) triggerFlowStep(11, txt);
+       else if (stepInfo.stepId === 115) triggerFlowStep(115, txt);
+       else if (stepInfo.stepId === 12) triggerFlowStep(12, txt);
        else if (stepInfo.stepId === 100) triggerFlowStep(1, txt);
     } else {
        setMessages(prev => [...prev, { id: "user-" + Date.now(), text: txt, sender: "user" }]);
@@ -595,14 +662,15 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
             </div>
 
             {/* Sub-footer Input for Text Typing */}
-            <div className="p-4 bg-white border-t border-gray-100 relative">
-               {isProcessing && (
-                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-3 py-1 rounded-full animate-pulse">
-                    {isEng ? "Typing..." : "Escribiendo..."}
-                  </div>
-               )}
-               <div className="flex gap-2 relative">
-                 <input 
+            {stepInfo.options.length === 0 && (
+              <div className="p-4 bg-white border-t border-gray-100 relative">
+                 {isProcessing && (
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-3 py-1 rounded-full animate-pulse">
+                      {isEng ? "Typing..." : "Escribiendo..."}
+                    </div>
+                 )}
+                 <div className="flex gap-2 relative">
+                   <input 
                    type="text"
                    value={input}
                    disabled={isProcessing}
@@ -620,7 +688,8 @@ export function AIAssistantChat({ color, niche = "hair_transplant", pos = "right
                    <Send size={18} />
                  </button>
                </div>
-            </div>
+             </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
