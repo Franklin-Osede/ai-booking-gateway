@@ -26,8 +26,6 @@ export async function GET(request: Request) {
             industry: true, 
             id: true,
             slug: true,
-            seoMetrics: true,
-            techMetrics: true,
             runtimeConfig: {
               select: { publishedWebsiteUrl: true }
             },
